@@ -112,12 +112,13 @@ done
 # Write start-wazuh.sh
 cat > /tmp/start-wazuh.sh << 'WEOF'
 #!/bin/sh
-pkill -f wazuh-agentd 2>/dev/null
-sleep 2
+# Exit if already running to prevent PID explosion
+pgrep -f wazuh-agentd > /dev/null 2>&1 && exit 0
+pkill -f start-wazuh.sh 2>/dev/null
+sleep 1
 while true; do
-  /var/ossec/bin/wazuh-agentd
-  echo "$(date): agentd exited, restarting..." >> /var/ossec/logs/watchdog.log
-  sleep 5
+  pgrep -f wazuh-agentd > /dev/null 2>&1 || /var/ossec/bin/wazuh-agentd
+  sleep 10
 done
 WEOF
 chmod +x /tmp/start-wazuh.sh
