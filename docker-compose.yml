@@ -300,6 +300,8 @@ services:
   elastalert:
     image: jertel/elastalert2:latest
     container_name: elastalert
+    dns:
+      - 8.8.8.8
     restart: unless-stopped
     command: ["--verbose", "--config", "/opt/elastalert/config.yaml"]
     volumes:

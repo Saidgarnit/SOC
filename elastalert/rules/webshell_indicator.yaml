@@ -1,0 +1,37 @@
+name: Webshell Indicator - Process Spawned from Web Server
+type: any
+index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
+ignore_unavailable: true
+filter:
+  - bool:
+      should:
+        - terms:
+            rule.id:
+              - "31166"
+              - "31167"
+              - "5710"
+              - "87105"
+        - query_string:
+            query: "rule.description:(*webshell* OR *reverse*shell* OR *shell*upload*)"
+            analyze_wildcard: true
+      minimum_should_match: 1
+realert:
+  minutes: 10
+alert_subject: "[CRITICAL] Webshell Indicator on {0}"
+alert_subject_args:
+  - agent.name
+alert_text_type: alert_text_jinja
+alert_text: |
+  WEBSHELL / REVERSE SHELL INDICATOR
+  Host       : {{ agent.name | default('N/A') }}
+  Timestamp  : {{ timestamp }}
+  Rule ID    : {{ rule.id | default('N/A') }}
+  Description: {{ rule.description | default('N/A') }}
+  Source IP  : {{ data.srcip | default('N/A') }}
+  MITRE      : T1505.003 / T1059
+  IMMEDIATE INVESTIGATION REQUIRED
+  Kibana: http://localhost:5601
+alert:
+  - email
+email:
+  - garnitsaid01@gmail.com

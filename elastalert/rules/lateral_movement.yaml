@@ -1,4 +1,4 @@
-name: Failed Login Attempt
+name: Lateral Movement Detected
 type: frequency
 index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
 ignore_unavailable: true
@@ -7,36 +7,43 @@ num_events: 5
 timeframe:
   minutes: 5
 
-query_key: data.srcip
+query_key: agent.name
 
 filter:
   - bool:
       should:
         - term:
-            rule.groups: "authentication_failed"
+            rule.groups: "authentication_success"
         - term:
             rule.groups: "sshd"
+        - term:
+            rule.groups: "win_lateral_movement"
+        - term:
+            rule.groups: "smb"
       minimum_should_match: 1
 
 realert:
   minutes: 20
 
-alert_subject: "🔑 [MED] {0} Failed Logins from {1}"
+alert_subject: "🔀 [HIGH] Lateral Movement — {0} on {1}"
 alert_subject_args:
   - num_hits
-  - data.srcip
+  - agent.name
 
 alert_text_type: alert_text_jinja
 alert_text: |
-  🔑 MULTIPLE FAILED LOGIN ATTEMPTS
+  🔀 LATERAL MOVEMENT DETECTED
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Host       : {{ agent.name | default('N/A') }}
   Attempts   : {{ num_hits }} in 5 minutes
   Timestamp  : {{ timestamp }}
   Source IP  : {{ data.srcip | default('N/A') }}
+  User       : {{ data.dstuser | default(data.srcuser) | default('N/A') }}
   Rule ID    : {{ rule.id | default('N/A') }}
   Description: {{ rule.description | default('N/A') }}
+  MITRE      : T1021 - Remote Services
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Kibana: http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))
+  Kibana: http://localhost:5601
 
 alert:
   - email
@@ -47,5 +54,5 @@ email:
 
 slack_webhook_url: "https://hooks.slack.com/services/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"
 slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":key:"
-slack_msg_color: "warning"
+slack_emoji_override: ":arrows_counterclockwise:"
+slack_msg_color: "danger"

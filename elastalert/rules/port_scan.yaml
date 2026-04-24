@@ -1,0 +1,46 @@
+name: Port Scan / Reconnaissance Detected
+type: frequency
+index: soc-logs-enriched-*
+ignore_unavailable: true
+num_events: 20
+timeframe:
+  minutes: 1
+query_key: src_ip
+filter:
+  - bool:
+      should:
+        - term:
+            event_type.keyword: "flow"
+        - bool:
+            must:
+              - term:
+                  event_type.keyword: "alert"
+              - query_string:
+                  query: "alert.signature:(*scan* OR *SCAN* OR *nmap* OR *recon*)"
+                  analyze_wildcard: true
+      minimum_should_match: 1
+  - bool:
+      must_not:
+        - terms:
+            src_ip:
+              - "172.18.0.6"
+              - "172.18.0.9"
+              - "172.18.0.19"
+realert:
+  minutes: 15
+alert_subject: "[MEDIUM] Port Scan - {0} flows from {1}"
+alert_subject_args:
+  - num_hits
+  - src_ip
+alert_text_type: alert_text_jinja
+alert_text: |
+  PORT SCAN DETECTED
+  Source IP  : {{ src_ip | default('N/A') }}
+  Flow Count : {{ num_hits }} in 1 minute
+  Timestamp  : {{ timestamp }}
+  MITRE      : T1046 / T1595
+  Kibana: http://localhost:5601
+alert:
+  - email
+email:
+  - garnitsaid01@gmail.com
