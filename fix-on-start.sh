@@ -109,8 +109,6 @@ for i in $(seq 1 20); do
     sleep 5
 done
 
-# Write start-wazuh.sh
-
 # ── 9. Fix and start all Wazuh agents ────────────────────────────
 echo "🔄 Fixing Wazuh agents (all 11 victims)..."
 for VICTIM in $WAZUH_AGENTS; do
@@ -133,11 +131,8 @@ for VICTIM in $WAZUH_AGENTS; do
         docker exec $VICTIM sh -c "echo '$MANAGER_KEY' > /var/ossec/etc/client.keys && chmod 640 /var/ossec/etc/client.keys && chown root:wazuh /var/ossec/etc/client.keys" > /dev/null 2>&1
         echo "  🔑 Key synced: $VICTIM"
     fi
-
-    # Start watchdog
-    docker cp /tmp/start-wazuh.sh $VICTIM:/usr/local/bin/start-wazuh.sh
-    docker exec -d $VICTIM /usr/local/bin/start-wazuh.sh
-    echo "✅ Wazuh started: $VICTIM"
+    docker exec $VICTIM /var/ossec/bin/wazuh-control start > /dev/null 2>&1
+    ok "Wazuh started: $VICTIM"
 done
 
 # ── 10. Verify Wazuh ─────────────────────────────────────────────
