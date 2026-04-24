@@ -181,11 +181,11 @@ docker exec victim-database sh -c "sed -i 's/bind-address.*= 127.0.0.1/bind-addr
 sleep 5
 docker exec victim-database sh -c 'mysql -u root -e "CREATE DATABASE IF NOT EXISTS dvwa; CREATE USER IF NOT EXISTS dvwa@\"%\" IDENTIFIED BY \"p@ssw0rd\"; GRANT ALL PRIVILEGES ON dvwa.* TO dvwa@\"%\"; FLUSH PRIVILEGES;" 2>/dev/null' && echo "✅ DVWA database ready"
 sleep 3
-docker exec victim-dvwa sh -c "
+docker exec victim-dvwa sh -c '
   curl -s -c /tmp/c.txt http://localhost/dvwa/setup.php > /tmp/s.html
-  TOKEN=$(grep user_token /tmp/s.html | grep -oP '(?<=value=")[^"]*' | head -1)
-  curl -s -b /tmp/c.txt -c /tmp/c.txt -X POST -d "create_db=Create+%2F+Reset+Database&user_token=\$TOKEN" http://localhost/dvwa/setup.php > /dev/null
-" && echo "✅ DVWA initialized"
+  DVWA_TOKEN=$(grep user_token /tmp/s.html | grep -oP "(?<=value=\")[^\"]*" | head -1)
+  curl -s -b /tmp/c.txt -c /tmp/c.txt -X POST -d "create_db=Create+%2F+Reset+Database&user_token=$DVWA_TOKEN" http://localhost/dvwa/setup.php > /dev/null
+' && echo "✅ DVWA initialized"
 
 # ── 12. bWAPP auto-install
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8892/install.php 2>/dev/null)
