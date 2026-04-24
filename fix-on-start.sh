@@ -112,7 +112,7 @@ for VICTIM in $WAZUH_AGENTS; do
     docker ps --format '{{.Names}}' | grep -q "^${VICTIM}$" || { echo "⚠️  $VICTIM not running"; continue; }
 
     # rsyslog and auth.log
-    docker exec $VICTIM sh -c "pgrep rsyslogd > /dev/null 2>&1 || rsyslogd 2>/dev/null; touch /var/log/auth.log && chmod 644 /var/log/auth.log" > /dev/null 2>&1
+    docker exec $VICTIM sh -c "pgrep rsyslogd > /dev/null 2>&1 || rsyslogd 2>/dev/null; chown syslog:adm /var/log/auth.log 2>/dev/null; chmod 640 /var/log/auth.log" > /dev/null 2>&1
 
     # Enroll if key missing on manager
     MANAGER_KEY=$(docker exec $WAZUH_MANAGER grep " $VICTIM " /var/ossec/etc/client.keys 2>/dev/null)
@@ -143,7 +143,7 @@ docker exec $WAZUH_MANAGER /var/ossec/bin/agent_control -l
 
 # ── 11. Filebeat reset ───────────────────────────────────────────
 docker exec filebeat sh -c "rm -rf /usr/share/filebeat/data/registry" 2>/dev/null && \
-    docker restart filebeat > /dev/null 2>&1 && echo "✅ Filebeat reset"
+    docker rm filebeat && docker compose -f ~/soc-stack/docker-compose.yml up -d filebeat > /dev/null 2>&1 && echo "✅ Filebeat reset"
 
 # ── 11a. Jenkins security fix
 docker exec victim-jenkins sh -c "mkdir -p /var/jenkins_home/init.groovy.d && cat > /var/jenkins_home/init.groovy.d/disable-security.groovy << 'GROOVY'
@@ -203,3 +203,28 @@ for ID in $OFFLINE_IDS; do
 done
 echo "✅ Fleet cleanup complete"
 ) &
+
+# ── 14. Fix auth.log permissions on all agents (needed for rsyslog) ──
+echo "🔧 Fixing auth.log ownership on all victims..."
+for VICTIM in $WAZUH_AGENTS; do
+    docker ps --format '{{.Names}}' | grep -q "^${VICTIM}$" || continue
+    docker exec $VICTIM sh -c "
+        touch /var/log/auth.log 2>/dev/null
+        chown syslog:adm /var/log/auth.log 2>/dev/null || chown root:root /var/log/auth.log 2>/dev/null
+        chmod 640 /var/log/auth.log 2>/dev/null
+        pgrep rsyslogd > /dev/null 2>&1 || service rsyslog start 2>/dev/null || rsyslogd 2>/dev/null
+    " 2>/dev/null && echo "  ✅ auth.log fixed: $VICTIM"
+done
+
+# ── 15. Fix Wazuh logcollector/syscheckd on victim-ubuntu ────────────
+echo "🔧 Restarting Wazuh full agent on victim-ubuntu..."
+docker exec victim-ubuntu /var/ossec/bin/wazuh-control restart 2>/dev/null
+sleep 5
+docker exec victim-ubuntu /var/ossec/bin/wazuh-control status 2>/dev/null | grep -E "running|not running"
+
+# ── 16. Restart elastalert after everything is up ────────────────────
+echo "🔧 Restarting elastalert to ensure clean rule load..."
+docker compose -f ~/soc-stack/docker-compose.yml restart elastalert > /dev/null 2>&1
+sleep 10
+RULES=$(docker logs elastalert 2>&1 | grep "rules loaded" | tail -1)
+echo "  ✅ ElastAlert: $RULES"
