@@ -109,7 +109,7 @@ log "Wazuh ghost cleanup done"
 title "STEP 9 — Filebeat + OpenCTI"
 docker exec filebeat sh -c "rm -rf /usr/share/filebeat/data/registry" 2>/dev/null \
     && docker restart filebeat > /dev/null 2>&1 && log "Filebeat reset" || warn "Filebeat skip"
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/graphql 2>/dev/null)
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/graphql 2>/dev/null)
 [[ "$STATUS" =~ ^(200|400)$ ]] && \
     docker restart connector-misp connector-mitre opencti-worker > /dev/null 2>&1 \
     && log "OpenCTI connectors restarted" || warn "OpenCTI not ready yet"
@@ -140,7 +140,7 @@ chk "DVWA"           "http://localhost:8890"
 chk "bWAPP"          "http://localhost:8892"
 chk "Jenkins"        "http://localhost:9090/login"
 chk "MISP"           "http://localhost:9001"
-chk "OpenCTI"        "http://localhost:8080"
+chk "OpenCTI"        "http://localhost:3000"
 chk "Metasploitable" "http://localhost:8889"
 chk "IoT-API"        "http://localhost:8891"
 
@@ -154,7 +154,7 @@ echo -e "${GREEN}║     SOC Stack is Ready! 🚀           ║${NC}"
 echo -e "${GREEN}╠══════════════════════════════════════╣${NC}"
 echo -e "${GREEN}║${NC}  Kibana  → http://localhost:5601     ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  DVWA    → http://localhost:8890     ${GREEN}║${NC}"
-echo -e "${GREEN}║${NC}  OpenCTI → http://localhost:8080     ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  OpenCTI → http://localhost:3000     ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  MISP    → http://localhost:9001     ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  Jenkins → http://localhost:9090     ${GREEN}║${NC}"
 echo -e "${GREEN}╚══════════════════════════════════════╝${NC}"
