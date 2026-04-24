@@ -7,6 +7,22 @@ WAZUH_AGENTS="victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail vi
 FLEET_AGENTS="victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail victim-dns victim-jenkins victim-database"
 PKG_DIR=~/soc-stack/wazuh/packages
 
+# ── Helpers ──────────────────────────────────────────────────────────
+ok()   { echo "  ✅ $*"; }
+warn() { echo "  ⚠️  $*"; }
+fail() { echo "  ❌ $*"; }
+container_up() { docker ps --format '{{.Names}}' | grep -q "^${1}$"; }
+wait_for() {
+    local label="$1" cmd="$2" tries="${3:-30}" delay="${4:-5}"
+    echo "⏳ Waiting for $label..."
+    for i in $(seq 1 $tries); do
+        eval "$cmd" && ok "$label ready" && return 0
+        sleep $delay
+    done
+    fail "$label NOT ready after $((tries * delay))s — continuing anyway"
+    return 1
+}
+
 # ── 1. Wazuh log dirs ────────────────────────────────────────────
 YEAR=$(date +%Y); MONTH=$(date +%b)
 BASE=/home/said/soc-stack/wazuh/logs
@@ -142,8 +158,13 @@ echo "📊 Wazuh agent status:"
 docker exec $WAZUH_MANAGER /var/ossec/bin/agent_control -l
 
 # ── 11. Filebeat reset ───────────────────────────────────────────
-docker exec filebeat sh -c "rm -rf /usr/share/filebeat/data/registry" 2>/dev/null && \
-    docker rm filebeat && docker compose -f ~/soc-stack/docker-compose.yml up -d filebeat > /dev/null 2>&1 && echo "✅ Filebeat reset"
+if container_up filebeat; then
+    docker exec filebeat sh -c "rm -rf /usr/share/filebeat/data/registry" 2>/dev/null
+    docker rm -f filebeat 2>/dev/null
+    docker compose -f ~/soc-stack/docker-compose.yml up -d filebeat > /dev/null 2>&1 && ok "Filebeat reset" || warn "Filebeat reset failed"
+else
+    docker compose -f ~/soc-stack/docker-compose.yml up -d filebeat > /dev/null 2>&1 && ok "Filebeat started" || warn "Filebeat start failed"
+fi
 
 # ── 11a. Jenkins security fix
 docker exec victim-jenkins sh -c "mkdir -p /var/jenkins_home/init.groovy.d && cat > /var/jenkins_home/init.groovy.d/disable-security.groovy << 'GROOVY'
@@ -183,7 +204,9 @@ else
 fi
 
 echo ""
+echo "════════════════════════════════════"
 echo "🎉 SOC stack ready!"
+echo "════════════════════════════════════"
 
 # ── 13. Background cleanup after 3min ────────────────────────────
 (
@@ -218,13 +241,31 @@ done
 
 # ── 15. Fix Wazuh logcollector/syscheckd on victim-ubuntu ────────────
 echo "🔧 Restarting Wazuh full agent on victim-ubuntu..."
-docker exec victim-ubuntu /var/ossec/bin/wazuh-control restart 2>/dev/null
-sleep 5
-docker exec victim-ubuntu /var/ossec/bin/wazuh-control status 2>/dev/null | grep -E "running|not running"
+if container_up victim-ubuntu; then
+    docker exec victim-ubuntu /var/ossec/bin/wazuh-control restart 2>/dev/null
+    for i in $(seq 1 6); do
+        sleep 5
+        STATUS=$(docker exec victim-ubuntu /var/ossec/bin/wazuh-control status 2>/dev/null)
+        NOT_RUNNING=$(echo "$STATUS" | grep -c 'not running' || true)
+        if [ "$NOT_RUNNING" = "0" ]; then
+            ok "All Wazuh procs running on victim-ubuntu"
+            break
+        fi
+        [ "$i" = "6" ] && { echo "$STATUS" | grep 'not running'; fail "Some Wazuh procs still down on victim-ubuntu"; }
+    done
+else
+    warn "victim-ubuntu not running — skipping Wazuh restart"
+fi
 
 # ── 16. Restart elastalert after everything is up ────────────────────
 echo "🔧 Restarting elastalert to ensure clean rule load..."
 docker compose -f ~/soc-stack/docker-compose.yml restart elastalert > /dev/null 2>&1
-sleep 10
-RULES=$(docker logs elastalert 2>&1 | grep "rules loaded" | tail -1)
-echo "  ✅ ElastAlert: $RULES"
+for i in $(seq 1 12); do
+    sleep 5
+    RULES=$(docker logs elastalert 2>&1 | grep 'rules loaded' | tail -1)
+    if [ -n "$RULES" ]; then
+        ok "ElastAlert: $RULES"
+        break
+    fi
+    [ "$i" = "12" ] && fail "ElastAlert no rules loaded after 60s — check: docker logs elastalert"
+done
