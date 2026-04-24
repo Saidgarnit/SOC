@@ -1,0 +1,44 @@
+name: VirusTotal Malicious IP Detected
+type: any
+index: soc-logs-enriched-*,alerts-soc-threats-*
+ignore_unavailable: true
+
+filter:
+- query:
+    query_string:
+      query: "tags: vt_malicious"
+
+
+
+
+mitre_technique_id: "T1204"
+mitre_technique: "User Execution"
+mitre_tactic: "Execution"
+mitre_tactic_id: "TA0002"
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🎯 MITRE: Execution (TA0002)
+  🔧 Technique: User Execution (T1204)
+  ⚠️  Severity: HIGH
+  🌍 Source IP: {{ src_ip }}
+realert:
+  minutes: 60
+
+alert:
+- slack
+- email
+
+slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: danger
+
+email:
+- garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "VirusTotal Alert - {0}"

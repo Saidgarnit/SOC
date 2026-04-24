@@ -1,0 +1,52 @@
+# Rule name for your PFE report
+name: "MISP-Threat-Intel-Match"
+
+type: any
+index: alerts-soc-threats-*
+ignore_unavailable: true
+
+filter:
+- term:
+    tags: "misp_threat_match"
+
+real_time_only: true
+
+run_every:
+  seconds: 10
+buffer_time:
+  minutes: 1
+realert:
+  minutes: 30
+
+# MITRE ATT&CK Mapping (kept for documentation)
+mitre_technique_id: "T1071"
+mitre_technique: "Application Layer Protocol"
+mitre_tactic: "Command and Control"
+mitre_tactic_id: "TA0011"
+
+
+
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🎯 MITRE: Command & Control (TA0011)
+  🔧 Technique: Application Layer Protocol (T1071)
+  ⚠️  Severity: HIGH
+  🌍 Source IP: {{ src_ip }}
+alert:
+- slack
+- email
+
+slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: danger
+
+email:
+- garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "🚨 SOC Alert - MISP Threat Intel Match - {1}"

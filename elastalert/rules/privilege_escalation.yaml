@@ -1,0 +1,35 @@
+name: Privilege Escalation Detected
+type: any
+index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
+ignore_unavailable: true
+filter:
+  - query:
+      query_string:
+        query: 'rule.groups:sudo OR rule.groups:privilege_escalation OR rule.id:5500 OR rule.id:5501 OR rule.id:5502'
+        analyze_wildcard: true
+realert:
+  minutes: 5
+alert_subject: "🔺 [PRIVESC] {0} on {1}"
+alert_subject_args:
+  - rule.description
+  - agent.name
+alert_text_type: alert_text_jinja
+alert_text: |
+  🔺 PRIVILEGE ESCALATION DETECTED
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Host       : {{ agent.name | default('N/A') }}
+  Rule ID    : {{ rule.id | default('N/A') }}
+  Description: {{ rule.description | default('N/A') }}
+  Level      : {{ rule.level | default('N/A') }}
+  Timestamp  : {{ timestamp }}
+  MITRE      : T1548 - Abuse Elevation Control
+  Kibana     : http://localhost:5601
+alert:
+  - email
+  - slack
+email:
+  - garnitsaid01@gmail.com
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":arrow_upper_right:"
+slack_msg_color: "danger"

@@ -1,0 +1,69 @@
+%YAML 1.1
+---
+vars:
+  address-groups:
+    HOME_NET: "[172.18.0.0/16,172.19.0.0/20,192.168.0.0/16,10.0.0.0/8]"
+    EXTERNAL_NET: "!$HOME_NET"
+
+default-log-dir: /var/log/suricata/
+
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+  - eve-log:
+      enabled: yes
+      filename: eve.json
+      types:
+        - alert:
+            payload: yes
+            packet: yes
+        - dns:
+            query: yes
+            answer: yes
+        - http:
+            extended: yes
+        - tls:
+            extended: yes
+        - ssh
+        - flow
+
+af-packet:
+  - interface: br-512af750d33d   
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+  - interface: eth0            
+    cluster-id: 98
+    cluster-type: cluster_flow
+    defrag: yes
+
+pcap:
+  - interface: br-512af750d33d
+
+detect:
+  profile: medium
+  custom-values:
+    toclient-groups: 3
+    toserver-groups: 25
+
+threading:
+  set-cpu-affinity: no
+  cpu-affinity:
+    - management-cpu-set:
+        cpu: [0]
+  detect-thread-ratio: 1.0
+
+app-layer:
+  protocols:
+    http:
+      enabled: yes
+    dns:
+      enabled: yes
+    tls:
+      enabled: yes
+    ssh:
+      enabled: yes
+
+rule-files:
+  - /etc/suricata/rules/local.rules

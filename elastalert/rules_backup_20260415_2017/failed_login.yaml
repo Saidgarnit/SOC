@@ -1,0 +1,43 @@
+name: Failed Login Attempt
+type: any
+index: soc-logs-enriched-*,alerts-soc-threats-*
+ignore_unavailable: true
+
+filter:
+- term:
+    event_type: "alert"
+
+
+
+
+mitre_technique_id: "T1078"
+mitre_technique: "Valid Accounts"
+mitre_tactic: "Initial Access"
+mitre_tactic_id: "TA0001"
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🎯 MITRE: Initial Access (TA0001)
+  🔧 Technique: Valid Accounts (T1078)
+  ⚠️  Severity: HIGH
+  🌍 Source IP: {{ src_ip }}
+realert:
+  minutes: 60
+
+alert:
+- email
+- slack
+
+slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: danger
+
+email:
+- garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "ElastAlert: Failed Login Attempt"

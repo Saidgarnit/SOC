@@ -1,0 +1,43 @@
+# SOC Stack Nginx Proxy - Fixed for Docker DNS
+resolver 127.0.0.11 valid=30s;   # Docker internal DNS resolver
+
+server {
+    listen 80;
+    server_name _;
+
+    # Optional: Redirect to HTTPS (comment out if SSL not ready)
+    # return 301 https://$host$request_uri;
+
+    # Root -> Kibana (main dashboard)
+    location / {
+        set $kibana_upstream kibana:5601;   # variable trick avoids startup failure
+        proxy_pass http://$kibana_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    # OpenCTI
+    location /opencti/ {
+        set $opencti_upstream opencti:3000;
+        proxy_pass http://$opencti_upstream/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # MISP (uncomment only when misp container is Up and healthy)
+    # location /misp/ {
+    #     set $misp_upstream misp:80;
+    #     proxy_pass http://$misp_upstream/;
+    #     proxy_set_header Host $host;
+    #     proxy_set_header X-Real-IP $remote_addr;
+    #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #     proxy_set_header X-Forwarded-Proto $scheme;
+    #     proxy_cookie_path / /;
+    #     proxy_cookie_flags ~ secure httponly samesite=lax;
+    # }
+}

@@ -1,0 +1,18 @@
+# Permission denied dirs
+wazuh/logs/
+wazuh/config/
+lab/elastic-agent-bin/
+venv/
+
+# Large/generated files
+wazuh/config/shared/default/merged.mg
+*.bak
+*.pre-*
+
+# Secrets (keep these local only)
+.env
+suricata/logs/
+# Large binaries - not for git
+lab/victim-windows/elastic-agent-bin/
+suricata/logs/
+logstash/geoip/*.mmdb

@@ -1,0 +1,48 @@
+name: Failed Login Attempt
+type: frequency
+index: soc-logs-enriched-*
+ignore_unavailable: true
+
+num_events: 5
+timeframe:
+  minutes: 5
+
+filter:
+  - term:
+      event_type.keyword: "alert"
+
+realert:
+  minutes: 60
+
+alert_subject: "🔑 [Failed Login] {0} attempts from {1}"
+alert_subject_args:
+  - num_hits
+  - src_ip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🔑 FAILED LOGIN ATTEMPT
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Attempts   : {{ num_hits }} in 5 minutes
+  Timestamp  : {{ timestamp }}
+
+  Source     : {{ src_ip | default('N/A') }}:{{ src_port | default('N/A') }}
+  Destination: {{ dest_ip | default('N/A') }}:{{ dest_port | default('N/A') }}
+  Protocol   : {{ proto | default('N/A') }}
+
+  Signature  : {{ alert.signature | default('N/A') }}
+  Action     : {{ alert.action | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":key:"
+slack_msg_color: "warning"

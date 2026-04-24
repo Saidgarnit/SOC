@@ -1,0 +1,48 @@
+name: High Risk Threat Score Detected
+type: any
+index: soc-logs-enriched-*,alerts-soc-threats-*
+ignore_unavailable: true
+
+filter:
+- term:
+    event_type: "alert"
+
+# MITRE ATT&CK Mapping
+mitre_technique_id: "T1595"
+mitre_technique: "Active Scanning"
+mitre_tactic: "Reconnaissance"
+mitre_tactic_id: "TA0043"
+
+
+
+
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🎯 MITRE: Reconnaissance (TA0043)
+  🔧 Technique: Active Scanning (T1595)
+  ⚠️  Severity: HIGH
+  🌍 Source IP: {{ src_ip }}
+#   📍 Country: {{ (src_geoip.get("geo", {}).get("country_name") or src_geoip.get("country_name") or "N/A") if src_geoip is defined and src_geoip else "N/A" }}
+#   🏙️  City: {{ (src_geoip.get("geo", {}).get("city_name") or src_geoip.get("city_name") or "N/A") if src_geoip is defined and src_geoip else "N/A" }}
+realert:
+  minutes: 60
+
+alert:
+- slack
+- email
+
+slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: danger
+
+email:
+- garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "🚨 SOC Alert - High Risk Threat Detected"
+slack_msg_color: danger

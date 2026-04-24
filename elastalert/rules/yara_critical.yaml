@@ -1,0 +1,43 @@
+name: YARA Critical Malware Detection
+type: any
+index: soc-logs-enriched-*
+ignore_unavailable: true
+
+filter:
+  - term:
+      yara_match: true
+
+realert:
+  hours: 6
+
+alert_subject: "🧬 [YARA] Malware detected from {0}"
+alert_subject_args:
+  - src_ip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🧬 YARA CRITICAL MALWARE DETECTION
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  YARA Match : {{ yara_match | default('N/A') }}
+  Timestamp  : {{ timestamp }}
+
+  Source     : {{ src_ip | default('N/A') }}:{{ src_port | default('N/A') }}
+  Destination: {{ dest_ip | default('N/A') }}:{{ dest_port | default('N/A') }}
+  Protocol   : {{ proto | default('N/A') }}
+
+  Signature  : {{ alert.signature | default('N/A') }}
+  Action     : {{ alert.action | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":biohazard_sign:"
+slack_msg_color: "danger"

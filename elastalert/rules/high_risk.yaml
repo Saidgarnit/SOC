@@ -1,0 +1,59 @@
+name: High Risk Threat Score Detected
+type: frequency
+index: soc-logs-enriched-*
+ignore_unavailable: true
+
+num_events: 2
+timeframe:
+  minutes: 5
+
+query_key: alert.signature
+
+filter:
+  - term:
+      event_type.keyword: "alert"
+  - term:
+      type.keyword: "SuricataIDPS"
+  - range:
+      alert.severity:
+        lte: 2
+
+realert:
+  minutes: 15
+
+alert_subject: "⚠️ [HIGH RISK] {0} — {1} → {2}"
+alert_subject_args:
+  - alert.signature
+  - src_ip
+  - dest_ip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  ⚠️ HIGH RISK THREAT DETECTED
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Signature  : {{ alert.signature | default('N/A') }}
+  Severity   : {{ alert.severity | default('N/A') }} (1=Critical, 2=High)
+  Action     : {{ alert.action | default('N/A') }}
+  Matches    : {{ num_hits }} events in 5 min
+  Timestamp  : {{ timestamp }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Source     : {{ src_ip | default('N/A') }}:{{ src_port | default('N/A') }}
+  Dest       : {{ dest_ip | default('N/A') }}:{{ dest_port | default('N/A') }}
+  Protocol   : {{ proto | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  GeoIP Src  : {{ src_geoip.country_name | default('Internal/Private') }}
+  GeoIP Dst  : {{ dest_geoip.country_name | default('Internal/Private') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":warning:"
+slack_msg_color: "danger"

@@ -1,0 +1,105 @@
+services:
+  opencti-redis:
+    image: redis:7-alpine
+    container_name: opencti-redis
+    restart: unless-stopped
+    networks:
+      - soc-net
+
+  opencti-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: opencti-es
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=opencti
+    volumes:
+      - opencti-es-data:/usr/share/elasticsearch/data
+    networks:
+      - soc-net
+
+  opencti-minio:
+    image: minio/minio:latest
+    container_name: opencti-minio
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=opencti
+      - MINIO_ROOT_PASSWORD=opencti_minio_password
+    command: server /data
+    volumes:
+      - opencti-minio-data:/data
+    networks:
+      - soc-net
+
+  opencti-rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: opencti-rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=opencti
+      - RABBITMQ_DEFAULT_PASS=opencti_rabbitmq_password
+    volumes:
+      - opencti-rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - soc-net
+
+  opencti:
+    image: opencti/platform:6.2.0
+    container_name: opencti
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=2048
+      - APP__PORT=3000
+      - APP__BASE_URL=http://localhost:3000
+      - APP__ADMIN__EMAIL=admin@opencti.local
+      - APP__ADMIN__PASSWORD=Admin@123
+      - APP__ADMIN__TOKEN=a3c5e7f9-b1d3-4e6f-8a2c-0d1e3f5a7b9c
+      - APP__APP_LOGS__LOGS_LEVEL=error
+      - REDIS__HOSTNAME=opencti-redis
+      - REDIS__PORT=6379
+      - ELASTICSEARCH__URL=http://opencti-es:9200
+      - MINIO__ENDPOINT=opencti-minio
+      - MINIO__PORT=9000
+      - MINIO__USE_SSL=false
+      - MINIO__ACCESS_KEY=opencti
+      - MINIO__SECRET_KEY=opencti_minio_password
+      - RABBITMQ__HOSTNAME=opencti-rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USERNAME=opencti
+      - RABBITMQ__PASSWORD=opencti_rabbitmq_password
+      - SMTP__HOSTNAME=localhost
+      - SMTP__PORT=25
+    depends_on:
+      - opencti-redis
+      - opencti-es
+      - opencti-minio
+      - opencti-rabbitmq
+    networks:
+      - soc-net
+
+  opencti-worker:
+    image: opencti/worker:6.2.0
+    container_name: opencti-worker
+    restart: unless-stopped
+    environment:
+      - OPENCTI_URL=http://opencti:3000
+      - OPENCTI_TOKEN=a3c5e7f9-b1d3-4e6f-8a2c-0d1e3f5a7b9c
+      - WORKER_LOG_LEVEL=error
+    depends_on:
+      - opencti
+    networks:
+      - soc-net
+
+volumes:
+  opencti-es-data:
+  opencti-minio-data:
+  opencti-rabbitmq-data:
+
+networks:
+  soc-net:
+    external: true
+    name: soc-stack_soc-net

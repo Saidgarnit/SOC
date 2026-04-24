@@ -1,0 +1,33 @@
+# SOC Stack Suricata Detection Rules
+
+# RECONNAISSANCE
+alert icmp any any -> $HOME_NET any (msg:"ICMP Ping Detected"; sid:1000001; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"Port Scan SYN"; flags:S; threshold:type threshold,track by_src,count 20,seconds 10; sid:1000003; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"Nmap NULL Scan"; flags:0; threshold:type threshold,track by_src,count 5,seconds 10; sid:1000004; rev:2;)
+
+# INITIAL ACCESS
+alert dns any any -> any any (msg:"DNS Lookup Malware"; dns.query; content:"malware"; nocase; sid:1000006; rev:2;)
+alert dns any any -> any any (msg:"DNS Lookup Exploit"; dns.query; content:"exploit"; nocase; sid:1000007; rev:2;)
+
+# LATERAL MOVEMENT
+alert tcp any any -> $HOME_NET 22 (msg:"SSH Brute Force"; flow:to_server; threshold:type threshold,track by_src,count 5,seconds 60; sid:1000002; rev:2;)
+alert tcp any any -> $HOME_NET 3389 (msg:"RDP Brute Force"; flow:to_server; threshold:type threshold,track by_src,count 10,seconds 60; sid:1000008; rev:2;)
+alert tcp any any -> $HOME_NET 445 (msg:"SMB Exploit"; flow:to_server,established; content:"|FF|SMB"; sid:1000009; rev:2;)
+
+# COMMAND & CONTROL - exclude internal SOC components
+alert tcp !172.18.0.0/24 any -> $EXTERNAL_NET any (msg:"C2 Beaconing"; flow:to_server,established; dsize:<50; threshold:type threshold,track by_dst,count 10,seconds 300; sid:1000011; rev:3;)
+
+# DATA EXFILTRATION
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Data Exfiltration Large"; flow:to_server,established; dsize:>10000; threshold:type threshold,track by_src,count 5,seconds 300; sid:1000013; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 21 (msg:"Outbound FTP"; flow:to_server,established; sid:1000014; rev:2;)
+
+# MALWARE - exclude internal SOC components
+alert http any any -> any any (msg:"Suspicious EXE Download"; flow:to_server; content:".exe"; http_uri; sid:1000015; rev:2;)
+alert tcp !172.18.0.0/24 any -> any any (msg:"PowerShell Encoded"; flow:to_server; content:"powershell"; nocase; content:"-encodedcommand"; nocase; sid:1000016; rev:3;)
+
+# POLICY VIOLATIONS
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"P2P Traffic"; flow:to_server; dsize:>5000; threshold:type threshold,track by_src,count 5,seconds 60; sid:1000017; rev:2;)
+
+# APPLICATION ATTACKS
+alert http any any -> any any (msg:"SQL Injection"; flow:to_server,established; content:"union"; nocase; sid:1000018; rev:2;)
+alert http any any -> any any (msg:"XSS Attack"; flow:to_server,established; content:"<script"; nocase; sid:1000019; rev:2;)

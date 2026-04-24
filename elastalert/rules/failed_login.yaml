@@ -1,0 +1,51 @@
+name: Failed Login Attempt
+type: frequency
+index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
+ignore_unavailable: true
+
+num_events: 5
+timeframe:
+  minutes: 5
+
+query_key: data.srcip
+
+filter:
+  - bool:
+      should:
+        - term:
+            rule.groups: "authentication_failed"
+        - term:
+            rule.groups: "sshd"
+      minimum_should_match: 1
+
+realert:
+  minutes: 20
+
+alert_subject: "🔑 [MED] {0} Failed Logins from {1}"
+alert_subject_args:
+  - num_hits
+  - data.srcip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🔑 MULTIPLE FAILED LOGIN ATTEMPTS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Attempts   : {{ num_hits }} in 5 minutes
+  Timestamp  : {{ timestamp }}
+  Source IP  : {{ data.srcip | default('N/A') }}
+  Rule ID    : {{ rule.id | default('N/A') }}
+  Description: {{ rule.description | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URLsRIpNUJkESdCdlfBlTPd4T4"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":key:"
+slack_msg_color: "warning"

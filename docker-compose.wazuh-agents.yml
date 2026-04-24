@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  victim-ubuntu:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-dvwa:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-iot:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-windows:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-mail:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-dns:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-jenkins:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]
+  victim-database:
+    entrypoint: ["/bin/sh", "-c", "/usr/local/bin/start-wazuh.sh & exec /entrypoint.sh 2>/dev/null || tail -f /dev/null"]

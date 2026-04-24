@@ -1,0 +1,41 @@
+name: Brute Force Attack Detected
+type: frequency
+index: soc-logs-enriched-*
+ignore_unavailable: true
+num_events: 5
+timeframe:
+  minutes: 2
+query_key: src_ip
+
+# The Fix: We only look for actual failed authentication logs now!
+filter:
+- query:
+    query_string:
+      query: "status: failed OR message: *fail* OR rule.description: *fail*"
+
+alert_text_type: alert_text_only
+use_elastalert_template: false
+
+alert_text: |
+  🎯 MITRE: Credential Access (TA0006)
+  🔧 Technique: Brute Force (T1110)
+  ⚠️ Severity: HIGH
+  🌍 Source IP: {0}
+  📍 Country: {1}
+  🏙️ City: {2}
+
+alert_text_args:
+- src_ip
+- geoip.country_name
+- geoip.city_name
+
+alert:
+- email
+email:
+- garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "ElastAlert: Brute Force Attack Detected - {0}"

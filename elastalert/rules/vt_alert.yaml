@@ -1,0 +1,47 @@
+name: VirusTotal Malicious IP Detected
+type: any
+index: soc-logs-enriched-*
+ignore_unavailable: true
+
+filter:
+  - term:
+      vt_malicious: true
+
+realert:
+  hours: 6
+
+alert_subject: "🦠 [VirusTotal] Malicious IP — {0} → {1}"
+alert_subject_args:
+  - src_ip
+  - dest_ip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🦠 VIRUSTOTAL MALICIOUS IP
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Severity   : CRITICAL
+  Timestamp  : {{ timestamp }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Source     : {{ src_ip | default('N/A') }}:{{ src_port | default('N/A') }}
+  Destination: {{ dest_ip | default('N/A') }}:{{ dest_port | default('N/A') }}
+  Protocol   : {{ proto | default('N/A') }}
+  Signature  : {{ alert.signature | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  VT Lookup  : {{ vt_lookup | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Dest Country : {{ dest_geoip.country_name | default('Internal/N/A') }}
+  Dest City    : {{ dest_geoip.city_name | default('N/A') }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":biohazard_sign:"
+slack_msg_color: "danger"

@@ -1,0 +1,45 @@
+name: VirusTotal Malicious IP Detected
+type: any
+index: soc-logs-enriched-*
+ignore_unavailable: true
+
+filter:
+- query:
+    query_string:
+      query: "tags: vt_malicious"
+
+alert_text_type: alert_text_only
+use_elastalert_template: false
+
+alert_text: |
+  🦠 VirusTotal Malicious Detection!
+  💥 Source IP: {0}
+  🌍 Country: {1}
+  🏙️ City: {2}
+  🚩 Detection Ratio: {3}
+  📝 Labels: {4}
+
+alert_text_args:
+- src_ip
+- geoip.country_name
+- geoip.city_name
+- vt.positives
+- vt.labels
+
+alert:
+- slack
+- email
+
+slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: danger
+
+email:
+- garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "VirusTotal Alert - {0}"

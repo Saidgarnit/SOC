@@ -1,0 +1,55 @@
+services:
+  misp-db:
+    image: mysql:8.0
+    container_name: misp-db
+    environment:
+      MYSQL_ROOT_PASSWORD: misp_root_password
+      MYSQL_DATABASE: misp
+      MYSQL_USER: misp
+      MYSQL_PASSWORD: misp_password
+    volumes:
+      - misp-db-data:/var/lib/mysql
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  misp-redis:
+    image: redis:7-alpine
+    container_name: misp-redis
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  misp:
+    image: nukib/misp:latest
+    container_name: misp
+    ports:
+      - "8080:80"
+      - "8443:443"
+    environment:
+      - MYSQL_HOST=misp-db
+      - MYSQL_PORT=3306
+      - MYSQL_LOGIN=misp
+      - MYSQL_PASSWORD=misp_password
+      - MYSQL_DATABASE=misp
+      - REDIS_HOST=misp-redis
+      - REDIS_PORT=6379
+      - MISP_BASEURL=http://localhost:8080
+      - MISP_EMAIL=admin@misp.local
+      - MISP_PASSWORD=Admin@123
+    depends_on:
+      - misp-db
+      - misp-redis
+    volumes:
+      - misp-app:/var/www/MISP
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+volumes:
+  misp-db-data:
+  misp-app:
+
+networks:
+  soc-net:
+    external: true

@@ -1,0 +1,41 @@
+name: Suricata Alert Detected
+type: any
+index: soc-logs-enriched-*
+ignore_unavailable: true
+
+filter:
+  - term:
+      event_type: "alert"
+  - term:
+      type: "SuricataIDPS"
+
+realert:
+  minutes: 30
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🛡️ Suricata IDS Alert
+  ⚠️  Severity: {{ alert.severity | default("N/A") }}
+  🌍 Source IP: {{ src_ip | default("N/A") }}
+  📍 Country: {{ src_geoip.country_name | default("N/A") if src_geoip is defined else "N/A" }}
+  🏙️  City: {{ src_geoip.city_name | default("N/A") if src_geoip is defined else "N/A" }}
+  🎯 Signature: {{ alert.signature | default("N/A") }}
+  🔌 Dest: {{ dest_ip | default("N/A") }}:{{ dest_port | default("N/A") }}
+
+alert:
+  - slack
+  - email
+
+slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: danger
+
+email:
+  - garnitsaid01@gmail.com
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+smtp_auth_file: /opt/elastalert/smtp_auth.yaml
+from_addr: garnitsaid01@gmail.com
+email_subject: "🚨 SOC Alert - Suricata Threat Detected"

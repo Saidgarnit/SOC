@@ -1,0 +1,47 @@
+name: MISP-Threat-Intel-Match
+type: any
+index: soc-logs-enriched-*,alerts-soc-threats-*
+ignore_unavailable: true
+filter:
+  - query:
+      query_string:
+        query: 'tags:misp_threat_match OR alert.signature:MISP_MALICIOUS_IP_MATCH OR threat_intel_info:*'
+        analyze_wildcard: true
+realert:
+  minutes: 0
+alert_subject: "🕵️ [MISP Intel] Threat match — {0} → {1}"
+alert_subject_args:
+  - src_ip
+  - dest_ip
+alert_text_type: alert_text_jinja
+alert_text: |
+  🕵️ MISP THREAT INTEL MATCH
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Severity   : HIGH
+  Matches    : {{ num_hits }} events
+  Timestamp  : {{ timestamp | default('N/A') }}
+  Source     : {{ src_ip | default('N/A') }}:{{ src_port | default('N/A') }}
+  Destination: {{ dest_ip | default('N/A') }}:{{ dest_port | default('N/A') }}
+  Protocol   : {{ proto | default('N/A') }}
+  Signature  : {{ alert.signature | default('N/A') }}
+  Action     : {{ alert.action | default('N/A') }}
+  {% if dest_geoip is defined %}
+  📍 Country: {{ dest_geoip.country_name | default("N/A") }}
+  🏙️  City: {{ dest_geoip.city_name | default("N/A") }}
+  🏢 ASN: {{ dest_geoip.autonomous_system_organization | default("N/A") }}
+  {% else %}
+  📍 Country: N/A
+  🏙️  City: N/A
+  🏢 ASN: N/A
+  {% endif %}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601
+alert:
+  - email
+  - slack
+email:
+  - garnitsaid01@gmail.com
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":mag:"
+slack_msg_color: "warning"

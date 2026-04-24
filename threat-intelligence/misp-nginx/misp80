@@ -1,0 +1,9 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    access_log off;
+    log_not_found off;
+    error_log /dev/stderr error;
+    include includes/misp;
+}

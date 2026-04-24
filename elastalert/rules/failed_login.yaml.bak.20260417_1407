@@ -1,0 +1,51 @@
+name: Failed Login Attempt
+type: frequency
+index: soc-logs-enriched-*
+ignore_unavailable: true
+num_events: 5
+timeframe:
+  minutes: 5
+query_key: src_ip
+realert:
+  minutes: 30
+filter:
+  - bool:
+      should:
+        - term:
+            event_type.keyword: "alert"
+        - term:
+            rule.groups.keyword: "authentication_failed"
+      minimum_should_match: 1
+
+alert_subject: "🔑 [MED] Multiple Failed Logins — {0} attempts from {1}"
+alert_subject_args:
+  - num_hits
+  - src_ip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🔑 **MULTIPLE FAILED LOGIN ATTEMPTS**
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Attempts     : {{ num_hits }} in last 5 minutes
+  Time         : {{ timestamp }}
+  Attacker IP  : {{ src_ip | default('N/A') }}
+  Target       : {{ dest_ip | default('N/A') }}
+  Signature    : {{ alert.signature | default(data.rule.description | default('N/A')) }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  **GeoIP**:
+  Country      : {{ GeoLocation.country_name | default(geoip.country_name | default('N/A')) }}
+  City         : {{ GeoLocation.city_name | default(geoip.city_name | default('N/A')) }}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":key:"
+slack_msg_color: "warning"

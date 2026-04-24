@@ -1,0 +1,54 @@
+name: Brute Force Attack Detected
+type: frequency
+index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
+ignore_unavailable: true
+
+num_events: 8
+timeframe:
+  minutes: 2
+
+query_key: data.srcip
+
+filter:
+  - bool:
+      should:
+        - term:
+            rule.groups: "authentication_failed"
+        - term:
+            rule.groups: "sshd"
+        - term:
+            rule.groups: "web-accesslog"
+      minimum_should_match: 1
+
+realert:
+  minutes: 15
+
+alert_subject: "🔐 [HIGH] Brute Force — {0} attempts from {1}"
+alert_subject_args:
+  - num_hits
+  - data.srcip
+
+alert_text_type: alert_text_jinja
+alert_text: |
+  🔐 BRUTE FORCE ATTACK DETECTED
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Attempts   : {{ num_hits }} in 2 minutes
+  Timestamp  : {{ timestamp }}
+  Attacker   : {{ data.srcip | default('N/A') }}
+  Rule ID    : {{ rule.id | default('N/A') }}
+  Description: {{ rule.description | default('N/A') }}
+  MITRE      : T1110 - Brute Force
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Kibana: http://localhost:5601
+
+alert:
+  - email
+  - slack
+
+email:
+  - garnitsaid01@gmail.com
+
+slack_webhook_url: "YOUR_SLACK_WEBHOOK_URL"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":lock:"
+slack_msg_color: "danger"
