@@ -11,9 +11,19 @@ filebeat.inputs:
           add_error_key: true
           expand_keys: true
     fields:
-      source: wazuh
+      log_source: wazuh
     fields_under_root: true
     prospector.scanner.check_interval: 5s
+
+  - type: syslog
+    format: rfc3164
+    enabled: true
+    protocol.udp:
+      host: "0.0.0.0:5514"
+    fields:
+      log_source: metasploitable
+      host_role: vuln-linux
+    fields_under_root: true
 
 setup.template.enabled: false
 setup.ilm.enabled: false
