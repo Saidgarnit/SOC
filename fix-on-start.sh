@@ -110,18 +110,6 @@ for i in $(seq 1 20); do
 done
 
 # Write start-wazuh.sh
-cat > /tmp/start-wazuh.sh << 'WEOF'
-#!/bin/sh
-# Exit if already running to prevent PID explosion
-pgrep -f wazuh-agentd > /dev/null 2>&1 && exit 0
-pkill -f start-wazuh.sh 2>/dev/null
-sleep 1
-while true; do
-  pgrep -f wazuh-agentd > /dev/null 2>&1 || /var/ossec/bin/wazuh-agentd
-  sleep 10
-done
-WEOF
-chmod +x /tmp/start-wazuh.sh
 
 # ── 9. Fix and start all Wazuh agents ────────────────────────────
 echo "🔄 Fixing Wazuh agents (all 11 victims)..."
