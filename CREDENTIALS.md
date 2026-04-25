@@ -1,0 +1,7 @@
+## Verified Working (2026-04-25)
+- OpenCTI: http://localhost:3000 | admin@opencti.io | Admin@123!
+- Kibana: http://localhost:5601 | elastic | SOCstack2026!
+- DVWA: http://localhost:8890/dvwa | admin | password
+- Jenkins: http://localhost:9090
+- MISP: http://localhost:9001 | admin@admin.test | admin
+- Wazuh API: curl http://localhost:55000 | wazuh | SOCstack2026!

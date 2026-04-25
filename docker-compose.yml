@@ -334,7 +334,7 @@ services:
       - ES_HOST=http://ec485485dc99_elasticsearch:9200
       - ES_USERNAME=elastic
       - ES_PASSWORD=SOCstack2026!
-      - ES_HOST=http://elasticsearch:9200
+      - ES_HOST=http://ec485485dc99_elasticsearch:9200
     volumes:
       - ./threat-intelligence/vt_enricher.py:/app/vt_enricher.py
     command: bash -c "pip install requests -q && python /app/vt_enricher.py"
