@@ -33,6 +33,11 @@ sudo chmod -R 775 $BASE/alerts $BASE/archives $BASE/firewall
 sudo chown 101:101 $BASE/active-responses.log && sudo chmod 664 $BASE/active-responses.log
 echo "✅ Wazuh dirs ready"
 
+# ── 1b. Ensure lab containers are running ────────────────────────────
+echo "🔧 Ensuring lab containers are up..."
+docker compose -f ~/soc-stack/docker-compose-lab.yml up -d 2>/dev/null | grep -E "Started|Running" || true
+ok "Lab containers checked"
+
 # ── 2. Wait for Elasticsearch ────────────────────────────────────
 echo "⏳ Waiting for Elasticsearch..."
 for i in $(seq 1 30); do
