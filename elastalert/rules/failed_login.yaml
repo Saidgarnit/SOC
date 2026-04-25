@@ -33,8 +33,8 @@ alert_text: |
   Attempts   : {{ num_hits }} in 5 minutes
   Timestamp  : {{ timestamp }}
   Source IP  : {{ data.srcip | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
+  Rule ID    : {{ rule_id | default('N/A') }}
+  Description: {{ rule_description | default('N/A') }}
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))
 

@@ -35,8 +35,8 @@ alert_text: |
   Attempts   : {{ num_hits }} in 2 minutes
   Timestamp  : {{ timestamp }}
   Attacker   : {{ data.srcip | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
+  Rule ID    : {{ rule_id | default('N/A') }}
+  Description: {{ rule_description | default('N/A') }}
   MITRE      : T1110 - Brute Force
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601
