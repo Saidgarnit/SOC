@@ -37,7 +37,7 @@ services:
           memory: 512M
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "3000:8080"
     environment:
       - APP__ADMIN__EMAIL=admin@opencti.io
       - APP__ADMIN__PASSWORD=Admin@123!
