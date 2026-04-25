@@ -38,6 +38,11 @@ echo "🔧 Ensuring lab containers are up..."
 docker compose -f ~/soc-stack/docker-compose-lab.yml up -d 2>/dev/null | grep -E "Started|Running" || true
 ok "Lab containers checked"
 
+# ── 1c. Ensure main stack services are running ───────────────────────
+echo "🔧 Ensuring main stack services are up..."
+docker compose -f ~/soc-stack/docker-compose.yml up -d kibana logstash vt-enricher 2>/dev/null | grep -v "^$" || true
+ok "Main stack services checked"
+
 # ── 2. Wait for Elasticsearch ────────────────────────────────────
 echo "⏳ Waiting for Elasticsearch..."
 for i in $(seq 1 30); do
