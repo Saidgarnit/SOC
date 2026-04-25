@@ -39,8 +39,8 @@ alert_text: |
   Timestamp  : {{ timestamp }}
   Source IP  : {{ data.srcip | default('N/A') }}
   User       : {{ data.dstuser | default(data.srcuser) | default('N/A') }}
-  Rule ID    : {{ rule_id | default('N/A') }}
-  Description: {{ rule_description | default('N/A') }}
+  Rule ID    : {{ rule.id | default('N/A') }}
+  Description: {{ rule.description | default('N/A') }}
   MITRE      : T1021 - Remote Services
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601
