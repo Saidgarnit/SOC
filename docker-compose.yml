@@ -13,6 +13,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    mem_limit: 1.5g
     ports:
       - "9200:9200"
     volumes:
@@ -174,6 +175,7 @@ services:
       elasticsearch:
         condition: service_healthy
     networks:
+    mem_limit: 1g
       - soc-net
 
   logstash:
@@ -191,6 +193,7 @@ services:
       - "5044:5044"
       - "5000:5000/tcp"
       - "5000:5000/udp"
+    mem_limit: 800m
     depends_on:
       elasticsearch:
         condition: service_healthy
