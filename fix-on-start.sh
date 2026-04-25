@@ -223,6 +223,25 @@ for VICTIM in $WAZUH_AGENTS; do
     " 2>/dev/null && echo "  ✅ auth.log fixed: $VICTIM"
 done
 
+# ── 14b. Start rsyslog and sshd on victim-ubuntu ────────────────────
+echo "🔧 Starting rsyslog and sshd on victim-ubuntu..."
+if container_up victim-ubuntu; then
+    docker exec victim-ubuntu bash -c "service rsyslog start 2>/dev/null; service ssh start 2>/dev/null"
+    ok "rsyslog and sshd started on victim-ubuntu"
+fi
+# ── 14c. Sync victim-ubuntu Wazuh key ───────────────────────────────
+echo "🔧 Syncing victim-ubuntu Wazuh key..."
+if container_up victim-ubuntu; then
+    UBUNTU_KEY=$(docker exec wazuh-manager grep "victim-ubuntu" /var/ossec/etc/client.keys 2>/dev/null)
+    if [ -n "$UBUNTU_KEY" ]; then
+        docker exec victim-ubuntu sh -c "echo '$UBUNTU_KEY' > /var/ossec/etc/client.keys && chmod 640 /var/ossec/etc/client.keys && chown root:wazuh /var/ossec/etc/client.keys" 2>/dev/null
+        ok "victim-ubuntu key synced"
+    else
+        warn "victim-ubuntu key not found in manager"
+    fi
+fi
+
+
 # ── 15. Fix Wazuh logcollector/syscheckd on victim-ubuntu ────────────
 echo "🔧 Restarting Wazuh full agent on victim-ubuntu..."
 if container_up victim-ubuntu; then
