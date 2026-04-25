@@ -331,6 +331,9 @@ services:
     restart: unless-stopped
     environment:
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+      - ES_HOST=http://ec485485dc99_elasticsearch:9200
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=SOCstack2026!
       - ES_HOST=http://elasticsearch:9200
     volumes:
       - ./threat-intelligence/vt_enricher.py:/app/vt_enricher.py
