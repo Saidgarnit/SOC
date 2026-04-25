@@ -351,4 +351,214 @@ Error response from daemon: Conflict. The container name "/opencti" is already i
 [0;32m[✔][0m Suricata interface updated
 
 [0;34m━━━ STEP 3 — Waiting for Elasticsearch ━━━[0m
-...
+....
+[0;32m[✔][0m Elasticsearch ready
+
+[0;34m━━━ STEP 4 — Waiting for Fleet Server ━━━[0m
+
+[0;32m[✔][0m Fleet Server ready
+
+[0;34m━━━ STEP 5 — Starting victim lab ━━━[0m
+time="2026-04-25T12:33:26+01:00" level=warning msg="/home/said/soc-stack/docker-compose-lab.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-04-25T12:33:26+01:00" level=warning msg="Found orphan containers ([filebeat elastalert wazuh-manager logstash vt-enricher kibana misp rabbitmq elasticsearch misp-redis yara-scanner suricata misp-db memcached minio]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container victim-metasploitable  Running
+ Container victim-mail  Running
+ Container kali-attacker  Running
+ Container victim-windows  Running
+ Container victim-jenkins  Running
+ Container victim-dvwa  Running
+ Container fleet-server  Running
+ Container victim-ftp  Running
+ Container victim-webapi  Running
+ Container victim-ubuntu  Running
+ Container victim-database  Running
+ Container victim-iot  Running
+ Container victim-dns  Starting
+ Container victim-dns  Started
+[0;32m[✔][0m Victim lab started — waiting 40s...
+[0;32m[✔][0m MySQL bind fixed
+
+[0;34m━━━ STEP 6 — Fixing Wazuh agents ━━━[0m
+
+
+****************************************
+* Wazuh v4.7.5 Agent manager.          *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+Available agents: 
+   ID: 019, Name: victim-dns, IP: any
+   ID: 013, Name: victim-mail, IP: any
+   ID: 009, Name: victim-database, IP: any
+   ID: 010, Name: victim-iot, IP: any
+   ID: 012, Name: victim-jenkins, IP: any
+   ID: 011, Name: victim-windows, IP: any
+   ID: 023, Name: victim-metasploitable, IP: any
+   ID: 016, Name: victim-dvwa, IP: any
+   ID: 020, Name: victim-webapi, IP: any
+   ID: 021, Name: victim-ftp, IP: any
+   ID: 022, Name: fleet-server, IP: any
+   ID: 024, Name: victim-ubuntu, IP: any
+Provide the ID of the agent to be removed (or '\q' to quit): 023
+Confirm deleting it?(y/n): y
+Agent '023' removed.
+
+manage_agents: Exiting.
+Removed stale 023
+
+
+****************************************
+* Wazuh v4.7.5 Agent manager.          *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+Available agents: 
+   ID: 019, Name: victim-dns, IP: any
+   ID: 013, Name: victim-mail, IP: any
+   ID: 009, Name: victim-database, IP: any
+   ID: 010, Name: victim-iot, IP: any
+   ID: 012, Name: victim-jenkins, IP: any
+   ID: 011, Name: victim-windows, IP: any
+   ID: 024, Name: victim-ubuntu, IP: any
+   ID: 016, Name: victim-dvwa, IP: any
+   ID: 020, Name: victim-webapi, IP: any
+   ID: 021, Name: victim-ftp, IP: any
+   ID: 022, Name: fleet-server, IP: any
+Provide the ID of the agent to be removed (or '\q' to quit): 020
+Confirm deleting it?(y/n): y
+Agent '020' removed.
+
+manage_agents: Exiting.
+Removed stale 020
+
+
+****************************************
+* Wazuh v4.7.5 Agent manager.          *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+Available agents: 
+   ID: 019, Name: victim-dns, IP: any
+   ID: 013, Name: victim-mail, IP: any
+   ID: 009, Name: victim-database, IP: any
+   ID: 010, Name: victim-iot, IP: any
+   ID: 012, Name: victim-jenkins, IP: any
+   ID: 011, Name: victim-windows, IP: any
+   ID: 024, Name: victim-ubuntu, IP: any
+   ID: 016, Name: victim-dvwa, IP: any
+   ID: 022, Name: fleet-server, IP: any
+   ID: 021, Name: victim-ftp, IP: any
+Provide the ID of the agent to be removed (or '\q' to quit): 021
+Confirm deleting it?(y/n): y
+Agent '021' removed.
+
+manage_agents: Exiting.
+Removed stale 021
+
+
+****************************************
+* Wazuh v4.7.5 Agent manager.          *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+Available agents: 
+   ID: 019, Name: victim-dns, IP: any
+   ID: 013, Name: victim-mail, IP: any
+   ID: 009, Name: victim-database, IP: any
+   ID: 010, Name: victim-iot, IP: any
+   ID: 012, Name: victim-jenkins, IP: any
+   ID: 011, Name: victim-windows, IP: any
+   ID: 024, Name: victim-ubuntu, IP: any
+   ID: 016, Name: victim-dvwa, IP: any
+   ID: 022, Name: fleet-server, IP: any
+Provide the ID of the agent to be removed (or '\q' to quit): 022
+Confirm deleting it?(y/n): y
+Agent '022' removed.
+
+manage_agents: Exiting.
+Removed stale 022
+x..x....
+[0;32m[✔][0m Wazuh agents fixed
+
+[0;34m━━━ STEP 7 — Cleaning ghost Fleet agents ━━━[0m
+  File "/home/said/soc-stack/fix-on-start.sh", line 68
+    -H "kbn-xsrf: true" 2>/dev/null | python3 -c "
+                                                 ^
+SyntaxError: unterminated string literal (detected at line 68)
+[0;32m[✔][0m Fleet cleanup done
+
+[0;34m━━━ STEP 8 — Cleaning ghost Wazuh agents ━━━[0m
+Waiting for Docker...
+
+[0;34m━━━ STEP 1 — Wazuh log directories ━━━[0m
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+[0;32m[✔][0m Wazuh dirs ready
+
+[0;34m━━━ STEP 2 — Starting main SOC stack ━━━[0m
+time="2026-04-25T12:37:56+01:00" level=warning msg="Found orphan containers ([victim-mail victim-jenkins kali-attacker victim-ubuntu victim-iot victim-dvwa victim-metasploitable victim-dns victim-webapi fleet-server victim-windows victim-database victim-ftp]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container opencti-redis  Creating
+ Container misp-db  Running
+ Container yara-scanner  Running
+ Container misp  Running
+ Container elasticsearch  Recreate
+ Container opencti-redis  Error response from daemon: Conflict. The container name "/opencti-redis" is already in use by container "c8b01b77e975a7d0add41c830d00778b980fb99c8bece64c95283dc29fde8b18". You have to remove (or rename) that container to be able to reuse that name.
+Error response from daemon: Conflict. The container name "/opencti-redis" is already in use by container "c8b01b77e975a7d0add41c830d00778b980fb99c8bece64c95283dc29fde8b18". You have to remove (or rename) that container to be able to reuse that name.
+[0;32m[✔][0m Main stack started
+
+[0;34m━━━ STEP 2b — Auto-fix Suricata interface ━━━[0m
+[*] Detected interface: br-63d3dfcd6f1b
+[*] Updated docker-compose.yml
+[*] Suricata restarted with interface: br-63d3dfcd6f1b
+[0;32m[✔][0m Suricata interface updated
+
+[0;34m━━━ STEP 3 — Waiting for Elasticsearch ━━━[0m
+....................................
+[0;32m[✔][0m Elasticsearch ready
+
+[0;34m━━━ STEP 4 — Waiting for Fleet Server ━━━[0m
+
+[0;32m[✔][0m Fleet Server ready
+
+[0;34m━━━ STEP 5 — Starting victim lab ━━━[0m
+time="2026-04-25T12:41:08+01:00" level=warning msg="/home/said/soc-stack/docker-compose-lab.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-04-25T12:41:09+01:00" level=warning msg="Found orphan containers ([ec485485dc99_elasticsearch filebeat elastalert wazuh-manager logstash vt-enricher kibana misp rabbitmq elasticsearch misp-redis yara-scanner suricata misp-db memcached minio]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container kali-attacker  Running
+ Container victim-ftp  Running
+ Container victim-windows  Running
+ Container victim-dvwa  Running
+ Container victim-iot  Running
+ Container victim-database  Running
+ Container victim-mail  Running
+ Container victim-jenkins  Running
+ Container victim-ubuntu  Running
+ Container victim-metasploitable  Running
+ Container fleet-server  Running
+ Container victim-webapi  Running
+ Container victim-dns  Starting
+ Container victim-dns  Started
+[0;32m[✔][0m Victim lab started — waiting 40s...
+[0;32m[✔][0m MySQL bind fixed
+
+[0;34m━━━ STEP 6 — Fixing Wazuh agents ━━━[0m
+x..x.x
