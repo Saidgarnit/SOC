@@ -40,8 +40,8 @@ services:
       - "8080:8080"
     environment:
       - APP__ADMIN__EMAIL=admin@opencti.io
-      - APP__ADMIN__PASSWORD=admin
-      - APP__ADMIN__TOKEN=9d924e89-90bf-45b2-bf1d-0faf5bb3618f
+      - APP__ADMIN__PASSWORD=Admin@123!
+      - APP__ADMIN__TOKEN=a3c5e7f9-b1d3-4e6f-8a2c-0d1e3f5a7b9c
       - DATABASE__TYPE=elasticsearch
       - ELASTICSEARCH__URL=http://elasticsearch:9200
       - ELASTICSEARCH__USERNAME=elastic
@@ -255,6 +255,7 @@ services:
   suricata:
     image: jasonish/suricata:latest
     container_name: suricata
+    network_mode: host
     privileged: true
     cap_add:
       - NET_ADMIN
@@ -264,10 +265,8 @@ services:
       - ./suricata/rules:/etc/suricata/rules:rw
       - ./suricata/logs:/var/log/suricata:rw
       - ./suricata/threshold.conf:/etc/suricata/threshold.conf:rw
-    command: -i eth0 -S /etc/suricata/rules/local.rules
+    command: -i br-63d3dfcd6f1b --set default-rule-path=/var/lib/suricata/rules -s /var/lib/suricata/rules/suricata.rules
     restart: unless-stopped
-    networks:
-      - soc-net
 
   # --- SUPPORTING INFRASTRUCTURE ---
   rabbitmq:
