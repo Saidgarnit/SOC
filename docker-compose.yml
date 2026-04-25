@@ -174,8 +174,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    networks:
     mem_limit: 1g
+    networks:
       - soc-net
 
   logstash:
