@@ -239,17 +239,20 @@ if container_up victim-ubuntu; then
     docker exec victim-ubuntu bash -c "service rsyslog start 2>/dev/null; service ssh start 2>/dev/null"
     ok "rsyslog and sshd started on victim-ubuntu"
 fi
-# ── 14c. Sync victim-ubuntu Wazuh key ───────────────────────────────
-echo "🔧 Syncing victim-ubuntu Wazuh key..."
-if container_up victim-ubuntu; then
-    UBUNTU_KEY=$(docker exec wazuh-manager grep "victim-ubuntu" /var/ossec/etc/client.keys 2>/dev/null)
-    if [ -n "$UBUNTU_KEY" ]; then
-        docker exec victim-ubuntu sh -c "echo '$UBUNTU_KEY' > /var/ossec/etc/client.keys && chmod 640 /var/ossec/etc/client.keys && chown root:wazuh /var/ossec/etc/client.keys" 2>/dev/null
-        ok "victim-ubuntu key synced"
+# ── 14c. Sync Wazuh keys for ephemeral agents ───────────────────────
+echo "🔧 Syncing Wazuh keys for ephemeral agents..."
+KEY_DIR=~/soc-stack/wazuh/agent-keys
+for VICTIM in victim-ubuntu victim-ftp victim-webapi victim-metasploitable; do
+    container_up $VICTIM || continue
+    KEY_FILE="$KEY_DIR/${VICTIM}.key"
+    if [ -f "$KEY_FILE" ]; then
+        KEY=$(cat "$KEY_FILE")
+        docker exec $VICTIM sh -c "echo '$KEY' > /var/ossec/etc/client.keys && chmod 640 /var/ossec/etc/client.keys && chown root:wazuh /var/ossec/etc/client.keys" 2>/dev/null
+        ok "Key synced: $VICTIM"
     else
-        warn "victim-ubuntu key not found in manager"
+        warn "No saved key for $VICTIM"
     fi
-fi
+done
 
 
 # ── 15. Fix Wazuh logcollector/syscheckd on victim-ubuntu ────────────
