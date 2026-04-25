@@ -189,7 +189,7 @@ if [ "$STATUS" = "200" ]; then
 fi
 
 # ── 12. OpenCTI connectors ───────────────────────────────────────
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/graphql 2>/dev/null)
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/graphql 2>/dev/null)
 if [ "$STATUS" = "200" ] || [ "$STATUS" = "400" ]; then
     docker restart connector-misp connector-mitre opencti-worker > /dev/null 2>&1
     echo "✅ OpenCTI connectors restarted"
