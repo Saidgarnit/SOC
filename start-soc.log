@@ -316,3 +316,39 @@ Adding auth.log monitoring to agents...
 OCI runtime exec failed: exec failed: unable to start container process: exec: "python3": executable file not found in $PATH
 OCI runtime exec failed: exec failed: unable to start container process: exec: "python3": executable file not found in $PATH
 [✔] Auth.log monitoring added to all agents
+Waiting for Docker...
+Docker not ready after 60s — open Docker Desktop first
+Waiting for Docker...
+
+[0;34m━━━ STEP 1 — Wazuh log directories ━━━[0m
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+[0;32m[✔][0m Wazuh dirs ready
+
+[0;34m━━━ STEP 2 — Starting main SOC stack ━━━[0m
+time="2026-04-25T12:33:05+01:00" level=warning msg="Found orphan containers ([victim-mail victim-jenkins kali-attacker victim-ubuntu victim-iot victim-dvwa victim-metasploitable victim-dns victim-webapi fleet-server victim-windows victim-database victim-ftp]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container misp-db  Running
+ Container opencti-redis  Creating
+ Container wazuh-manager  Running
+ Container misp  Running
+ Container elasticsearch  Running
+ Container elastalert  Running
+ Container vt-enricher  Running
+ Container kibana  Running
+ Container filebeat  Running
+ Container logstash  Running
+ Container yara-scanner  Running
+ Container suricata  Running
+ Container opencti  Creating
+ Container opencti  Error response from daemon: Conflict. The container name "/opencti" is already in use by container "a640387492bf82d88f3a3d9e7c684f172f838e72e1eb0ab3bdf6c63728082956". You have to remove (or rename) that container to be able to reuse that name.
+Error response from daemon: Conflict. The container name "/opencti" is already in use by container "a640387492bf82d88f3a3d9e7c684f172f838e72e1eb0ab3bdf6c63728082956". You have to remove (or rename) that container to be able to reuse that name.
+[0;32m[✔][0m Main stack started
+
+[0;34m━━━ STEP 2b — Auto-fix Suricata interface ━━━[0m
+[*] Detected interface: br-63d3dfcd6f1b
+[*] Updated docker-compose.yml
+[*] Suricata restarted with interface: br-63d3dfcd6f1b
+[0;32m[✔][0m Suricata interface updated
+
+[0;34m━━━ STEP 3 — Waiting for Elasticsearch ━━━[0m
+...
