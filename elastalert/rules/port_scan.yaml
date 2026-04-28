@@ -27,6 +27,7 @@ filter:
               - "172.18.0.9"
               - "172.18.0.19"
 realert:
+  minutes: 1
   minutes: 15
 alert_subject: "[MEDIUM] Port Scan - {0} flows from {1}"
 alert_subject_args:
