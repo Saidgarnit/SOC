@@ -2,12 +2,12 @@ input {
   file {
     path => "/var/log/suricata/eve.json"
     codec => "json"
-    start_position => "beginning"
+    start_position => "end"
     sincedb_path => "/usr/share/logstash/data/sincedb"
     type => "SuricataIDPS"
   }
   beats { port => 5044 }
-  udp { port => 5001 codec => json }
+  udp { port => 5000 codec => json }
   tcp { port => 5000 codec => json }
 }
 

@@ -25,9 +25,9 @@ alert_text: |
   WEBSHELL / REVERSE SHELL INDICATOR
   Host       : {{ agent.name | default('N/A') }}
   Timestamp  : {{ timestamp }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  Source IP  : {{ data.srcip | default('N/A') }}
+  Rule ID    : {{ rule_id | default('N/A') }}
+  Description: {{ rule_description | default('N/A') }}
+  Source IP  : {{ data_srcip | default('N/A') }}
   MITRE      : T1505.003 / T1059
   IMMEDIATE INVESTIGATION REQUIRED
   Kibana: http://localhost:5601

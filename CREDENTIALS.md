@@ -5,3 +5,9 @@
 - Jenkins: http://localhost:9090
 - MISP: http://localhost:9001 | admin@admin.test | admin
 - Wazuh API: curl http://localhost:55000 | wazuh | SOCstack2026!
+
+## Wazuh API
+- URL: https://localhost:55000
+- Auth: JWT (Basic wazuh:wazuh to get token)
+- Get token: curl -s -k -u wazuh:wazuh -X POST https://localhost:55000/security/user/authenticate
+- Use token: curl -k -H "Authorization: Bearer <TOKEN>" https://localhost:55000/agents

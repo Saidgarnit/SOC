@@ -7,15 +7,23 @@ import socket
 import datetime
 
 RULES_PATH = "/rules/malware.yar"
-SCAN_PATH = "/samples"
 LOGSTASH_HOST = "logstash"
 LOGSTASH_PORT = 5000
 
+SCAN_PATHS = [
+    "/samples",
+    "/victims/dvwa",
+    "/victims/ubuntu-www",
+    "/victims/ubuntu-tmp",
+    "/victims/ftp",
+]
+
 def send_to_logstash(alert):
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         message = json.dumps(alert).encode('utf-8')
-        sock.sendto(message, (LOGSTASH_HOST, LOGSTASH_PORT))
+        sock.connect((LOGSTASH_HOST, LOGSTASH_PORT))
+        sock.sendall(message)
         sock.close()
         print(f"[+] Alert sent: {alert['rule_name']}")
     except Exception as e:
@@ -44,39 +52,44 @@ def scan_file(filepath, rules):
     except Exception as e:
         print(f"[-] Error scanning {filepath}: {e}")
 
+def scan_directory(path, rules, scanned):
+    if not os.path.exists(path):
+        return
+    try:
+        for root, dirs, files in os.walk(path):
+            for filename in files:
+                filepath = os.path.join(root, filename)
+                if filepath not in scanned:
+                    scan_file(filepath, rules)
+                    scanned.add(filepath)
+    except Exception as e:
+        print(f"[-] Error walking {path}: {e}")
+
 def continuous_scan():
     print("[*] Loading YARA rules...")
-    # Retry loop for volume mount race condition
     rules = None
     for attempt in range(10):
         try:
             if os.path.exists(RULES_PATH):
                 rules = yara.compile(RULES_PATH)
-                print("[*] YARA rules loaded successfully!")
+                print("[*] YARA rules loaded!")
                 break
             else:
-                print(f"[*] Waiting for rules file... attempt {attempt+1}/10")
+                print(f"[*] Waiting for rules... attempt {attempt+1}/10")
                 time.sleep(5)
         except Exception as e:
             print(f"[-] Error loading rules: {e}, retrying...")
             time.sleep(5)
 
     if not rules:
-        print("[-] Failed to load YARA rules after 10 attempts. Exiting.")
+        print("[-] Failed to load YARA rules. Exiting.")
         return
 
-    print(f"[*] Scanning directory: {SCAN_PATH}")
+    print(f"[*] Watching: {SCAN_PATHS}")
     scanned = set()
     while True:
-        try:
-            for filename in os.listdir(SCAN_PATH):
-                filepath = os.path.join(SCAN_PATH, filename)
-                if filepath not in scanned:
-                    print(f"[*] Scanning: {filename}")
-                    scan_file(filepath, rules)
-                    scanned.add(filepath)
-        except Exception as e:
-            print(f"[-] Scan loop error: {e}")
+        for path in SCAN_PATHS:
+            scan_directory(path, rules, scanned)
         time.sleep(10)
 
 if __name__ == "__main__":

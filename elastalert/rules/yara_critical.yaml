@@ -5,28 +5,25 @@ ignore_unavailable: true
 
 filter:
   - term:
-      yara_match: true
+      event_type.keyword: "yara_match"
 
 realert:
-  hours: 6
+  minutes: 30
 
-alert_subject: "🧬 [YARA] Malware detected from {0}"
+alert_subject: "🧬 [YARA] Malware detected: {0}"
 alert_subject_args:
-  - src_ip
+  - rule_name
 
 alert_text_type: alert_text_jinja
 alert_text: |
   🧬 YARA CRITICAL MALWARE DETECTION
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  YARA Match : {{ yara_match | default('N/A') }}
+  Rule       : {{ rule_name | default('N/A') }}
+  File       : {{ file_path | default('N/A') }}
+  Severity   : {{ severity | default('N/A') }}
+  MITRE      : {{ mitre_technique | default('N/A') }}
+  Tactic     : {{ mitre_tactic | default('N/A') }}
   Timestamp  : {{ timestamp }}
-
-  Source     : {{ src_ip | default('N/A') }}:{{ src_port | default('N/A') }}
-  Destination: {{ dest_ip | default('N/A') }}:{{ dest_port | default('N/A') }}
-  Protocol   : {{ proto | default('N/A') }}
-
-  Signature  : {{ alert.signature | default('N/A') }}
-  Action     : {{ alert.action | default('N/A') }}
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601
 

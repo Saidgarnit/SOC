@@ -34,13 +34,13 @@ alert_text_type: alert_text_jinja
 alert_text: |
   📁 FTP BRUTE FORCE DETECTED
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Attacker   : {{ data.srcip | default('N/A') }}
-  Target User: {{ data.dstuser | default('N/A') }}
+  Attacker   : {{ data_srcip | default('N/A') }}
+  Target User: {{ (data or {}).get('dstuser', 'N/A') | default('N/A') | default('N/A') }}
   Attempts   : {{ num_hits }} in 2 minutes
   Timestamp  : {{ timestamp }}
   Agent/Host : {{ agent.name | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
+  Rule ID    : {{ rule_id | default('N/A') }}
+  Description: {{ rule_description | default('N/A') }}
   MITRE      : T1110.001 - Brute Force: Password Guessing (FTP)
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601

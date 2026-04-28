@@ -1,6 +1,6 @@
 name: File Integrity Violation
 type: any
-index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
+index: .ds-wazuh-alerts-4.x-*,wazuh-alerts-4.x-*
 ignore_unavailable: true
 filter:
   - query_string:
@@ -16,8 +16,8 @@ alert_text: |
   📁 FILE INTEGRITY VIOLATION
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Host       : {{ agent.name | default('N/A') }}
-  Rule       : {{ rule.description | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
+  Rule       : {{ rule_description | default('N/A') }}
+  Rule ID    : {{ rule_id | default('N/A') }}
   Timestamp  : {{ timestamp }}
   MITRE      : T1565 - Data Manipulation
   Kibana     : http://localhost:5601

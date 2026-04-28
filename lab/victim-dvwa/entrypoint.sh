@@ -31,25 +31,17 @@ sleep 2
 
 # Fleet
 AGENT_BIN=$(find /opt/elastic-agent/data/ -name "elastic-agent" -type f -executable 2>/dev/null | head -1)
-HOSTNAME=$(hostname)
 
 echo "[fleet] Waiting for fleet-server..."
 for i in $(seq 1 30); do
-    STATUS=$(curl -sf http://fleet-server:8220/api/status 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
-    [ "$STATUS" = "HEALTHY" ] || [ "$STATUS" = "degraded" ] && break
+    curl -sf http://fleet-server:8220/api/status 2>/dev/null | grep -q "HEALTHY" && break
     sleep 5
 done
 
-ONLINE=$(curl -sf -u "elastic:SOCstack2026!" -H "Content-Type: application/json" \
-    -d "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"local_metadata.host.hostname\":\"$HOSTNAME\"}},{\"term\":{\"status\":\"online\"}}]}}}" \
-    "http://elasticsearch:9200/.fleet-agents-7/_search" 2>/dev/null \
-    | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['hits']['total']['value'])" 2>/dev/null)
-
-if [ "${ONLINE:-0}" -gt 0 ]; then
-    echo "[fleet] Already ONLINE — skipping enrollment."
+if [ -f /opt/elastic-agent/fleet.enc ]; then
+    echo "[fleet] Existing enrollment found — skipping re-enroll."
 else
-    echo "[fleet] Not online — enrolling fresh..."
-    rm -f /opt/elastic-agent/fleet.enc
+    echo "[fleet] No enrollment found — enrolling fresh..."
     rm -rf /opt/elastic-agent/data/elastic-agent-*/state/ 2>/dev/null
     cd /opt/elastic-agent && "$AGENT_BIN" enroll \
         --url=http://fleet-server:8220 \

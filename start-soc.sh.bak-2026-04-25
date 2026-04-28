@@ -20,8 +20,7 @@ title() { echo -e "\n${BLUE}━━━ $1 ━━━${NC}"; }
 
 PASS="SOCstack2026!"
 FLEET_TOKEN="RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw=="
-VICTIMS=(victim-ubuntu victim-dvwa victim-iot victim-mail victim-database victim-dns victim-jenkins victim-windows victim-ftp victim-webapi victim-metasploitable)
-FLEET_AGENTS=(victim-ubuntu victim-dvwa victim-iot victim-mail victim-database victim-dns victim-jenkins victim-windows victim-ftp victim-webapi)
+VICTIMS=(victim-ubuntu victim-dvwa victim-iot victim-mail victim-database victim-dns victim-jenkins victim-windows)
 
 title "STEP 1 — Wazuh log directories"
 YEAR=$(date +%Y); MONTH=$(date +%b)
@@ -32,7 +31,6 @@ sudo chown -R 101:101 $BASE/alerts $BASE/archives $BASE/firewall 2>/dev/null || 
 sudo chmod -R 775 $BASE/alerts $BASE/archives $BASE/firewall 2>/dev/null || true
 log "Wazuh dirs ready"
 
-docker rm -f opencti-redis opencti-rabbitmq opencti-es opencti-minio 2>/dev/null
 title "STEP 2 — Starting main SOC stack"
 docker compose -f docker-compose.yml up -d
 log "Main stack started"
@@ -52,12 +50,6 @@ for i in $(seq 1 24); do
     curl -sf http://localhost:8220/api/status 2>/dev/null | grep -q "HEALTHY" && break
     echo -n "."; sleep 5
 done; echo ""; log "Fleet Server ready"
-
-title "STEP 4b — Fix Fleet Server Hosts URL (HTTP)"
-for i in $(seq 1 12); do curl -sf -u elastic:"$PASS" "http://localhost:5601/api/status" 2>/dev/null | grep -q "available" && break; sleep 5; done
-curl -s -u elastic:"$PASS" -X PUT "http://localhost:5601/api/fleet/fleet_server_hosts/69090aca-4691-4427-8077-a5529a5d77ee" -H "kbn-xsrf: true" -H "Content-Type: application/json" -d '{"name":"soc-fleet","host_urls":["http://fleet-server:8220"],"is_default":true}' > /dev/null 2>&1
-curl -s -u elastic:"$PASS" -X PUT "http://localhost:5601/api/fleet/settings" -H "kbn-xsrf: true" -H "Content-Type: application/json" -d '{"fleet_server_hosts":["http://fleet-server:8220"]}' > /dev/null 2>&1
-log "Fleet Server Hosts forced to HTTP"
 
 title "STEP 5 — Starting victim lab"
 docker compose -f docker-compose-lab.yml up -d
@@ -102,7 +94,7 @@ done; echo ""; log "Wazuh agents fixed"
 title "STEP 7 — Cleaning ghost Fleet agents"
 # Deletes all offline/duplicate agents via Kibana Fleet API before victims enroll.
 # Victims use smart entrypoints that check online status before enrolling.
-bash /home/said/soc-stack/fix-on-start.sh
+python3 /home/said/soc-stack/fix-on-start.sh
 log "Fleet cleanup done"
 
 title "STEP 8 — Cleaning ghost Wazuh agents"
@@ -180,6 +172,10 @@ done
 docker cp ~/soc-stack/wazuh/ossec.conf wazuh-manager:/tmp/ossec_new.conf 2>/dev/null
 docker exec wazuh-manager bash -c "cp /tmp/ossec_new.conf /var/ossec/etc/ossec.conf && chown root:wazuh /var/ossec/etc/ossec.conf && chmod 640 /var/ossec/etc/ossec.conf" 2>/dev/null
 
+# Copy ossec.conf into container (WSL2 bind mount unreliable)
+docker cp ~/soc-stack/wazuh/ossec.conf wazuh-manager:/tmp/ossec_new.conf 2>/dev/null
+docker exec wazuh-manager bash -c "cp /tmp/ossec_new.conf /var/ossec/etc/ossec.conf && chown root:wazuh /var/ossec/etc/ossec.conf && chmod 640 /var/ossec/etc/ossec.conf" 2>/dev/null
+echo "ossec.conf copied"
 
 docker restart wazuh-manager
 sleep 20
@@ -206,7 +202,13 @@ docker exec wazuh-manager /var/ossec/bin/agent_control -l | grep -v agentless
 # Add auth.log monitoring to all agent ossec.conf files
 echo "Adding auth.log monitoring to agents..."
 for c in victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail victim-jenkins victim-database victim-dns victim-webapi victim-ftp; do
-  docker exec $c bash -c "grep -q 'auth.log' /var/ossec/etc/ossec.conf || sed -i 's|</ossec_config>|  <localfile>\n    <log_format>syslog</log_format>\n    <location>/var/log/auth.log</location>\n  </localfile>\n</ossec_config>|' /var/ossec/etc/ossec.conf" 2>/dev/null
+  docker exec $c python3 -c "
+content = open('/var/ossec/etc/ossec.conf').read()
+addition = '  <localfile>\n    <log_format>syslog</log_format>\n    <location>/var/log/auth.log</location>\n  </localfile>\n'
+if '/var/log/auth.log' not in content:
+    content = content.replace('</ossec_config>', addition + '</ossec_config>')
+    open('/var/ossec/etc/ossec.conf', 'w').write(content)
+" 2>/dev/null
   docker exec $c bash -c "pkill -f wazuh-logcollector 2>/dev/null; sleep 1; /var/ossec/bin/wazuh-logcollector &" 2>/dev/null
 done
 echo "[✔] Auth.log monitoring added to all agents"

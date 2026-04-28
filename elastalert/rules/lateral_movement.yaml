@@ -37,10 +37,10 @@ alert_text: |
   Host       : {{ agent.name | default('N/A') }}
   Attempts   : {{ num_hits }} in 5 minutes
   Timestamp  : {{ timestamp }}
-  Source IP  : {{ data.srcip | default('N/A') }}
-  User       : {{ data.dstuser | default(data.srcuser) | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
+  Source IP  : {{ data_srcip | default('N/A') }}
+  User       : {{ (data or {}).get('dstuser', 'N/A') | default('N/A') | default(data.srcuser) | default('N/A') }}
+  Rule ID    : {{ rule_id | default('N/A') }}
+  Description: {{ rule_description | default('N/A') }}
   MITRE      : T1021 - Remote Services
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601

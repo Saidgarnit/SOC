@@ -6,3 +6,7 @@ monitoring.ui.container.elasticsearch.enabled: true
 xpack.security.encryptionKey: "60dc7ab801f4f962da3fc2d6c18f9923"
 xpack.encryptedSavedObjects.encryptionKey: "447ce0051a66de9478bdd5a449036a42"
 xpack.reporting.encryptionKey: "4b7543b890a04395d292c484273bf734"
+
+# Task Manager tuning (fixes degraded status)
+xpack.task_manager.max_workers: 20
+xpack.task_manager.poll_interval: 3000
