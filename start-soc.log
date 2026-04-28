@@ -2216,3 +2216,332 @@ Wazuh agent_control. List of available agents:
 
 Adding auth.log monitoring to agents...
 [✔] Auth.log monitoring added to all agents
+Waiting for Docker...
+
+[0;34m━━━ STEP 1 — Wazuh log directories ━━━[0m
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+[0;32m[✔][0m Wazuh dirs ready
+opencti-redis
+
+[0;34m━━━ STEP 2 — Starting main SOC stack ━━━[0m
+time="2026-04-28T21:00:48+01:00" level=warning msg="Found orphan containers ([victim-ftp kali-attacker victim-windows victim-jenkins victim-dvwa victim-ubuntu victim-iot victim-dns victim-mail victim-database fleet-server victim-webapi victim-metasploitable]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container yara-scanner  Running
+ Container rabbitmq  Running
+ Container wazuh-manager  Running
+ Container misp-db  Running
+ Container opencti-redis  Creating
+ Container suricata  Running
+ Container minio  Running
+ Container elasticsearch  Running
+ Container misp-redis  Running
+ Container misp  Running
+ Container memcached  Running
+ Container opencti-redis  Created
+ Container elasticsearch  Waiting
+ Container elasticsearch  Waiting
+ Container elasticsearch  Waiting
+ Container misp-db  Waiting
+ Container opencti-redis  Starting
+ Container minio  Waiting
+ Container elasticsearch  Waiting
+ Container rabbitmq  Waiting
+ Container elasticsearch  Waiting
+ Container elasticsearch  Waiting
+ Container opencti-redis  Started
+ Container misp-db  Healthy
+ Container rabbitmq  Healthy
+ Container minio  Healthy
+ Container elasticsearch  Healthy
+ Container logstash  Starting
+ Container elasticsearch  Healthy
+ Container vt-enricher  Starting
+ Container elasticsearch  Healthy
+ Container opencti  Starting
+ Container elasticsearch  Healthy
+ Container kibana  Starting
+ Container elasticsearch  Healthy
+ Container filebeat  Starting
+ Container elasticsearch  Healthy
+ Container elastalert  Starting
+ Container vt-enricher  Started
+ Container filebeat  Started
+ Container elastalert  Started
+ Container logstash  Started
+ Container opencti  Started
+ Container opencti  Waiting
+ Container opencti  Waiting
+ Container opencti  Waiting
+ Container kibana  Started
+ Container opencti  Healthy
+ Container connector-mitre  Starting
+ Container opencti  Healthy
+ Container opencti-worker  Starting
+ Container opencti  Healthy
+ Container connector-misp  Starting
+ Container connector-misp  Started
+ Container connector-mitre  Started
+ Container opencti-worker  Started
+[0;32m[✔][0m Main stack started
+
+[0;34m━━━ STEP 2b — Auto-fix Suricata interface ━━━[0m
+[*] Detected interface: br-63d3dfcd6f1b
+[*] Updated docker-compose.yml
+[*] Updated suricata.yaml
+[*] Suricata restarted with interface: br-63d3dfcd6f1b
+[0;32m[✔][0m Suricata interface updated
+
+[0;34m━━━ STEP 3 — Waiting for Elasticsearch ━━━[0m
+
+[0;32m[✔][0m Elasticsearch ready
+
+[0;34m━━━ STEP 4 — Waiting for Fleet Server ━━━[0m
+
+[0;32m[✔][0m Fleet Server ready
+
+[0;34m━━━ STEP 4b — Fix Fleet Server Hosts URL (HTTP) ━━━[0m
+[0;32m[✔][0m Fleet Server Hosts forced to HTTP
+
+[0;34m━━━ STEP 5 — Starting victim lab ━━━[0m
+time="2026-04-28T21:01:47+01:00" level=warning msg="Found orphan containers ([suricata opencti-redis connector-misp elastalert logstash elasticsearch connector-mitre wazuh-manager opencti-worker misp opencti filebeat kibana vt-enricher yara-scanner misp-redis minio rabbitmq memcached misp-db]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container victim-dvwa  Running
+ Container victim-webapi  Running
+ Container victim-windows  Running
+ Container victim-iot  Running
+ Container victim-ubuntu  Running
+ Container victim-dns  Running
+ Container kali-attacker  Running
+ Container victim-ftp  Recreate
+ Container victim-database  Running
+ Container victim-jenkins  Running
+ Container victim-mail  Running
+ Container victim-metasploitable  Running
+ Container fleet-server  Running
+ Container victim-ftp  Recreated
+ Container victim-ftp  Starting
+ Container victim-ftp  Started
+[0;32m[✔][0m Victim lab started — waiting 40s...
+[0;32m[✔][0m MySQL bind fixed
+
+[0;34m━━━ STEP 6 — Fixing Wazuh agents ━━━[0m
+
+
+****************************************
+* Wazuh v4.7.5 Agent manager.          *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+Available agents: 
+   ID: 001, Name: victim-windows, IP: any
+   ID: 002, Name: victim-jenkins, IP: any
+   ID: 003, Name: victim-dns, IP: any
+   ID: 004, Name: victim-database, IP: any
+   ID: 005, Name: victim-mail, IP: any
+   ID: 006, Name: victim-dvwa, IP: any
+   ID: 007, Name: victim-iot, IP: any
+   ID: 008, Name: victim-ftp, IP: any
+   ID: 009, Name: victim-ubuntu, IP: any
+   ID: 010, Name: victim-webapi, IP: any
+   ID: 011, Name: victim-metasploitable, IP: any
+Provide the ID of the agent to be removed (or '\q' to quit): 011
+Confirm deleting it?(y/n): y
+Agent '011' removed.
+
+manage_agents: Exiting.
+Removed stale 011
+x..xx.....x
+[0;32m[✔][0m Wazuh agents fixed
+
+[0;34m━━━ STEP 7 — Cleaning ghost Fleet agents ━━━[0m
+🔧 SOC stack fixes (no restart)...
+🔧 Step 0: Fleet-server health check...
+  ✅ Fleet-server healthy
+🔧 Step 1: Fleet HTTP URL fix...
+  ✅ Fleet Hosts set to HTTP
+🔧 Step 2: Cleaning offline Fleet agents...
+🔧 Step 3: Fleet agent enrollment...
+  ✅ Fleet online: victim-ubuntu
+  ✅ Fleet online: victim-dvwa
+  ✅ Fleet online: victim-iot
+  ✅ Fleet online: victim-windows
+  ✅ Fleet online: victim-mail
+  ✅ Fleet online: victim-dns
+  ✅ Fleet online: victim-jenkins
+  ✅ Fleet online: victim-database
+  ✅ Fleet online: victim-ftp
+  ✅ Fleet online: victim-webapi
+  ✅ YARA scanner running
+🔧 Step 4: Wazuh install (ephemeral)...
+🔧 Step 5: Wazuh agent enrollment...
+  ✅ Wazuh: victim-ubuntu
+  ✅ Wazuh: victim-dvwa
+  ✅ Wazuh: victim-iot
+  ✅ Wazuh: victim-windows
+  ✅ Wazuh: victim-mail
+  ✅ Wazuh: victim-dns
+  ✅ Wazuh: victim-jenkins
+  ✅ Wazuh: victim-database
+  ✅ Wazuh: victim-ftp
+  ✅ Wazuh: victim-webapi
+  ✅ Wazuh: victim-metasploitable
+  ✅ victim-webapi Apache running
+  ✅ IoT Flask app running
+  ✅ VT enricher ES_HOST correct
+
+⏳ Waiting 20s...
+📊 Fleet:
+  ✅ victim-ubuntu             online
+  ✅ fleet-server              online
+  ✅ victim-webapi             online
+  ✅ victim-database           online
+  ✅ victim-dns                online
+  ✅ victim-dvwa               online
+  ✅ victim-windows            online
+  ✅ victim-mail               online
+  ✅ victim-iot                online
+  ✅ victim-jenkins            online
+  ✅ victim-ftp                online
+📊 Wazuh:
+   ID: 000, Name: aef2ddd48d51 (server), IP: 127.0.0.1, Active/Local
+   ID: 001, Name: victim-windows, IP: any, Active
+   ID: 002, Name: victim-jenkins, IP: any, Active
+   ID: 003, Name: victim-dns, IP: any, Active
+   ID: 004, Name: victim-database, IP: any, Active
+   ID: 005, Name: victim-mail, IP: any, Active
+   ID: 006, Name: victim-dvwa, IP: any, Active
+   ID: 007, Name: victim-iot, IP: any, Active
+   ID: 008, Name: victim-ftp, IP: any, Active
+   ID: 009, Name: victim-ubuntu, IP: any, Active
+   ID: 010, Name: victim-webapi, IP: any, Active
+   ID: 012, Name: victim-metasploitable, IP: any, Active
+
+🎉 Fixes applied!
+[Tue Apr 28 21:05:48 +01 2026] Fixing FIM config on all agents...
+Completed.
+  ✅ victim-ubuntu FIM fixed
+Completed.
+  ✅ victim-dvwa FIM fixed
+Completed.
+  ✅ victim-windows FIM fixed
+Completed.
+  ✅ victim-webapi FIM fixed
+Completed.
+  ✅ victim-jenkins FIM fixed
+Completed.
+  ✅ victim-mail FIM fixed
+Completed.
+  ✅ victim-database FIM fixed
+Completed.
+  ✅ victim-dns FIM fixed
+Completed.
+  ✅ victim-iot FIM fixed
+Completed.
+  ✅ victim-ftp FIM fixed
+[Tue Apr 28 21:38:38 +01 2026] Ensuring vulnerability detector is enabled...
+  ✅ Vulnerability detector enabled
+[Tue Apr 28 21:38:38 +01 2026] Checking Suricata rules for duplicate SIDs...
+  ✅ Suricata rules clean (0 dupes)
+[Tue Apr 28 21:38:38 +01 2026] Verifying YARA TCP send method...
+  ✅ YARA TCP method correct
+[Tue Apr 28 21:38:38 +01 2026] Checking YARA scanner and victim volume mounts...
+  ✅ /victims/dvwa mounted
+  ✅ /victims/ubuntu-www mounted
+  ✅ /victims/ubuntu-tmp mounted
+  ✅ /victims/ftp mounted
+[Tue Apr 28 21:38:39 +01 2026] Checking YARA named volumes exist...
+  ✅ Volume exists: yara-dvwa
+  ✅ Volume exists: yara-ubuntu-www
+  ✅ Volume exists: yara-ubuntu-tmp
+  ✅ Volume exists: yara-ftp
+[Tue Apr 28 21:38:39 +01 2026] Fixing victim-ftp Fleet agent...
+[Tue Apr 28 21:38:39 +01 2026] Ensuring wazuh-agentd watchdog running on all victims...
+  ✅ agentd already running: victim-dvwa (1 proc)
+  ✅ agentd already running: victim-iot (1 proc)
+  ✅ agentd already running: victim-mail (5 proc)
+  ✅ agentd already running: victim-database (5 proc)
+  ✅ agentd already running: victim-dns (5 proc)
+  ✅ agentd already running: victim-jenkins (5 proc)
+  ✅ agentd already running: victim-windows (1 proc)
+  ✅ agentd already running: victim-ftp (5 proc)
+  ✅ agentd already running: victim-webapi (5 proc)
+[Tue Apr 28 21:38:41 +01 2026] Verifying OpenCTI extra_hosts in running containers...
+OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+  🔧 connector-mitre: opencti host entry injected (172.18.0.29)
+OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+  🔧 connector-misp: opencti host entry injected (172.18.0.29)
+OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+  🔧 opencti-worker: opencti host entry injected (172.18.0.29)
+[0;32m[✔][0m Fleet cleanup done
+
+[0;34m━━━ STEP 8 — Cleaning ghost Wazuh agents ━━━[0m
+[0;32m[✔][0m Wazuh ghost cleanup done
+
+[0;34m━━━ STEP 9 — Filebeat + OpenCTI ━━━[0m
+[0;32m[✔][0m Filebeat reset
+[0;32m[✔][0m OpenCTI connectors restarted
+
+[0;34m━━━ STEP 10 — Fleet agent final status ━━━[0m
+[0;32m[✔][0m Fleet status shown
+
+[0;34m━━━ STEP 11 — Final Health Check ━━━[0m
+
+  Kibana                 [0;32mUP[0m
+  Fleet                  [0;32mUP[0m
+  DVWA                   [0;32mUP[0m
+  bWAPP                  [0;32mUP[0m
+  Jenkins                [0;31mDOWN[0m (000)
+  MISP                   [0;32mUP[0m
+  OpenCTI                [0;32mUP[0m
+  Metasploitable         [0;32mUP[0m
+  IoT-API                [0;32mUP[0m
+
+[0;34m━━━ Wazuh Agents ━━━[0m
+   ID: 000, Name: aef2ddd48d51 (server), IP: 127.0.0.1, Active/Local
+   ID: 001, Name: victim-windows, IP: any, Active
+   ID: 002, Name: victim-jenkins, IP: any, Active
+   ID: 003, Name: victim-dns, IP: any, Active
+   ID: 004, Name: victim-database, IP: any, Active
+   ID: 005, Name: victim-mail, IP: any, Active
+   ID: 006, Name: victim-dvwa, IP: any, Active
+   ID: 007, Name: victim-iot, IP: any, Active
+   ID: 008, Name: victim-ftp, IP: any, Active
+   ID: 009, Name: victim-ubuntu, IP: any, Active
+   ID: 010, Name: victim-webapi, IP: any, Active
+   ID: 012, Name: victim-metasploitable, IP: any, Active
+
+[0;32m╔══════════════════════════════════════╗[0m
+[0;32m║     SOC Stack is Ready! 🚀           ║[0m
+[0;32m╠══════════════════════════════════════╣[0m
+[0;32m║[0m  Kibana  → http://localhost:5601     [0;32m║[0m
+[0;32m║[0m  DVWA    → http://localhost:8890     [0;32m║[0m
+[0;32m║[0m  OpenCTI → http://localhost:3000     [0;32m║[0m
+[0;32m║[0m  MISP    → http://localhost:9001     [0;32m║[0m
+[0;32m║[0m  Jenkins → http://localhost:9090     [0;32m║[0m
+[0;32m╚══════════════════════════════════════╝[0m
+
+━━━ STEP 12 — Enrolling Wazuh agents ━━━
+wazuh-manager
+[✔] Wazuh agents enrolled
+
+Wazuh agent_control. List of available agents:
+   ID: 000, Name: aef2ddd48d51 (server), IP: 127.0.0.1, Active/Local
+   ID: 001, Name: victim-windows, IP: any, Active
+   ID: 002, Name: victim-jenkins, IP: any, Active
+   ID: 003, Name: victim-dns, IP: any, Active
+   ID: 004, Name: victim-database, IP: any, Active
+   ID: 005, Name: victim-mail, IP: any, Active
+   ID: 006, Name: victim-dvwa, IP: any, Active
+   ID: 007, Name: victim-iot, IP: any, Active
+   ID: 008, Name: victim-ftp, IP: any, Active
+   ID: 009, Name: victim-ubuntu, IP: any, Active
+   ID: 010, Name: victim-webapi, IP: any, Active
+   ID: 012, Name: victim-metasploitable, IP: any, Active
+
+
+Adding auth.log monitoring to agents...
+[✔] Auth.log monitoring added to all agents
