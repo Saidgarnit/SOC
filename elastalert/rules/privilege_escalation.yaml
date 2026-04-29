@@ -17,9 +17,9 @@ alert_text: |
   🔺 PRIVILEGE ESCALATION DETECTED
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Host       : {{ agent.name | default('N/A') }}
-  Rule ID    : {{ rule_id | default('N/A') }}
-  Description: {{ rule_description | default('N/A') }}
-  Level      : {{ rule_level | default('N/A') }}
+  Rule ID    : {{ rule.id | default('N/A') }}
+  Description: {{ rule.description | default('N/A') }}
+  Level      : {{ rule.level | default('N/A') }}
   Timestamp  : {{ timestamp }}
   MITRE      : T1548 - Abuse Elevation Control
   Kibana     : http://localhost:5601
