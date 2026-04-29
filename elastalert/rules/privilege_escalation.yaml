@@ -1,6 +1,6 @@
 name: Privilege Escalation Detected
 type: any
-index: wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
+index: .ds-wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
 ignore_unavailable: true
 filter:
   - query_string:

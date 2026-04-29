@@ -10,6 +10,10 @@ es_password: SOCstack2026!
 writeback_index: elastalert_status
 alert_time_limit:
   days: 2
+start_from_tail: true
+scroll_keepalive: 30s
+
+# SMTP settings kept so per-rule email works
 smtp_host: smtp.gmail.com
 smtp_port: 587
 smtp_ssl: false
@@ -17,3 +21,5 @@ smtp_starttls: true
 from_addr: "garnitsaid01@gmail.com"
 smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
 email_reply_to: "garnitsaid01@gmail.com"
+
+# NO global alert: or email: here — each rule controls its own alerting

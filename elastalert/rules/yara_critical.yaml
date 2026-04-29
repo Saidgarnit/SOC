@@ -30,10 +30,8 @@ alert_text: |
 alert:
   - email
   - slack
-
 email:
   - garnitsaid01@gmail.com
-
 slack_webhook_url: "https://hooks.slack.com/services/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"
 slack_username_override: "SOC-Alert-Bot"
 slack_emoji_override: ":biohazard_sign:"
