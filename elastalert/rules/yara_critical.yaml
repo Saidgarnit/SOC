@@ -8,7 +8,7 @@ filter:
       event_type.keyword: "yara_match"
 
 realert:
-  minutes: 30
+  minutes: 60
 
 alert_subject: "🧬 [YARA] Malware detected: {0}"
 alert_subject_args:

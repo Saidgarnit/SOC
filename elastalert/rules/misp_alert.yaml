@@ -7,7 +7,7 @@ filter:
         query: 'tags:misp_threat_match OR alert.signature:MISP_MALICIOUS_IP_MATCH OR threat_intel_info:*'
         analyze_wildcard: true
 realert:
-  minutes: 0
+  minutes: 60
 alert_subject: "🕵️ [MISP Intel] Threat match — {0} → {1}"
 alert_subject_args:
   - src_ip

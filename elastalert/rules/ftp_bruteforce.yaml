@@ -23,7 +23,7 @@ filter:
       minimum_should_match: 1
 
 realert:
-  minutes: 15
+  minutes: 60
 
 alert_subject: "📁 [HIGH] FTP Brute Force — {0} attempts from {1}"
 alert_subject_args:

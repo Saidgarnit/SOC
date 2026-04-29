@@ -54,7 +54,7 @@ filter:
               - 9001
               - 9090
 realert:
-  minutes: 1
+  minutes: 60
 #
   minutes: 60
 alert_subject: "🔦 [HIGH] C2 Beacon — {0} flows to {1}"

@@ -19,7 +19,7 @@ filter:
               - "172.18.0.9"
               - "172.18.0.19"
 realert:
-  minutes: 10
+  minutes: 60
 alert_subject: "🚨 [Suricata] {0} — {1} → {2}"
 alert_subject_args:
   - alert.signature

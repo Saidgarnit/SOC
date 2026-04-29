@@ -19,7 +19,7 @@ filter:
       minimum_should_match: 1
 
 realert:
-  minutes: 20
+  minutes: 60
 
 alert_subject: "🔑 [MED] {0} Failed Logins from {1}"
 alert_subject_args:

@@ -7,7 +7,7 @@ filter:
         query: 'rule.groups:sudo OR rule.groups:privilege_escalation OR rule.id:5500 OR rule.id:5501 OR rule.id:5502'
         analyze_wildcard: true
 realert:
-  minutes: 5
+  minutes: 60
 alert_subject: "🔺 [PRIVESC] {0} on {1}"
 alert_subject_args:
   - rule.description

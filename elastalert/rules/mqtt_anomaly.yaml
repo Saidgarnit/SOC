@@ -25,7 +25,7 @@ filter:
               - "172.18.0.9"
               - "172.18.0.19"
 realert:
-  minutes: 15
+  minutes: 60
 alert_subject: "[MEDIUM] MQTT Anomaly - {0} events from {1}"
 alert_subject_args:
   - num_hits

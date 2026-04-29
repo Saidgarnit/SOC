@@ -16,7 +16,7 @@ filter:
             analyze_wildcard: true
       minimum_should_match: 1
 realert:
-  minutes: 10
+  minutes: 60
 alert_subject: "[CRITICAL] Webshell Indicator on {0}"
 alert_subject_args:
   - agent.name

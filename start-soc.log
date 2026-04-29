@@ -2755,3 +2755,114 @@ Completed.
   ✅ victim-jenkins FIM fixed
 Completed.
   ✅ victim-mail FIM fixed
+Completed.
+  ✅ victim-database FIM fixed
+Completed.
+  ✅ victim-dns FIM fixed
+Completed.
+  ✅ victim-iot FIM fixed
+Completed.
+  ✅ victim-ftp FIM fixed
+[Wed Apr 29 12:12:02 +01 2026] Ensuring vulnerability detector is enabled...
+  ✅ Vulnerability detector enabled
+[Wed Apr 29 12:12:03 +01 2026] Checking Suricata rules for duplicate SIDs...
+  ✅ Suricata rules clean (0 dupes)
+[Wed Apr 29 12:12:03 +01 2026] Verifying YARA TCP send method...
+  ✅ YARA TCP method correct
+[Wed Apr 29 12:12:03 +01 2026] Checking YARA scanner and victim volume mounts...
+  ✅ /victims/dvwa mounted
+  ✅ /victims/ubuntu-www mounted
+  ✅ /victims/ubuntu-tmp mounted
+  ✅ /victims/ftp mounted
+[Wed Apr 29 12:12:04 +01 2026] Checking YARA named volumes exist...
+  ✅ Volume exists: yara-dvwa
+  ✅ Volume exists: yara-ubuntu-www
+  ✅ Volume exists: yara-ubuntu-tmp
+  ✅ Volume exists: yara-ftp
+[Wed Apr 29 12:12:04 +01 2026] Fixing victim-ftp Fleet agent...
+[Wed Apr 29 12:12:05 +01 2026] Ensuring wazuh-agentd watchdog running on all victims...
+  ✅ agentd already running: victim-dvwa (1 proc)
+  ✅ agentd already running: victim-iot (1 proc)
+  ✅ agentd already running: victim-mail (5 proc)
+  ✅ agentd already running: victim-database (5 proc)
+  ✅ agentd already running: victim-dns (5 proc)
+  ✅ agentd already running: victim-jenkins (5 proc)
+  ✅ agentd already running: victim-windows (1 proc)
+  ✅ agentd already running: victim-ftp (5 proc)
+  ✅ agentd already running: victim-webapi (5 proc)
+[Wed Apr 29 12:12:07 +01 2026] Verifying OpenCTI extra_hosts in running containers...
+OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+  🔧 connector-mitre: opencti host entry injected (172.18.0.11)
+OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+  🔧 connector-misp: opencti host entry injected (172.18.0.11)
+OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+  🔧 opencti-worker: opencti host entry injected (172.18.0.11)
+[0;32m[✔][0m Fleet cleanup done
+
+[0;34m━━━ STEP 8 — Cleaning ghost Wazuh agents ━━━[0m
+[0;32m[✔][0m Wazuh ghost cleanup done
+
+[0;34m━━━ STEP 9 — Filebeat + OpenCTI ━━━[0m
+[0;32m[✔][0m Filebeat reset
+[0;32m[✔][0m OpenCTI connectors restarted
+
+[0;34m━━━ STEP 10 — Fleet agent final status ━━━[0m
+[0;32m[✔][0m Fleet status shown
+
+[0;34m━━━ STEP 11 — Final Health Check ━━━[0m
+
+  Kibana                 [0;32mUP[0m
+  Fleet                  [0;32mUP[0m
+  DVWA                   [0;32mUP[0m
+  bWAPP                  [0;32mUP[0m
+  Jenkins                [0;31mDOWN[0m (000)
+  MISP                   [0;32mUP[0m
+  OpenCTI                [0;32mUP[0m
+  Metasploitable         [0;32mUP[0m
+  IoT-API                [0;32mUP[0m
+
+[0;34m━━━ Wazuh Agents ━━━[0m
+   ID: 000, Name: aef2ddd48d51 (server), IP: 127.0.0.1, Active/Local
+   ID: 001, Name: victim-windows, IP: any, Active
+   ID: 002, Name: victim-jenkins, IP: any, Active
+   ID: 003, Name: victim-dns, IP: any, Active
+   ID: 004, Name: victim-database, IP: any, Active
+   ID: 005, Name: victim-mail, IP: any, Active
+   ID: 006, Name: victim-dvwa, IP: any, Active
+   ID: 007, Name: victim-iot, IP: any, Active
+   ID: 008, Name: victim-ftp, IP: any, Active
+   ID: 009, Name: victim-ubuntu, IP: any, Active
+   ID: 010, Name: victim-webapi, IP: any, Active
+   ID: 013, Name: victim-metasploitable, IP: any, Active
+
+[0;32m╔══════════════════════════════════════╗[0m
+[0;32m║     SOC Stack is Ready! 🚀           ║[0m
+[0;32m╠══════════════════════════════════════╣[0m
+[0;32m║[0m  Kibana  → http://localhost:5601     [0;32m║[0m
+[0;32m║[0m  DVWA    → http://localhost:8890     [0;32m║[0m
+[0;32m║[0m  OpenCTI → http://localhost:3000     [0;32m║[0m
+[0;32m║[0m  MISP    → http://localhost:9001     [0;32m║[0m
+[0;32m║[0m  Jenkins → http://localhost:9090     [0;32m║[0m
+[0;32m╚══════════════════════════════════════╝[0m
+
+━━━ STEP 12 — Enrolling Wazuh agents ━━━
+wazuh-manager
+[✔] Wazuh agents enrolled
+
+Wazuh agent_control. List of available agents:
+   ID: 000, Name: aef2ddd48d51 (server), IP: 127.0.0.1, Active/Local
+   ID: 001, Name: victim-windows, IP: any, Active
+   ID: 002, Name: victim-jenkins, IP: any, Active
+   ID: 003, Name: victim-dns, IP: any, Active
+   ID: 004, Name: victim-database, IP: any, Active
+   ID: 005, Name: victim-mail, IP: any, Active
+   ID: 006, Name: victim-dvwa, IP: any, Active
+   ID: 007, Name: victim-iot, IP: any, Active
+   ID: 008, Name: victim-ftp, IP: any, Active
+   ID: 009, Name: victim-ubuntu, IP: any, Active
+   ID: 010, Name: victim-webapi, IP: any, Active
+   ID: 013, Name: victim-metasploitable, IP: any, Active
+
+
+Adding auth.log monitoring to agents...
+[✔] Auth.log monitoring added to all agents

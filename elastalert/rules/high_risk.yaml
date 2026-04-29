@@ -19,7 +19,7 @@ filter:
         lte: 2
 
 realert:
-  minutes: 15
+  minutes: 60
 
 alert_subject: "⚠️ [HIGH RISK] {0} — {1} → {2}"
 alert_subject_args:

@@ -7,7 +7,7 @@ filter:
         query: 'rule.groups:syscheck AND (rule.id:550 OR rule.id:554 OR rule.id:553 OR rule.id:552 OR rule.id:551)'
         analyze_wildcard: true
 realert:
-  minutes: 10
+  minutes: 60
 alert_subject: "📁 [FIM] File changed on {0}"
 alert_subject_args:
   - agent.name

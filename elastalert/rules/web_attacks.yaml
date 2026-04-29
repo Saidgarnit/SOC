@@ -15,7 +15,7 @@ filter:
       query: 'alert.signature:*SQL* OR alert.signature:*XSS* OR alert.signature:*injection* OR alert.signature:*traversal* OR alert.signature:*scanner*'
       analyze_wildcard: true
 realert:
-  minutes: 10
+  minutes: 60
 alert_subject: "[WEB ATTACK] {0} -> {1}"
 alert_subject_args:
   - alert.signature
