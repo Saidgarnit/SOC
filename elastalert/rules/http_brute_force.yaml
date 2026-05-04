@@ -1,4 +1,4 @@
-name: "Wazuh — Authentication Brute Force"
+name: "Wazuh — HTTP Brute Force (DVWA/Web)"
 type: frequency
 index: wazuh-alerts-*
 
@@ -7,29 +7,39 @@ filter:
     bool:
       must:
       - match:
-          rule.groups: authentication_failures
+          rule.groups: web
+      should:
+      - match:
+          rule.groups: authentication_failed
+      - match_phrase:
+          full_log: "401"
+      - match_phrase:
+          full_log: "403"
+      - match_phrase:
+          data.url: "login"
+      minimum_should_match: 1
 
 query_key:
 - agent.name
 - data.srcip
-num_events: 5
+num_events: 10
 timeframe:
   minutes: 2
 realert:
-  minutes: 30
+  minutes: 15
 
 alert: slack
 slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
 slack_username_override: "SOC Alerts"
-slack_icon_emoji: ":lock:"
+slack_icon_emoji: ":repeat:"
 slack_msg_color: danger
 alert_text_type: alert_text_only
 alert_text: |
-  *Authentication Brute Force Detected*
+  *HTTP Brute Force Attack Detected*
   *Severity:* HIGH
   *Agent/Target:* {agent.name}
   *Source IP:* {data.srcip}
-  *Attack Method:* Repeated authentication failures
+  *Target URL:* {data.url}
+  *Attack Method:* HTTP login brute force
   *Timestamp:* {timestamp}
   *Dashboard:* http://localhost:5601/app/discover
-

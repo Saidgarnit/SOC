@@ -1,5 +1,5 @@
-name: "Suricata IDS — Port Scan"
-type: any
+name: "Suricata IDS — Network Reconnaissance"
+type: frequency
 index: soc-logs-enriched-*
 
 filter:
@@ -10,30 +10,36 @@ filter:
           event_type: alert
       should:
       - match_phrase:
-          alert.signature: "Port Scan"
-      - match_phrase:
           alert.signature: "SCAN"
       - match_phrase:
+          alert.signature: "Nmap"
+      - match_phrase:
+          alert.signature: "OS fingerprint"
+      - match_phrase:
           alert.category: "Attempted Information Leak"
+      - match_phrase:
+          alert.category: "Network Scan"
       minimum_should_match: 1
 
 query_key: src_ip
+num_events: 10
+timeframe:
+  minutes: 5
 realert:
   minutes: 30
 
 alert: slack
 slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
 slack_username_override: "SOC Alerts"
-slack_icon_emoji: ":mag:"
+slack_icon_emoji: ":mag_right:"
 slack_msg_color: warning
 alert_text_type: alert_text_only
 alert_text: |
-  *Port Scan Detected*
+  *Network Reconnaissance Detected*
   *Severity:* MEDIUM
   *Source IP:* {src_ip}
-  *Destination:* {dest_ip}
+  *Target:* {dest_ip}
   *Signature:* {alert.signature}
-  *Attack Method:* Network port scanning
+  *Attack Method:* {alert.category}
   *Timestamp:* {timestamp}
   *Dashboard:* http://localhost:5601/app/discover
-

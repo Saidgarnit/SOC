@@ -1,19 +1,30 @@
-alert: slack
-alert_text: 'Web Attack: {agent.name} - {rule.description} from {data.srcip}'
-alert_text_type: alert_text_only
+name: "Web Attacks (Wazuh)"
+type: any
+index: wazuh-alerts-*
+
 filter:
 - query:
     bool:
       must:
       - match:
           rule.groups: web
-index: wazuh-alerts-*
-name: Web Attacks (Wazuh)
+
 query_key: agent.name
 realert:
   minutes: 5
-slack_icon_emoji: ':spider_web:'
+
+alert: slack
+slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":spider_web:"
 slack_msg_color: danger
-slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
-type: any
+alert_text_type: alert_text_only
+alert_text: |
+  *Web Attack Detected*
+  *Severity:* HIGH
+  *Agent/Target:* {agent.name}
+  *Source IP:* {data.srcip}
+  *Attack Method:* {rule.description}
+  *Timestamp:* {timestamp}
+  *Dashboard:* http://localhost:5601/app/discover
+

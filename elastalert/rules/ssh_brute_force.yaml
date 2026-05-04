@@ -1,4 +1,4 @@
-name: "Wazuh — Authentication Brute Force"
+name: "Wazuh — SSH Brute Force"
 type: frequency
 index: wazuh-alerts-*
 
@@ -7,7 +7,17 @@ filter:
     bool:
       must:
       - match:
-          rule.groups: authentication_failures
+          rule.groups: syslog
+      - match_phrase:
+          full_log: "sshd"
+      should:
+      - match:
+          rule.groups: authentication_failed
+      - match_phrase:
+          full_log: "Failed password"
+      - match_phrase:
+          full_log: "Invalid user"
+      minimum_should_match: 1
 
 query_key:
 - agent.name
@@ -21,15 +31,14 @@ realert:
 alert: slack
 slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
 slack_username_override: "SOC Alerts"
-slack_icon_emoji: ":lock:"
+slack_icon_emoji: ":closed_lock_with_key:"
 slack_msg_color: danger
 alert_text_type: alert_text_only
 alert_text: |
-  *Authentication Brute Force Detected*
+  *SSH Brute Force Attack Detected*
   *Severity:* HIGH
   *Agent/Target:* {agent.name}
   *Source IP:* {data.srcip}
-  *Attack Method:* Repeated authentication failures
+  *Attack Method:* SSH password brute force
   *Timestamp:* {timestamp}
   *Dashboard:* http://localhost:5601/app/discover
-

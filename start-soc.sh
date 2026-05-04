@@ -16,7 +16,25 @@ cd ~/soc-stack
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BLUE='\033[0;34m'; NC='\033[0m'
 log()   { echo -e "${GREEN}[✔]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[⚠]${NC} $1"; }
+err()   { echo -e "${RED}[✗]${NC} $1"; }
 title() { echo -e "\n${BLUE}━━━ $1 ━━━${NC}"; }
+
+# Helper: wait for a URL to respond with optional grep pattern
+wait_for_url() {
+  local label="$1" url="$2" pattern="${3:-}" auth="${4:-}" retries="${5:-24}" interval="${6:-5}"
+  local curl_opts=(-sf --connect-timeout 5)
+  [ -n "$auth" ] && curl_opts+=(-u "$auth")
+  for i in $(seq 1 "$retries"); do
+    if [ -n "$pattern" ]; then
+      curl "${curl_opts[@]}" "$url" 2>/dev/null | grep -q "$pattern" && { echo ""; log "$label ready"; return 0; }
+    else
+      curl "${curl_opts[@]}" "$url" > /dev/null 2>&1 && { echo ""; log "$label ready"; return 0; }
+    fi
+    echo -n "."; sleep "$interval"
+  done
+  echo ""
+  warn "$label did not become ready after $((retries * interval))s — continuing"
+}
 
 PASS="sYVfKJCe2RCfELjf=GLa"
 FLEET_TOKEN="RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw=="

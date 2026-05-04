@@ -1,0 +1,42 @@
+name: "DVWA — Malicious File Upload"
+type: any
+index: wazuh-alerts-*
+
+filter:
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: web
+      should:
+      - match_phrase:
+          data.url: "upload"
+      - match_phrase:
+          full_log: ".php"
+      - match_phrase:
+          full_log: ".jsp"
+      - match_phrase:
+          full_log: ".asp"
+      - match_phrase:
+          rule.description: "file upload"
+      minimum_should_match: 1
+
+query_key: agent.name
+realert:
+  minutes: 10
+
+alert: slack
+slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":file_folder:"
+slack_msg_color: danger
+alert_text_type: alert_text_only
+alert_text: |
+  *Malicious File Upload Detected*
+  *Severity:* HIGH
+  *Agent:* {agent.name}
+  *Source IP:* {data.srcip}
+  *Target URL:* {data.url}
+  *Rule:* {rule.description}
+  *Timestamp:* {timestamp}
+  *Dashboard:* http://localhost:5601/app/discover
