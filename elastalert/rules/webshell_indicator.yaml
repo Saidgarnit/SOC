@@ -1,42 +1,22 @@
-name: Webshell Indicator - Process Spawned from Web Server
-type: any
-index: .ds-wazuh-alerts-4.x-*
-ignore_unavailable: true
+alert: slack
+alert_text: 'Webshell: {agent.name} - {rule.description} from {data.srcip}'
+alert_text_type: alert_text_only
 filter:
-  - bool:
-      should:
-        - terms:
-            rule.id:
-              - "31166"
-              - "31167"
-              - "5710"
-              - "87105"
-        - query_string:
-            query: "rule.description:(*webshell* OR *reverse*shell* OR *shell*upload*)"
-            analyze_wildcard: true
-      minimum_should_match: 1
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: web
+      - range:
+          rule.level:
+            gte: 10
+index: wazuh-alerts-*
+name: "Wazuh \u2014 Webshell Indicator"
+query_key: agent.name
 realert:
-  minutes: 60
-alert_subject: "[CRITICAL] Webshell Indicator on {0}"
-alert_subject_args:
-  - agent.name
-alert_text_type: alert_text_jinja
-alert_text: |
-  WEBSHELL / REVERSE SHELL INDICATOR
-  Host       : {{ agent.name | default('N/A') }}
-  Timestamp  : {{ timestamp }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  Source IP  : {{ data.srcip | default('N/A') }}
-  MITRE      : T1505.003 / T1059
-  IMMEDIATE INVESTIGATION REQUIRED
-  Kibana: http://localhost:5601
-alert:
-  - email
-  - slack
-email:
-  - garnitsaid01@gmail.com
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":warning:"
-slack_msg_color: "danger"
+  minutes: 15
+slack_icon_emoji: ':ghost:'
+slack_msg_color: danger
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+type: any

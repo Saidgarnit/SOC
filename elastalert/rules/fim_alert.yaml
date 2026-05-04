@@ -1,29 +1,19 @@
-name: File Integrity Violation
-type: any
-index: .ds-wazuh-alerts-4.x-*,wazuh-alerts-4.x-*
-ignore_unavailable: true
+alert: slack
+alert_text: 'FIM Alert: {agent.name} - {syscheck.path} - {syscheck.event}'
+alert_text_type: alert_text_only
 filter:
-  - query_string:
-        query: 'rule.groups:syscheck AND (rule.id:550 OR rule.id:554 OR rule.id:553 OR rule.id:552 OR rule.id:551)'
-        analyze_wildcard: true
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: syscheck
+index: wazuh-alerts-*
+name: "Wazuh \u2014 File Integrity Alert"
+query_key: agent.name
 realert:
-  minutes: 60
-alert_subject: "📁 [FIM] File changed on {0}"
-alert_subject_args:
-  - agent.name
-alert_text_type: alert_text_jinja
-alert_text: |
-  📁 FILE INTEGRITY VIOLATION
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Host       : {{ agent.name | default('N/A') }}
-  Rule       : {{ rule.description | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Timestamp  : {{ timestamp }}
-  MITRE      : T1565 - Data Manipulation
-  Kibana     : http://localhost:5601
-alert:
-  - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":file_folder:"
-slack_msg_color: "warning"
+  minutes: 5
+slack_icon_emoji: ':file_folder:'
+slack_msg_color: warning
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+type: any

@@ -1,45 +1,34 @@
-name: VirusTotal Malicious IP Detected
+# vt_alert.yaml — written by fix script
+# vt_malicious is INTEGER in ES — use range, not string match
+name: vt_malicious_enrichment_alert
 type: any
 index: soc-logs-enriched-*
-ignore_unavailable: true
 
 filter:
-- query:
-    query_string:
-      query: "tags: vt_malicious"
+  - range:
+      vt_malicious:
+        gte: 1
 
-alert_text_type: alert_text_only
-use_elastalert_template: false
-
-alert_text: |
-  🦠 VirusTotal Malicious Detection!
-  💥 Source IP: {0}
-  🌍 Country: {1}
-  🏙️ City: {2}
-  🚩 Detection Ratio: {3}
-  📝 Labels: {4}
-
-alert_text_args:
-- src_ip
-- geoip.country_name
-- geoip.city_name
-- vt.positives
-- vt.labels
+realert:
+  minutes: 10
 
 alert:
-- slack
-- email
+  - slack
 
-slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":rotating_light:"
-slack_msg_color: danger
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: "SOC-VT-Alert"
+slack_emoji_override: ":biohazard_sign:"
+slack_msg_color: "warning"
 
-email:
-- garnitsaid01@gmail.com
-smtp_host: smtp.gmail.com
-smtp_port: 587
-smtp_ssl: false
-smtp_auth_file: /opt/elastalert/smtp_auth.yaml
-from_addr: garnitsaid01@gmail.com
-email_subject: "VirusTotal Alert - {0}"
+alert_subject: ":biohazard_sign: [VirusTotal] Malicious IP %(src_ip)s detected"
+alert_text_type: alert_text_only
+alert_text: |
+  :biohazard_sign: VIRUSTOTAL MALICIOUS IP
+  ________________________________
+  Source IP  : %(src_ip)s
+  VT Score   : %(vt_malicious)s detections
+  Severity   : %(vt_severity)s
+  Timestamp  : %(@timestamp)s
+  ________________________________
+  Kibana: http://localhost:5601
+

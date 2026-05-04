@@ -18,7 +18,7 @@ log()   { echo -e "${GREEN}[✔]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[⚠]${NC} $1"; }
 title() { echo -e "\n${BLUE}━━━ $1 ━━━${NC}"; }
 
-PASS="SOCstack2026!"
+PASS="sYVfKJCe2RCfELjf=GLa"
 FLEET_TOKEN="RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw=="
 VICTIMS=(victim-ubuntu victim-dvwa victim-iot victim-mail victim-database victim-dns victim-jenkins victim-windows victim-ftp victim-webapi victim-metasploitable)
 FLEET_AGENTS=(victim-ubuntu victim-dvwa victim-iot victim-mail victim-database victim-dns victim-jenkins victim-windows victim-ftp victim-webapi)
@@ -32,7 +32,6 @@ sudo chown -R 101:101 $BASE/alerts $BASE/archives $BASE/firewall 2>/dev/null || 
 sudo chmod -R 775 $BASE/alerts $BASE/archives $BASE/firewall 2>/dev/null || true
 log "Wazuh dirs ready"
 
-docker rm -f opencti-redis opencti-rabbitmq opencti-es opencti-minio 2>/dev/null
 title "STEP 2 — Starting main SOC stack"
 docker compose -f docker-compose.yml up -d
 log "Main stack started"
@@ -217,3 +216,98 @@ grep -q 'var/log/secure' /var/ossec/etc/ossec.conf || \
 sed -i 's|</ossec_config>|  <localfile>\n    <log_format>syslog</log_format>\n    <location>/var/log/secure</location>\n  </localfile>\n</ossec_config>|' /var/ossec/etc/ossec.conf
 pkill -f wazuh-logcollector 2>/dev/null; sleep 1; /var/ossec/bin/wazuh-logcollector &
 " 2>/dev/null
+
+# Trigger automated fixes
+bash /home/said/soc-stack/fix-on-start.sh
+bash ~/soc-stack/soc-fix.sh
+
+# ── PERMANENT FIXES (added $(date +%Y-%m-%d)) ──────────────────────────────
+
+title "PERM-FIX 1 — Emergency swap (idempotent)"
+if ! swapon --show | grep -q swapfile2; then
+  sudo fallocate -l 4G /swapfile2 2>/dev/null || true
+  sudo chmod 600 /swapfile2 2>/dev/null || true
+  sudo mkswap /swapfile2 2>/dev/null || true
+  sudo swapon /swapfile2 && log "Swap /swapfile2 activated" || warn "Swap already active"
+else
+  log "Swap /swapfile2 already active"
+fi
+
+title "PERM-FIX 2 — Runtime memory caps"
+docker update --memory=1g    --memory-swap=1g    wazuh-manager  2>/dev/null && log "wazuh-manager capped"
+docker update --memory=512m  --memory-swap=512m  fleet-server   2>/dev/null
+docker update --memory=512m  --memory-swap=512m  rabbitmq       2>/dev/null
+docker update --memory=256m  --memory-swap=256m  filebeat       2>/dev/null
+docker update --memory=256m  --memory-swap=256m  minio          2>/dev/null
+docker update --memory=256m  --memory-swap=256m  kali-attacker  2>/dev/null
+docker update --memory=128m  --memory-swap=128m  yara-scanner vt-enricher \
+  connector-misp connector-mitre opencti-redis misp-redis memcached 2>/dev/null
+log "Memory caps applied"
+
+title "PERM-FIX 3 — Wazuh index template"
+for i in $(seq 1 12); do
+  curl -sf -u elastic:"$PASS" http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"' && break
+  sleep 5
+done
+curl -s -u elastic:"$PASS" \
+  -X PUT "http://localhost:9200/_index_template/wazuh-alerts" \
+  -H "Content-Type: application/json" -d '{
+  "index_patterns":["wazuh-alerts-4.x-*"],
+  "template":{
+    "settings":{"number_of_shards":1,"number_of_replicas":0},
+    "mappings":{"dynamic":true}
+  }
+}' | grep -q "acknowledged" && log "Wazuh index template loaded" || warn "Template load failed"
+
+title "PERM-FIX 4 — Fix unassigned shards"
+curl -s -u elastic:"$PASS" \
+  -X POST "http://localhost:9200/_cluster/reroute?retry_failed=true" \
+  -H "Content-Type: application/json" > /dev/null
+log "Shard reroute triggered"
+
+
+# ── PERM-FIX 5 — Force-start containers that exit 127 on WSL2 boot ──
+title "PERM-FIX 5 — Restart WSL2-sensitive containers"
+sleep 10
+for c in wazuh-manager suricata kibana filebeat elastalert; do
+  STATE=$(docker inspect $c --format '{{.State.Status}}' 2>/dev/null)
+  if [ "$STATE" != "running" ]; then
+    echo "  Restarting $c (was: $STATE)..."
+    docker start $c 2>/dev/null && echo "  ✅ $c started" || echo "  ⚠ $c failed"
+  else
+    echo "  ✅ $c already running"
+  fi
+done
+sleep 20
+log "WSL2-sensitive containers recovered"
+
+# ── PERM-FIX 6 — Force-recreate WSL2 bind-mount containers (stale UUID fix) ──
+title "PERM-FIX 6 — Recreate bind-mount sensitive containers"
+for c in suricata wazuh-manager kibana filebeat elastalert; do
+  STATE=$(docker inspect $c --format '{{.State.Status}}' 2>/dev/null)
+  if [ "$STATE" != "running" ]; then
+    echo "  Force-recreating $c (WSL2 bind-mount stale)..."
+    docker compose -f ~/soc-stack/docker-compose.yml up -d \
+      --no-deps --force-recreate $c 2>/dev/null && \
+      echo "  ✅ $c recreated" || echo "  ⚠ $c failed"
+  else
+    echo "  ✅ $c running"
+  fi
+done
+sleep 15
+log "Bind-mount containers recovered"
+
+# ── PERM-FIX 7 — Reset logstash sincedb so suricata alerts re-index on boot ──
+title "PERM-FIX 7 — Logstash sincedb reset for eve.json"
+docker exec logstash bash -c "
+  grep -v 'eve.json' /usr/share/logstash/data/sincedb > /tmp/sincedb_new 2>/dev/null || true
+  cp /tmp/sincedb_new /usr/share/logstash/data/sincedb
+" 2>/dev/null && log "Logstash sincedb reset" || warn "Logstash sincedb reset failed"
+docker restart logstash > /dev/null 2>&1
+sleep 5
+
+# EA-4 Permanent Fix — DVWA MariaDB auto-init
+bash ~/soc-stack/dvwa-db-init.sh &
+
+# ATK-6 Permanent Fix — metasploitable syslog forwarder
+bash ~/soc-stack/metasploitable-syslog.sh &

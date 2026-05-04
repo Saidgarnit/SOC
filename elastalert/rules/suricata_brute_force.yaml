@@ -1,0 +1,29 @@
+alert: slack
+alert_text: 'Brute Force: {alert.signature} from {src_ip} to {dest_ip}:{dest_port}'
+alert_text_type: alert_text_only
+filter:
+- query:
+    bool:
+      must:
+      - match:
+          event_type: alert
+      - bool:
+          should:
+          - match_phrase:
+              alert.signature: SSH Brute Force
+          - match_phrase:
+              alert.signature: RDP Brute Force
+          - match_phrase:
+              alert.signature: FTP Brute Force
+index: soc-logs-enriched-*
+name: "Suricata IDS \u2014 Brute Force"
+query_key:
+- src_ip
+- dest_ip
+realert:
+  minutes: 30
+slack_icon_emoji: ':hammer:'
+slack_msg_color: warning
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+type: any

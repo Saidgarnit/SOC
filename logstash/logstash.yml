@@ -1,2 +1,3 @@
 xpack.monitoring.elasticsearch.username: elastic
 xpack.monitoring.elasticsearch.password: SOCstack2026!
+pipeline.workers: 1

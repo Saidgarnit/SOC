@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+# Setup filebeat.yml before 1-config-filebeat runs
+
+echo "Setting up filebeat.yml from template..."
+mkdir -p /etc/filebeat
+
+if [ -f /filebeat-template.yml ]; then
+    cp /filebeat-template.yml /etc/filebeat/filebeat.yml
+    chown root:root /etc/filebeat/filebeat.yml
+    chmod 644 /etc/filebeat/filebeat.yml
+    echo "filebeat.yml created successfully"
+else
+    echo "ERROR: filebeat-template.yml not found!"
+    exit 1
+fi

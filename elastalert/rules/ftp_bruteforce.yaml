@@ -1,53 +1,26 @@
-name: FTP Brute Force Detected
-type: frequency
-index: .ds-wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
-ignore_unavailable: true
-
-num_events: 6
+alert: slack
+alert_text: 'FTP Brute Force: {alert.signature} from {src_ip} to {dest_ip}:{dest_port}'
+alert_text_type: alert_text_only
+filter:
+- query:
+    bool:
+      must:
+      - match:
+          event_type: alert
+      - match:
+          alert.category: Attempted Administrator Privilege Gain
+index: soc-logs-enriched-*
+name: "Suricata IDS \u2014 FTP Brute Force"
+num_events: 5
+query_key:
+- src_ip
+- dest_ip
+realert:
+  minutes: 30
+slack_icon_emoji: ':file_cabinet:'
+slack_msg_color: warning
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
 timeframe:
   minutes: 2
-
-query_key: data.srcip
-
-filter:
-  - bool:
-      should:
-        - term:
-            rule.groups: "authentication_failed"
-        - term:
-            rule.groups: "vsftpd"
-        - term:
-            rule.groups: "proftpd"
-        - term:
-            rule.groups: "ftp"
-      minimum_should_match: 1
-
-realert:
-  minutes: 60
-
-alert_subject: "📁 [HIGH] FTP Brute Force — {0} attempts from {1}"
-alert_subject_args:
-  - num_hits
-  - data.srcip
-
-alert_text_type: alert_text_jinja
-alert_text: |
-  📁 FTP BRUTE FORCE DETECTED
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Attacker   : {{ data.srcip | default('N/A') }}
-  Target User: {{ (data or {}).get('dstuser', 'N/A') | default('N/A') | default('N/A') }}
-  Attempts   : {{ num_hits }} in 2 minutes
-  Timestamp  : {{ timestamp }}
-  Agent/Host : {{ agent.name | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  MITRE      : T1110.001 - Brute Force: Password Guessing (FTP)
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Kibana: http://localhost:5601
-
-alert:
-  - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":file_folder:"
-slack_msg_color: "danger"
+type: frequency

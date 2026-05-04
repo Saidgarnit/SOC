@@ -1,52 +1,24 @@
-name: Brute Force Attack Detected
-type: frequency
-index: .ds-wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
-ignore_unavailable: true
-
-num_events: 8
+alert: slack
+alert_text: 'Auth Brute Force: {agent.name} from {data.srcip}'
+alert_text_type: alert_text_only
+filter:
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: authentication_failures
+index: wazuh-alerts-*
+name: "Wazuh \u2014 Authentication Brute Force"
+num_events: 5
+query_key:
+- agent.name
+- data.srcip
+realert:
+  minutes: 30
+slack_icon_emoji: ':lock:'
+slack_msg_color: danger
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
 timeframe:
   minutes: 2
-
-query_key: data.srcip
-
-filter:
-  - bool:
-      should:
-        - term:
-            rule.groups: "authentication_failed"
-        - term:
-            rule.groups: "sshd"
-        - term:
-            rule.groups: "web-accesslog"
-      minimum_should_match: 1
-
-realert:
-  minutes: 60
-
-alert_subject: "🔐 [HIGH] Brute Force — {0} attempts from {1}"
-alert_subject_args:
-  - num_hits
-  - data.srcip
-
-alert_text_type: alert_text_jinja
-alert_text: |
-  🔐 BRUTE FORCE ATTACK DETECTED
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Attempts   : {{ num_hits }} in 2 minutes
-  Timestamp  : {{ timestamp }}
-  Attacker   : {{ data.srcip | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  MITRE      : T1110 - Brute Force
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Kibana: http://localhost:5601
-
-alert:
-  - email
-  - slack
-email:
-  - garnitsaid01@gmail.com
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":lock:"
-slack_msg_color: "danger"
+type: frequency

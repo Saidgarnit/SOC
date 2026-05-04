@@ -1,67 +1,57 @@
-# Rule name for your PFE report
-name: "MISP-Threat-Intel-Match"
-
+name: MISP-Threat-Intel-Match
 type: any
-index: alerts-soc-threats-*
+index: soc-logs-enriched-*,alerts-soc-threats-*
 ignore_unavailable: true
-
 filter:
-- term:
-    tags: "misp_threat_match"
-
-real_time_only: true
-
-run_every:
-  seconds: 10
-buffer_time:
-  minutes: 1
+  - bool:
+      should:
+        - term:
+            tags: "misp_threat_match"
+        - term:
+            alert.signature: "MISP_MALICIOUS_IP_MATCH"
+        - exists:
+            field: threat_intel_info
+      minimum_should_match: 1
 realert:
-  minutes: 30
-
-# MITRE ATT&CK Mapping (kept for documentation)
-mitre_technique_id: "T1071"
-mitre_technique: "Application Layer Protocol"
-mitre_tactic: "Command and Control"
-mitre_tactic_id: "TA0011"
-
+  minutes: 10
+alert_subject: ":mag: MISP Threat Intel Detected"
+alert_subject: ":female_detective: [MISP Intel] Threat match -- %(src_ip)s -> %(dest_ip)s"
 alert_text_type: alert_text_only
-use_elastalert_template: false
-
 alert_text: |
-  🛑 MISP: Threat Intel Match!
-  🏷️  Attribute: {0}
-  💥 Source IP: {1}
-  🌍 Country: {2}
-  🏙️ City: {3}
-  ⚡ Threat Level: {4}
-  📝 Event Info: {5}
-  🎯 MITRE: Command & Control (TA0011)
-  🔧 Technique: Application Layer Protocol (T1071)
-  ⚠️ Severity: HIGH
+  :female_detective: MISP THREAT INTEL MATCH
+  ________________________________
+  Severity   : HIGH
+  Timestamp  : %(@timestamp)s
+  Source     : %(src_ip)s:%(src_port)s
+  Destination: %(dest_ip)s:%(dest_port)s
+  Protocol   : %(proto)s
+  Signature  : %(threat_intel_info)s
+  Action     : %(event_type)s
+  :round_pushpin: Country: %(src_geoip.country_name)s
+  :cityscape: City: %(src_geoip.city_name)s
+  :office: ASN: %(src_geoip.as_org)s
+  ________________________________
+  Kibana: http://localhost:5601
 
-# Dynamic argument mapping from matching log fields
-alert_text_args:
-- misp.attribute
-- src_ip
-- geoip.country_name
-- geoip.city_name
-- misp.threat_level
-- misp.event_info
 
+  Severity   : HIGH
+  Matches    : %(num_hits)s events
+  Timestamp  : %(@timestamp)s
+  Source     : %(src_ip)s:%(src_port)s
+  Destination: %(dest_ip)s:%(dest_port)s
+  Protocol   : %(proto)s
+  Signature  : %(threat_intel_info)s
+  Action     : %(event_type)s
+
+  :round_pushpin: Country: %(src_geoip.country_name)s
+  :cityscape: City: %(src_geoip.city_name)s
+  :office: ASN: %(src_geoip.as_org)s
+  ________________________________
+
+  Kibana: http://localhost:5601
 alert:
-- slack
-- email
-
-slack_webhook_url: YOUR_SLACK_WEBHOOK_URL
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
 slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":rotating_light:"
-slack_msg_color: danger
-
-email:
-- garnitsaid01@gmail.com
-smtp_host: smtp.gmail.com
-smtp_port: 587
-smtp_ssl: false
-smtp_auth_file: /opt/elastalert/smtp_auth.yaml
-from_addr: garnitsaid01@gmail.com
-email_subject: "🚨 SOC Alert - MISP Threat Intel Match - {1}"
+slack_emoji_override: ":mag:"
+slack_msg_color: "danger"
