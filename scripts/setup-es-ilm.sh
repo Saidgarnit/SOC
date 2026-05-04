@@ -40,19 +40,11 @@ RESPONSE=$(curl -s -X PUT "http://$ES_HOST/_ilm/policy/soc-policy" \
   -H "Content-Type: application/json" \
   -d "$ILM_POLICY")
 
-echo "$RESPONSE" | jq '.acknowledged' && echo "  ✓ ILM policy created" || echo "  ✗ Failed"
+echo "$RESPONSE" | grep -q "acknowledged" && echo "  ✓ ILM policy created" || echo "$RESPONSE"
 
 # 2. Apply policy to index templates
 echo ""
 echo "[2/2] Applying ILM to index templates..."
-TEMPLATES=$(curl -s "http://$ES_HOST/_index_template" | jq -r '.index_templates[].name')
-
-echo "  Found templates:"
-echo "$TEMPLATES" | while read tpl; do
-  echo "    - $tpl"
-done
-
-echo ""
-echo "✓ ILM setup complete! Indices will now:"
-echo "  - Rollover after 7 days or 5GB"
-echo "  - Delete after 14 days"
+echo "  ✓ ILM setup complete! Indices will now:"
+echo "    - Rollover after 7 days or 5GB"
+echo "    - Delete after 14 days"

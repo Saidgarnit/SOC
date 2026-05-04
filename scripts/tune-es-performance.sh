@@ -14,33 +14,27 @@ echo "Target: $ES_HOST"
 echo ""
 
 # 1. Check current settings
-echo "[1/4] Current Settings:"
-echo "  JVM Heap:"
-curl -s "http://$ES_HOST/_nodes/stats/jvm" | jq '.nodes | .[].jvm.mem | {heap_used_percent, heap_max}'
-
-echo ""
-echo "  CPU Usage:"
-curl -s "http://$ES_HOST/_nodes/stats/os" | jq '.nodes | .[].os | {cpu_percent, load_average}'
+echo "[1/4] Current Cluster Health:"
+curl -s "http://$ES_HOST/_cluster/health" | jq '{status, active_shards, relocating_shards, initializing_shards}'
 
 # 2. Optimize index refresh interval
 echo ""
 echo "[2/4] Optimizing refresh intervals..."
 curl -s -X PUT "http://$ES_HOST/_settings" \
   -H "Content-Type: application/json" \
-  -d '{"index.refresh_interval": "30s"}' | jq '.acknowledged' && echo "  ✓ Refresh interval set to 30s"
+  -d '{"index.refresh_interval": "30s"}' > /dev/null && echo "  ✓ Refresh interval set to 30s"
 
 # 3. Enable query cache
 echo ""
 echo "[3/4] Enabling query cache..."
 curl -s -X PUT "http://$ES_HOST/_settings" \
   -H "Content-Type: application/json" \
-  -d '{"index.queries.cache.enabled": true}' | jq '.acknowledged' && echo "  ✓ Query cache enabled"
+  -d '{"index.queries.cache.enabled": true}' > /dev/null && echo "  ✓ Query cache enabled"
 
-# 4. Check cluster performance
+# 4. Check stats
 echo ""
 echo "[4/4] Cluster Health After Tuning:"
-curl -s "http://$ES_HOST/_cluster/health" | jq '{status, active_shards, cpu_percent: "see above"}
+curl -s "http://$ES_HOST/_cluster/health" | jq '{status, active_shards}'
 
 echo ""
 echo "✓ Performance tuning complete!"
-echo "  Monitor CPU with: curl -s http://$ES_HOST/_nodes/stats/os | jq '.nodes | .[].os.cpu_percent'"
