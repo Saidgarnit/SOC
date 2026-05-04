@@ -1,6 +1,7 @@
-alert: slack
-alert_text: 'C2 Beaconing: {alert.signature} from {src_ip} to {dest_ip}:{dest_port}'
-alert_text_type: alert_text_only
+name: "Suricata IDS — C2 Beaconing"
+type: frequency
+index: soc-logs-enriched-*
+
 filter:
 - query:
     bool:
@@ -8,19 +9,30 @@ filter:
       - match:
           event_type: alert
       - match_phrase:
-          alert.signature: C2 Beaconing
-index: soc-logs-enriched-*
-name: "Suricata IDS \u2014 C2 Beaconing"
-num_events: 3
+          alert.signature: "C2 Beaconing"
+
 query_key:
 - src_ip
 - dest_ip
-realert:
-  minutes: 60
-slack_icon_emoji: ':satellite:'
-slack_msg_color: danger
-slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+num_events: 3
 timeframe:
   minutes: 10
-type: frequency
+realert:
+  minutes: 60
+
+alert: slack
+slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":satellite:"
+slack_msg_color: danger
+alert_text_type: alert_text_only
+alert_text: |
+  *C2 Beaconing Detected*
+  *Severity:* CRITICAL
+  *Source IP:* {src_ip}
+  *Destination:* {dest_ip}:{dest_port}
+  *Signature:* {alert.signature}
+  *Attack Method:* Command & Control beaconing
+  *Timestamp:* {timestamp}
+  *Dashboard:* http://localhost:5601/app/discover
+

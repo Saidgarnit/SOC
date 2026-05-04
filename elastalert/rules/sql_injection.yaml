@@ -1,0 +1,46 @@
+name: "DVWA — SQL Injection Attack"
+type: any
+index: wazuh-alerts-*
+
+filter:
+- query:
+    bool:
+      should:
+      - match_phrase:
+          data.url: "id="
+      - match_phrase:
+          full_log: "' OR '"
+      - match_phrase:
+          full_log: "UNION SELECT"
+      - match_phrase:
+          full_log: "1=1"
+      - match_phrase:
+          data.url: "SELECT"
+      must:
+      - bool:
+          should:
+          - match:
+              rule.groups: web
+          - match_phrase:
+              data.url: "dvwa"
+      minimum_should_match: 1
+
+query_key: agent.name
+realert:
+  minutes: 5
+
+alert: slack
+slack_webhook_url: "https://hooks.slack.com/services/YOUR_REAL_WEBHOOK"
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":syringe:"
+slack_msg_color: danger
+alert_text_type: alert_text_only
+alert_text: |
+  *SQL Injection Detected*
+  *Severity:* HIGH
+  *Agent:* {agent.name}
+  *Source IP:* {data.srcip}
+  *Target URL:* {data.url}
+  *Rule:* {rule.description}
+  *Timestamp:* {timestamp}
+  *Dashboard:* http://localhost:5601/app/discover

@@ -22,4 +22,9 @@ from_addr: "garnitsaid01@gmail.com"
 smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
 email_reply_to: "garnitsaid01@gmail.com"
 
+# Global Slack webhook — override per-rule or set env SLACK_WEBHOOK_URL
+# Replace YOUR_REAL_WEBHOOK with your actual Slack incoming webhook URL
+# Example: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+slack_webhook_url: "${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/YOUR_REAL_WEBHOOK}"
+
 # NO global alert: or email: here — each rule controls its own alerting

@@ -107,7 +107,11 @@ services:
   connector-mitre:
     image: opencti/connector-mitre:6.0.5
     container_name: connector-mitre
-    restart: unless-stopped
+    restart: on-failure:3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=a3c5e7f9-b1d3-4e6f-8a2c-0d1e3f5a7b9c
@@ -205,7 +209,11 @@ services:
   misp:
     image: ghcr.io/misp/misp-docker/misp-core:latest
     container_name: misp
-    restart: unless-stopped
+    restart: on-failure:3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     ports:
     - 9001:80
     - 9002:443
@@ -228,6 +236,14 @@ services:
     - misp-app:/var/www/MISP
     networks:
     - soc-net
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -sf http://localhost/users/login || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
   misp-db:
     image: mysql:8.0
     container_name: misp-db
@@ -373,7 +389,11 @@ services:
   connector-misp:
     image: opencti/connector-misp:6.0.5
     container_name: connector-misp
-    restart: unless-stopped
+    restart: on-failure:3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=a3c5e7f9-b1d3-4e6f-8a2c-0d1e3f5a7b9c
@@ -398,7 +418,7 @@ services:
       opencti:
         condition: service_healthy
       misp:
-        condition: service_started
+        condition: service_healthy
     networks:
     - soc-net
 volumes:
