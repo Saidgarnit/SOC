@@ -1,4 +1,5 @@
 #!/bin/sh
+rm -f /var/ossec/var/start-script-lock
 FLEET_URL="${FLEET_URL:-http://fleet-server:8220}"
 ENROLL_TOKEN="${ENROLL_TOKEN:-RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw==}"
 AGENT_DIR="/opt/elastic-agent"

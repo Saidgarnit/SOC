@@ -1,0 +1,30 @@
+name: DNS Exfiltration or Tunneling Detected
+type: frequency
+index: soc-logs-enriched-*
+ignore_unavailable: true
+num_events: 10
+timeframe:
+  minutes: 5
+filter:
+  - term:
+      event_type.keyword: "dns"
+realert:
+  minutes: 10
+alert_subject: ":satellite: [DNS Tunnel] %(src_ip)s -- %(alert.signature)s"
+alert_text_type: alert_text_only
+alert_text: |
+  :satellite: DNS EXFILTRATION / TUNNELING
+  ________________________________
+  Signature  : %(alert.signature)s
+  Source     : %(src_ip)s
+  Destination: %(dest_ip)s:%(dest_port)s
+  Timestamp  : %(@timestamp)s
+  ________________________________
+  Kibana: http://localhost:5601
+
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: "SOC-Alert-Bot"
+slack_emoji_override: ":satellite:"
+slack_msg_color: "danger"

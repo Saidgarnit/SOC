@@ -43,7 +43,7 @@ af-packet:
     cluster-type: cluster_flow
     defrag: yes
     use-mmap: yes
-    ring-size: 2048
+    ring-size: 200000
 
 detect:
   profile: medium

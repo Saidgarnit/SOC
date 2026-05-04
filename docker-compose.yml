@@ -12,7 +12,6 @@ services:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 2g
     ports:
     - 9200:9200
     volumes:
@@ -22,7 +21,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - curl -s -u elastic:SOCstack2026! http://localhost:9200/_cluster/health | grep
+      - curl -s -u elastic:sYVfKJCe2RCfELjf=GLa http://localhost:9200/_cluster/health | grep
         -vq '"status":"red"'
       interval: 20s
       timeout: 10s
@@ -45,7 +44,7 @@ services:
     - DATABASE__TYPE=elasticsearch
     - ELASTICSEARCH__URL=http://elasticsearch:9200
     - ELASTICSEARCH__USERNAME=elastic
-    - ELASTICSEARCH__PASSWORD=SOCstack2026!
+    - ELASTICSEARCH__PASSWORD=sYVfKJCe2RCfELjf=GLa
     - ELASTICSEARCH__SSL_VERIFY=false
     - REDIS__HOSTNAME=opencti-redis
     - REDIS__PORT=6379
@@ -126,22 +125,26 @@ services:
   wazuh-manager:
     image: wazuh/wazuh-manager:4.7.5
     container_name: wazuh-manager
+    init: true
     volumes:
-    - ./wazuh/filebeat.yml:/etc/filebeat/filebeat.yml
     - ./wazuh/wazuh-template.json:/etc/filebeat/wazuh-template.json
     - ./wazuh/init-dirs.sh:/init-dirs.sh:ro
     - ./wazuh/config/shared/default/agent.conf:/var/ossec/etc/shared/default/agent.conf
     - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf
     - ./wazuh/logs:/var/ossec/logs
+    - ./wazuh/0-wazuh-init:/etc/cont-init.d/0-wazuh-init
+    - ./wazuh/0a-setup-filebeat:/etc/cont-init.d/0a-setup-filebeat
+    - ./wazuh/filebeat-template.yml:/filebeat-template.yml:ro
     restart: unless-stopped
     ports:
     - 1514:1514/tcp
     - 1514:1514/udp
     - 1515:1515
+    - 55000:55000
     environment:
     - INDEXER_URL=http://elasticsearch:9200
     - INDEXER_USERNAME=elastic
-    - INDEXER_PASSWORD=SOCstack2026!
+    - INDEXER_PASSWORD=sYVfKJCe2RCfELjf=GLa
     networks:
     - soc-net
   filebeat:
@@ -176,7 +179,6 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    mem_limit: 1g
     networks:
     - soc-net
   logstash:
@@ -186,15 +188,15 @@ services:
     restart: unless-stopped
     environment:
     - LS_JAVA_OPTS=-Xms512m -Xmx512m
+    - XPACK_MONITORING_ENABLED=false
+    - LOGSTASH_PIPELINE_WORKERS=1
     volumes:
     - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     - ./suricata/logs:/var/log/suricata:ro
     - ./logstash/geoip:/usr/share/logstash/geoip:ro
     ports:
-    - 5044:5044
     - 5000:5000/tcp
     - 5001:5001/udp
-    mem_limit: 1024m
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -254,7 +256,6 @@ services:
   suricata:
     image: jasonish/suricata:latest
     container_name: suricata
-    mem_limit: 300m
     network_mode: host
     privileged: true
     cap_add:
@@ -310,7 +311,6 @@ services:
   elastalert:
     image: jertel/elastalert2:latest
     container_name: elastalert
-    mem_limit: 768m
     dns:
     - 8.8.8.8
     restart: unless-stopped
@@ -355,10 +355,10 @@ services:
     environment:
     - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
     - ES_USER=elastic
-    - ES_PASS=SOCstack2026!
+    - ES_PASS=sYVfKJCe2RCfELjf=GLa
     - ES_HOST=http://elasticsearch:9200
     - ES_USERNAME=elastic
-    - ES_PASSWORD=SOCstack2026!
+    - ES_PASSWORD=sYVfKJCe2RCfELjf=GLa
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -384,7 +384,7 @@ services:
     - CONNECTOR_CONFIDENCE_LEVEL=75
     - CONNECTOR_LOG_LEVEL=info
     - MISP_URL=http://misp
-    - MISP_KEY=UEinzLgbSTaCwdgxzD5JRybGBJusnck0JzFh9Dba
+    - MISP_KEY=VEE2IPlsLIxQbq7ufQxAuB7a9zHxRZxBtS7XjFIk
     - MISP_SSL=false
     - MISP_FEED_MODE=false
     - MISP_DATETIME_ATTRIBUTE=timestamp

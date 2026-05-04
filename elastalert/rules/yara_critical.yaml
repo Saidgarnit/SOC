@@ -1,38 +1,19 @@
-name: YARA Critical Malware Detection
-type: any
-index: soc-logs-enriched-*
-ignore_unavailable: true
-
+alert: slack
+alert_text: 'YARA: {agent.name} - {rule.description} in {syscheck.path}'
+alert_text_type: alert_text_only
 filter:
-  - term:
-      event_type.keyword: "yara_match"
-
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: yara
+index: wazuh-alerts-*
+name: "Wazuh \u2014 YARA Critical Match"
+query_key: agent.name
 realert:
-  minutes: 60
-
-alert_subject: "🧬 [YARA] Malware detected: {0}"
-alert_subject_args:
-  - rule_name
-
-alert_text_type: alert_text_jinja
-alert_text: |
-  🧬 YARA CRITICAL MALWARE DETECTION
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Rule       : {{ rule_name | default('N/A') }}
-  File       : {{ file_path | default('N/A') }}
-  Severity   : {{ severity | default('N/A') }}
-  MITRE      : {{ mitre_technique | default('N/A') }}
-  Tactic     : {{ mitre_tactic | default('N/A') }}
-  Timestamp  : {{ timestamp }}
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Kibana: http://localhost:5601
-
-alert:
-  - email
-  - slack
-email:
-  - garnitsaid01@gmail.com
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":biohazard_sign:"
-slack_msg_color: "danger"
+  minutes: 15
+slack_icon_emoji: ':skull_crossbones:'
+slack_msg_color: danger
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+type: any

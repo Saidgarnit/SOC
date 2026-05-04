@@ -6,7 +6,7 @@ buffer_time:
 es_host: elasticsearch
 es_port: 9200
 es_username: elastic
-es_password: SOCstack2026!
+es_password: "sYVfKJCe2RCfELjf=GLa"
 writeback_index: elastalert_status
 alert_time_limit:
   days: 2

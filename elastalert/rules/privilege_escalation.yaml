@@ -1,34 +1,22 @@
-name: Privilege Escalation Detected
-type: any
-index: .ds-wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
-ignore_unavailable: true
+alert: slack
+alert_text: 'Priv Esc: {agent.name} - {system.auth.sudo.command}'
+alert_text_type: alert_text_only
 filter:
-  - query_string:
-        query: 'rule.groups:sudo OR rule.groups:privilege_escalation OR rule.id:5500 OR rule.id:5501 OR rule.id:5502'
-        analyze_wildcard: true
+- query:
+    bool:
+      minimum_should_match: 1
+      should:
+      - match:
+          rule.groups: priv_esc
+      - match:
+          rule.groups: sudo
+index: wazuh-alerts-*
+name: "Wazuh \u2014 Privilege Escalation"
+query_key: agent.name
 realert:
-  minutes: 60
-alert_subject: "🔺 [PRIVESC] {0} on {1}"
-alert_subject_args:
-  - rule.description
-  - agent.name
-alert_text_type: alert_text_jinja
-alert_text: |
-  🔺 PRIVILEGE ESCALATION DETECTED
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Host       : {{ agent.name | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  Level      : {{ rule.level | default('N/A') }}
-  Timestamp  : {{ timestamp }}
-  MITRE      : T1548 - Abuse Elevation Control
-  Kibana     : http://localhost:5601
-alert:
-  - email
-  - slack
-email:
-  - garnitsaid01@gmail.com
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":arrow_upper_right:"
-slack_msg_color: "danger"
+  minutes: 10
+slack_icon_emoji: ':arrow_double_up:'
+slack_msg_color: danger
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+type: any

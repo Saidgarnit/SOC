@@ -5,6 +5,12 @@ rsyslogd 2>/dev/null || true
 python3 /usr/local/bin/fake-win-events.py &
 /var/ossec/bin/wazuh-modulesd &
 sleep 3
+# Auto-enroll if no client.keys (e.g. after full container recreate)
+if [ ! -s /var/ossec/etc/client.keys ]; then
+    echo "[wazuh] No enrollment found — enrolling with wazuh-manager..."
+    /var/ossec/bin/agent-auth -m wazuh-manager -p 1515 -A victim-windows 2>/dev/null || true
+    sleep 2
+fi
 /var/ossec/bin/wazuh-agentd 2>/dev/null || true
 
 AGENT_BIN=$(find /opt/elastic-agent/data/ -name "elastic-agent" -type f -executable 2>/dev/null | head -1)

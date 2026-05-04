@@ -1,46 +1,22 @@
-name: Failed Login Attempt
-type: frequency
-index: .ds-wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
-ignore_unavailable: true
-
-num_events: 5
-timeframe:
-  minutes: 5
-
-query_key: data.srcip
-
+alert: slack
+alert_text: 'Failed Login: {agent.name} from {data.srcip}'
+alert_text_type: alert_text_only
 filter:
-  - bool:
-      should:
-        - term:
-            rule.groups: "authentication_failed"
-        - term:
-            rule.groups: "sshd"
-      minimum_should_match: 1
-
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: authentication_failed
+index: wazuh-alerts-*
+name: "Wazuh \u2014 Failed Login"
+num_events: 3
+query_key: agent.name
 realert:
-  minutes: 60
-
-alert_subject: "🔑 [MED] {0} Failed Logins from {1}"
-alert_subject_args:
-  - num_hits
-  - data.srcip
-
-alert_text_type: alert_text_jinja
-alert_text: |
-  🔑 MULTIPLE FAILED LOGIN ATTEMPTS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Attempts   : {{ num_hits }} in 5 minutes
-  Timestamp  : {{ timestamp }}
-  Source IP  : {{ data.srcip | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Kibana: http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))
-
-alert:
-  - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":key:"
-slack_msg_color: "warning"
+  minutes: 10
+slack_icon_emoji: ':no_entry:'
+slack_msg_color: warning
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+timeframe:
+  minutes: 1
+type: frequency

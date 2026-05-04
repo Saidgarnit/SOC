@@ -1,45 +1,33 @@
-name: Suricata Alert Detected
+name: Suricata Generic IDS Alert
 type: any
 index: soc-logs-enriched-*
 ignore_unavailable: true
-
 filter:
-- query:
-    query_string:
-      query: "event.module: suricata"
-
+  - term:
+      event_type.keyword: "alert"
+realert:
+  minutes: 10
+alert_subject: ":rotating_light: [Suricata IDS] %(alert.signature)s -- %(src_ip)s -> %(dest_ip)s"
 alert_text_type: alert_text_only
-use_elastalert_template: false
-
 alert_text: |
-  🛡️ Suricata Alert Fired!
-  📝 Signature: {0}
-  💥 Source IP: {1}
-  🎯 Destination IP: {2}
-  🌍 Country: {3}
-  🏙️ City: {4}
-
-alert_text_args:
-- rule.description
-- src_ip
-- dest_ip
-- geoip.country_name
-- geoip.city_name
+  :rotating_light: SURICATA IDS ALERT
+  ________________________________
+  Severity   : %(alert.severity)s
+  Timestamp  : %(@timestamp)s
+  Source     : %(src_ip)s:%(src_port)s
+  Destination: %(dest_ip)s:%(dest_port)s
+  Protocol   : %(proto)s
+  Signature  : %(alert.signature)s
+  Action     : %(alert.action)s
+  :round_pushpin: Country: %(src_geoip.country_name)s
+  :cityscape: City: %(src_geoip.city_name)s
+  :office: ASN: %(src_geoip.as_org)s
+  ________________________________
+  Kibana: http://localhost:5601
 
 alert:
-- slack
-- email
-
-slack_webhook_url: YOUR_SLACK_WEBHOOK_URLsRIpNUJkESdCdlfBlTPd4T4
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
 slack_username_override: "SOC-Alert-Bot"
 slack_emoji_override: ":rotating_light:"
-slack_msg_color: danger
-
-email:
-- garnitsaid01@gmail.com
-smtp_host: smtp.gmail.com
-smtp_port: 587
-smtp_ssl: false
-smtp_auth_file: /opt/elastalert/smtp_auth.yaml
-from_addr: garnitsaid01@gmail.com
-email_subject: "Suricata Alert - {1} -> {2}"
+slack_msg_color: "warning"

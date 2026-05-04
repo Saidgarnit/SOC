@@ -1,56 +1,26 @@
-name: Lateral Movement Detected
-type: frequency
-index: .ds-wazuh-alerts-4.x-*,.ds-wazuh-alerts-4.x-*
-ignore_unavailable: true
-
-num_events: 5
+alert: slack
+alert_text: 'Lateral Movement: {agent.name} from {data.srcip}'
+alert_text_type: alert_text_only
+filter:
+- query:
+    bool:
+      must:
+      - match:
+          rule.groups: authentication_success
+      - range:
+          rule.level:
+            gte: 8
+index: wazuh-alerts-*
+name: "Wazuh \u2014 Lateral Movement"
+num_events: 3
+query_key:
+- data.srcip
+realert:
+  minutes: 20
+slack_icon_emoji: ':left_right_arrow:'
+slack_msg_color: danger
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
 timeframe:
   minutes: 5
-
-query_key: agent.name
-
-filter:
-  - bool:
-      should:
-        - term:
-            rule.groups: "authentication_success"
-        - term:
-            rule.groups: "sshd"
-        - term:
-            rule.groups: "win_lateral_movement"
-        - term:
-            rule.groups: "smb"
-      minimum_should_match: 1
-
-realert:
-  minutes: 60
-
-alert_subject: "🔀 [HIGH] Lateral Movement — {0} on {1}"
-alert_subject_args:
-  - num_hits
-  - agent.name
-
-alert_text_type: alert_text_jinja
-alert_text: |
-  🔀 LATERAL MOVEMENT DETECTED
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Host       : {{ agent.name | default('N/A') }}
-  Attempts   : {{ num_hits }} in 5 minutes
-  Timestamp  : {{ timestamp }}
-  Source IP  : {{ data.srcip | default('N/A') }}
-  User       : {{ (data or {}).get('dstuser', 'N/A') | default('N/A') | default(data.srcuser) | default('N/A') }}
-  Rule ID    : {{ rule.id | default('N/A') }}
-  Description: {{ rule.description | default('N/A') }}
-  MITRE      : T1021 - Remote Services
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Kibana: http://localhost:5601
-
-alert:
-  - email
-  - slack
-email:
-  - garnitsaid01@gmail.com
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC-Alert-Bot"
-slack_emoji_override: ":arrows_counterclockwise:"
-slack_msg_color: "danger"
+type: frequency
