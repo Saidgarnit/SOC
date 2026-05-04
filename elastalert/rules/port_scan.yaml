@@ -1,21 +1,25 @@
-name: Port Scan / Reconnaissance Detected
-type: frequency
-index: soc-logs-enriched-*
-ignore_unavailable: true
-num_events: 100
-timeframe:
-  minutes: 5
+alert: slack
+alert_text: 'Port Scan: {alert.signature} from {src_ip} to {dest_ip}'
+alert_text_type: alert_text_only
 filter:
-  - terms:
-      alert.signature_id: [2010937, 2010935, 2001219]
+- query:
+    bool:
+      must:
+      - match:
+          event_type: alert
+      - bool:
+          should:
+          - match_phrase:
+              alert.signature: Port Scan
+          - match_phrase:
+              alert.category: Attempted Information Leak
+index: soc-logs-enriched-*
+name: "Suricata IDS \u2014 Port Scan"
+query_key: src_ip
 realert:
-  hours: 24
-alert_subject: "[MED] Port Scan Detected"
-alert_text_type: alert_text_jinja
-alert_text: |
-  PORT SCAN DETECTED
-  MITRE: T1046
-  Kibana: http://localhost:5601
-alert:
-  - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+  minutes: 30
+slack_icon_emoji: ':mag:'
+slack_msg_color: warning
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+type: any

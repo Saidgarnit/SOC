@@ -1,0 +1,2130 @@
+
+======================================================================
+  ELASTICSEARCH INDEX DISCOVERY
+======================================================================
+
+Index Pattern                        Count  Health
+------------------------------------------------------------
+  elastalert (internal)               8243 docs  [green]
+    └─ elastalert_status                                   27 docs  293.1kb
+    └─ elastalert_status_error                           5256 docs  1.6mb
+    └─ elastalert_status_silence                          140 docs  166.5kb
+    └─ elastalert_status_status                          2820 docs  541.1kb
+  logs-*  (Fleet/Elastic Agent)     2908275 docs  [green]
+    └─ .ds-logs-elastic_agent-default-2026.04.17-000001   297535 docs  30.1mb
+    └─ .ds-logs-elastic_agent.filebeat-default-2026.04.17-000001   183944 docs  77.1mb
+    └─ .ds-logs-elastic_agent.fleet_server-default-2026.04.17-000001  1132679 docs  153mb
+    └─ .ds-logs-elastic_agent.metricbeat-default-2026.04.17-000001   520025 docs  126.4mb
+    └─ .ds-logs-system.auth-default-2026.04.25-000001   178562 docs  14mb
+    └─ .ds-logs-system.syslog-default-2026.04.25-000001   595530 docs  62.2mb
+  other                             11787249 docs  [green]
+    └─ .ds-.fleet-actions-results-2026.04.18-000001       339 docs  161.5kb
+    └─ .ds-.items-default-2026.04.12-000001                 0 docs  250b
+    └─ .ds-.lists-default-2026.04.12-000001                 0 docs  250b
+    └─ .ds-metrics-elastic_agent.elastic_agent-default-2026.04.17-000001   123276 docs  6.7mb
+    └─ .ds-metrics-elastic_agent.filebeat-default-2026.04.18-000001    42405 docs  7.3mb
+    └─ .ds-metrics-elastic_agent.filebeat_input-default-2026.04.22-000001      101 docs  176kb
+    └─ .ds-metrics-elastic_agent.fleet_server-default-2026.04.17-000001    12255 docs  1023kb
+    └─ .ds-metrics-elastic_agent.metricbeat-default-2026.04.17-000001    76099 docs  11.5mb
+    └─ .ds-metrics-fleet_server.agent_status-default-2026.04.17-000001     4714 docs  673.7kb
+    └─ .ds-metrics-fleet_server.agent_versions-default-2026.04.17-000001     4670 docs  300.7kb
+    └─ .ds-metrics-system.cpu-default-2026.04.17-000001   406941 docs  23.4mb
+    └─ .ds-metrics-system.diskio-default-2026.04.17-000001  2501157 docs  109.4mb
+    └─ .ds-metrics-system.filesystem-default-2026.04.26-000001    56219 docs  3.2mb
+    └─ .ds-metrics-system.fsstat-default-2026.04.17-000001    67636 docs  4mb
+    └─ .ds-metrics-system.load-default-2026.04.17-000001   404847 docs  18.6mb
+    └─ .ds-metrics-system.memory-default-2026.04.17-000001   386488 docs  23mb
+    └─ .ds-metrics-system.network-default-2026.04.17-000001  1199160 docs  53.5mb
+    └─ .ds-metrics-system.process-default-2026.04.17-000001  2073861 docs  970.6mb
+    └─ .ds-metrics-system.process.summary-default-2026.04.17-000001   395572 docs  17mb
+    └─ .ds-metrics-system.socket_summary-default-2026.04.17-000001   379729 docs  17.2mb
+    └─ .ds-metrics-system.uptime-default-2026.04.17-000001   400785 docs  16.2mb
+    └─ alerts-soc-threats-2026.04.26                       10 docs  56.2kb
+    └─ alerts-soc-threats-2026.04.27                       10 docs  56.1kb
+    └─ alerts-soc-threats-test                              0 docs  248b
+    └─ metrics-endpoint.metadata_current_default            0 docs  250b
+    └─ opencti_files-000001                                 0 docs  250b
+    └─ opencti_history-000001                          282426 docs  221.6mb
+    └─ opencti_inferred_entities-000001                     0 docs  250b
+    └─ opencti_inferred_relationships-000001                0 docs  250b
+    └─ opencti_internal_objects-000001                     95 docs  320.3kb
+    └─ opencti_internal_relationships-000001               81 docs  168.6kb
+    └─ opencti_stix_core_relationships-000001          258606 docs  112.4mb
+    └─ opencti_stix_cyber_observables-000001            62038 docs  49.5mb
+    └─ opencti_stix_domain_objects-000001               66015 docs  102.8mb
+    └─ opencti_stix_meta_objects-000001                  9577 docs  14.9mb
+    └─ opencti_stix_meta_relationships-000001         2572107 docs  616.6mb
+    └─ opencti_stix_sighting_relationships-000001           0 docs  250b
+    └─ suricata-alerts-2026.04.17                          30 docs  89.8kb
+  soc-logs-enriched-*               766724 docs  [green]
+    └─ soc-logs-enriched-2026.04.30                     98483 docs  52.5mb
+    └─ soc-logs-enriched-2026.05.01                      1150 docs  4mb
+    └─ soc-logs-enriched-2026.05.02                    137037 docs  111.4mb
+    └─ soc-logs-enriched-2026.05.03                    493026 docs  367.1mb
+    └─ soc-logs-enriched-2026.05.04                     37028 docs  26mb
+  wazuh-alerts-*                    574714 docs  [green]
+    └─ .ds-wazuh-alerts-4.x-2026.04.23-2026.04.23-000001    40822 docs  37.7mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.24-2026.04.24-000001    20162 docs  17.4mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.25-2026.04.25-000001   314251 docs  92.3mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.26-2026.04.26-000001    33231 docs  33.5mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.27-2026.04.27-000001    27903 docs  39.7mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.28-2026.04.28-000001     3634 docs  2mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.29-2026.04.29-000001     4640 docs  2.2mb
+    └─ .ds-wazuh-alerts-4.x-2026.04.30-2026.04.30-000001    15442 docs  22.6mb
+    └─ .ds-wazuh-alerts-4.x-2026.05.01-2026.05.01-000001    84020 docs  86.8mb
+    └─ .ds-wazuh-alerts-4.x-2026.05.02-2026.05.02-000001    26781 docs  46.1mb
+    └─ .ds-wazuh-alerts-4.x-2026.05.03-2026.05.03-000001     3523 docs  7.5mb
+    └─ .ds-wazuh-alerts-4.x-2026.05.04-2026.05.04-000001      300 docs  462.1kb
+    └─ .ds-wazuh-alerts-4.x-fake-2026.05.03-000001          1 docs  8.3kb
+    └─ .ds-wazuh-alerts-test-2026.05.03-000001              4 docs  27.2kb
+
+======================================================================
+  INDEX: wazuh-alerts-*
+======================================================================
+
+  FIELDS (8265 total):
+    @timestamp                                         [date]
+    activemq.*
+      activemq                                         [object]
+      activemq.caller                                  [keyword]
+      activemq.log                                     [object]
+      activemq.log.stack_trace                         [keyword]
+      activemq.thread                                  [keyword]
+      activemq.user                                    [keyword]
+    agent.*
+      agent                                            [object]
+      agent.build                                      [object]
+      agent.build.original                             [keyword]
+      agent.ephemeral_id                               [keyword]
+      agent.hostname                                   [alias]
+      agent.id                                         [keyword]
+      agent.ip                                         [keyword]
+      agent.name                                       [keyword]
+      agent.type                                       [keyword]
+      agent.version                                    [keyword]
+    apache.*
+      apache                                           [object]
+      apache.access                                    [object]
+      apache.access.ssl                                [object]
+      apache.access.ssl.cipher                         [keyword]
+      apache.access.ssl.protocol                       [keyword]
+      apache.error                                     [object]
+      apache.error.module                              [keyword]
+    as.*
+      as                                               [object]
+      as.number                                        [long]
+      as.organization                                  [object]
+      as.organization.name                             [keyword]
+    auditd.*
+      auditd                                           [object]
+      auditd.log                                       [object]
+      auditd.log.a0                                    [keyword]
+      auditd.log.addr                                  [ip]
+      auditd.log.item                                  [keyword]
+      auditd.log.items                                 [keyword]
+      auditd.log.laddr                                 [ip]
+      auditd.log.lport                                 [long]
+      auditd.log.new_auid                              [keyword]
+      auditd.log.new_ses                               [keyword]
+      auditd.log.old_auid                              [keyword]
+      auditd.log.old_ses                               [keyword]
+      auditd.log.rport                                 [long]
+      auditd.log.sequence                              [long]
+      auditd.log.tty                                   [keyword]
+    aws.*
+      aws                                              [object]
+      aws.cloudtrail                                   [object]
+      aws.cloudtrail.additional_eventdata              [keyword]
+      aws.cloudtrail.api_version                       [keyword]
+      aws.cloudtrail.console_login                     [object]
+      aws.cloudtrail.console_login.additional_eventdata [object]
+      aws.cloudtrail.console_login.additional_eventdata.login_to [keyword]
+      aws.cloudtrail.console_login.additional_eventdata.mfa_used [boolean]
+      aws.cloudtrail.console_login.additional_eventdata.mobile_version [boolean]
+      aws.cloudtrail.digest                            [object]
+      aws.cloudtrail.digest.end_time                   [date]
+      aws.cloudtrail.digest.log_files                  [nested]
+      aws.cloudtrail.digest.newest_event_time          [date]
+      aws.cloudtrail.digest.oldest_event_time          [date]
+      aws.cloudtrail.digest.previous_hash_algorithm    [keyword]
+      ... and 128 more
+    awscloudwatch.*
+      awscloudwatch                                    [object]
+      awscloudwatch.ingestion_time                     [keyword]
+      awscloudwatch.log_group                          [keyword]
+      awscloudwatch.log_stream                         [keyword]
+    azure.*
+      azure                                            [object]
+      azure.activitylogs                               [object]
+      azure.activitylogs.category                      [keyword]
+      azure.activitylogs.event_category                [keyword]
+      azure.activitylogs.identity                      [object]
+      azure.activitylogs.identity.authorization        [object]
+      azure.activitylogs.identity.authorization.action [keyword]
+      azure.activitylogs.identity.authorization.evidence [object]
+      azure.activitylogs.identity.authorization.evidence.principal_id [keyword]
+      azure.activitylogs.identity.authorization.evidence.principal_type [keyword]
+      azure.activitylogs.identity.authorization.evidence.role [keyword]
+      azure.activitylogs.identity.authorization.evidence.role_assignment_id [keyword]
+      azure.activitylogs.identity.authorization.evidence.role_assignment_scope [keyword]
+      azure.activitylogs.identity.authorization.evidence.role_definition_id [keyword]
+      azure.activitylogs.identity.authorization.scope  [keyword]
+      ... and 143 more
+    bucket.*
+      bucket                                           [object]
+      bucket.arn                                       [keyword]
+      bucket.name                                      [keyword]
+    cef.*
+      cef                                              [object]
+      cef.device                                       [object]
+      cef.device.event_class_id                        [keyword]
+      cef.device.product                               [keyword]
+      cef.device.vendor                                [keyword]
+      cef.device.version                               [keyword]
+      cef.extensions                                   [object]
+      cef.extensions.Reason                            [keyword]
+      cef.extensions.agentAddress                      [ip]
+      cef.extensions.agentDnsDomain                    [keyword]
+      cef.extensions.agentHostName                     [keyword]
+      cef.extensions.agentId                           [keyword]
+      cef.extensions.agentMacAddress                   [keyword]
+      cef.extensions.agentNtDomain                     [keyword]
+      cef.extensions.agentReceiptTime                  [date]
+      ... and 188 more
+    checkpoint.*
+      checkpoint                                       [object]
+      checkpoint.action_reason                         [long]
+      checkpoint.action_reason_msg                     [keyword]
+      checkpoint.additional_info                       [keyword]
+      checkpoint.additional_ip                         [keyword]
+      checkpoint.additional_rdata                      [keyword]
+      checkpoint.alert                                 [keyword]
+      checkpoint.allocated_ports                       [long]
+      checkpoint.analyzed_on                           [keyword]
+      checkpoint.answer_rdata                          [keyword]
+      checkpoint.anti_virus_type                       [keyword]
+      checkpoint.app_desc                              [keyword]
+      checkpoint.app_id                                [long]
+      checkpoint.app_package                           [keyword]
+      checkpoint.app_properties                        [keyword]
+      ... and 415 more
+    cisco.*
+      cisco                                            [object]
+      cisco.amp                                        [object]
+      cisco.amp.bp_data                                [flattened]
+      cisco.amp.cloud_ioc                              [object]
+      cisco.amp.cloud_ioc.description                  [keyword]
+      cisco.amp.cloud_ioc.short_description            [keyword]
+      cisco.amp.command_line                           [object]
+      cisco.amp.command_line.arguments                 [keyword]
+      cisco.amp.computer                               [object]
+      cisco.amp.computer.active                        [boolean]
+      cisco.amp.computer.connector_guid                [keyword]
+      cisco.amp.computer.external_ip                   [ip]
+      cisco.amp.computer.network_addresses             [flattened]
+      cisco.amp.connector_guid                         [keyword]
+      cisco.amp.detection                              [keyword]
+      ... and 147 more
+    client.*
+      client                                           [object]
+      client.address                                   [keyword]
+      client.as                                        [object]
+      client.as.number                                 [long]
+      client.as.organization                           [object]
+      client.as.organization.name                      [keyword]
+      client.bytes                                     [long]
+      client.domain                                    [keyword]
+      client.geo                                       [object]
+      client.geo.city_name                             [keyword]
+      client.geo.continent_code                        [keyword]
+      client.geo.continent_name                        [keyword]
+      client.geo.country_iso_code                      [keyword]
+      client.geo.country_name                          [keyword]
+      client.geo.location                              [geo_point]
+      ... and 27 more
+    cloud.*
+      cloud                                            [object]
+      cloud.account                                    [object]
+      cloud.account.id                                 [keyword]
+      cloud.account.name                               [keyword]
+      cloud.availability_zone                          [keyword]
+      cloud.image                                      [object]
+      cloud.image.id                                   [keyword]
+      cloud.instance                                   [object]
+      cloud.instance.id                                [keyword]
+      cloud.instance.name                              [keyword]
+      cloud.machine                                    [object]
+      cloud.machine.type                               [keyword]
+      cloud.origin                                     [object]
+      cloud.origin.account                             [object]
+      cloud.origin.account.id                          [keyword]
+      ... and 38 more
+    code_signature.*
+      code_signature                                   [object]
+      code_signature.digest_algorithm                  [keyword]
+      code_signature.exists                            [boolean]
+      code_signature.signing_id                        [keyword]
+      code_signature.status                            [keyword]
+      code_signature.subject_name                      [keyword]
+      code_signature.team_id                           [keyword]
+      code_signature.timestamp                         [date]
+      code_signature.trusted                           [boolean]
+      code_signature.valid                             [boolean]
+    container.*
+      container                                        [object]
+      container.cpu                                    [object]
+      container.cpu.usage                              [scaled_float]
+      container.disk                                   [object]
+      container.disk.read                              [object]
+      container.disk.read.bytes                        [long]
+      container.disk.write                             [object]
+      container.disk.write.bytes                       [long]
+      container.id                                     [keyword]
+      container.image                                  [object]
+      container.image.name                             [keyword]
+      container.image.tag                              [keyword]
+      container.labels                                 [object]
+      container.memory                                 [object]
+      container.memory.usage                           [scaled_float]
+      ... and 7 more
+    coredns.*
+      coredns                                          [object]
+      coredns.query                                    [object]
+      coredns.query.size                               [long]
+      coredns.response                                 [object]
+      coredns.response.size                            [long]
+    crowdstrike.*
+      crowdstrike                                      [object]
+      crowdstrike.event                                [object]
+      crowdstrike.event.AuditKeyValues                 [nested]
+      crowdstrike.event.CommandLine                    [keyword]
+      crowdstrike.event.Commands                       [keyword]
+      crowdstrike.event.ComputerName                   [keyword]
+      crowdstrike.event.ConnectionDirection            [keyword]
+      crowdstrike.event.CustomerId                     [keyword]
+      crowdstrike.event.DetectDescription              [keyword]
+      crowdstrike.event.DetectId                       [keyword]
+      crowdstrike.event.DetectName                     [keyword]
+      crowdstrike.event.DeviceId                       [keyword]
+      crowdstrike.event.EndTimestamp                   [date]
+      crowdstrike.event.EventType                      [keyword]
+      crowdstrike.event.ExecutablesWritten             [nested]
+      ... and 78 more
+    cyberarkpas.*
+      cyberarkpas                                      [object]
+      cyberarkpas.audit                                [object]
+      cyberarkpas.audit.action                         [keyword]
+      cyberarkpas.audit.ca_properties                  [object]
+      cyberarkpas.audit.ca_properties.address          [keyword]
+      cyberarkpas.audit.ca_properties.cpm_disabled     [keyword]
+      cyberarkpas.audit.ca_properties.cpm_error_details [keyword]
+      cyberarkpas.audit.ca_properties.cpm_status       [keyword]
+      cyberarkpas.audit.ca_properties.creation_method  [keyword]
+      cyberarkpas.audit.ca_properties.customer         [keyword]
+      cyberarkpas.audit.ca_properties.database         [keyword]
+      cyberarkpas.audit.ca_properties.device_type      [keyword]
+      cyberarkpas.audit.ca_properties.dual_account_status [keyword]
+      cyberarkpas.audit.ca_properties.group_name       [keyword]
+      cyberarkpas.audit.ca_properties.in_process       [keyword]
+      ... and 59 more
+    data.*
+      data                                             [object]
+      data.action                                      [keyword]
+      data.arch                                        [keyword]
+      data.dpkg_status                                 [keyword]
+      data.dstuser                                     [keyword]
+      data.euid                                        [keyword]
+      data.extra_data                                  [keyword]
+      data.file                                        [keyword]
+      data.id                                          [keyword]
+      data.logname                                     [keyword]
+      data.package                                     [keyword]
+      data.protocol                                    [keyword]
+      data.sca                                         [object]
+      data.sca.check                                   [object]
+      data.sca.check.command                           [keyword]
+      ... and 99 more
+    data_stream.*
+      data_stream                                      [object]
+      data_stream.dataset                              [constant_keyword]
+      data_stream.namespace                            [constant_keyword]
+      data_stream.type                                 [constant_keyword]
+    decoder.*
+      decoder                                          [object]
+      decoder.name                                     [keyword]
+      decoder.parent                                   [keyword]
+    destination.*
+      destination                                      [object]
+      destination.address                              [keyword]
+      destination.as                                   [object]
+      destination.as.number                            [long]
+      destination.as.organization                      [object]
+      destination.as.organization.name                 [keyword]
+      destination.bytes                                [long]
+      destination.domain                               [keyword]
+      destination.geo                                  [object]
+      destination.geo.city_name                        [keyword]
+      destination.geo.continent_code                   [keyword]
+      destination.geo.continent_name                   [keyword]
+      destination.geo.country_iso_code                 [keyword]
+      destination.geo.country_name                     [keyword]
+      destination.geo.location                         [geo_point]
+      ... and 29 more
+    dll.*
+      dll                                              [object]
+      dll.code_signature                               [object]
+      dll.code_signature.digest_algorithm              [keyword]
+      dll.code_signature.exists                        [boolean]
+      dll.code_signature.signing_id                    [keyword]
+      dll.code_signature.status                        [keyword]
+      dll.code_signature.subject_name                  [keyword]
+      dll.code_signature.team_id                       [keyword]
+      dll.code_signature.timestamp                     [date]
+      dll.code_signature.trusted                       [boolean]
+      dll.code_signature.valid                         [boolean]
+      dll.hash                                         [object]
+      dll.hash.md5                                     [keyword]
+      dll.hash.sha1                                    [keyword]
+      dll.hash.sha256                                  [keyword]
+      ... and 12 more
+    dns.*
+      dns                                              [object]
+      dns.answers                                      [object]
+      dns.answers.class                                [keyword]
+      dns.answers.data                                 [keyword]
+      dns.answers.name                                 [keyword]
+      dns.answers.ttl                                  [long]
+      dns.answers.type                                 [keyword]
+      dns.header_flags                                 [keyword]
+      dns.id                                           [keyword]
+      dns.op_code                                      [keyword]
+      dns.question                                     [object]
+      dns.question.class                               [keyword]
+      dns.question.name                                [keyword]
+      dns.question.registered_domain                   [keyword]
+      dns.question.subdomain                           [keyword]
+      ... and 5 more
+    docker.*
+      docker                                           [object]
+      docker.attrs                                     [object]
+      docker.container                                 [object]
+      docker.container.labels                          [object]
+    ecs.*
+      ecs                                              [object]
+      ecs.version                                      [keyword]
+    elasticsearch.*
+      elasticsearch                                    [object]
+      elasticsearch.audit                              [object]
+      elasticsearch.audit.action                       [keyword]
+      elasticsearch.audit.authentication               [object]
+      elasticsearch.audit.authentication.type          [keyword]
+      elasticsearch.audit.component                    [keyword]
+      elasticsearch.audit.event_type                   [keyword]
+      elasticsearch.audit.indices                      [keyword]
+      elasticsearch.audit.invalidate                   [object]
+      elasticsearch.audit.invalidate.apikeys           [object]
+      elasticsearch.audit.invalidate.apikeys.owned_by_authenticated_user [boolean]
+      elasticsearch.audit.layer                        [keyword]
+      elasticsearch.audit.message                      [text]
+      elasticsearch.audit.opaque_id                    [text]
+      elasticsearch.audit.origin                       [object]
+      ... and 82 more
+    elf.*
+      elf                                              [object]
+      elf.architecture                                 [keyword]
+      elf.byte_order                                   [keyword]
+      elf.cpu_type                                     [keyword]
+      elf.creation_date                                [date]
+      elf.exports                                      [flattened]
+      elf.header                                       [object]
+      elf.header.abi_version                           [keyword]
+      elf.header.class                                 [keyword]
+      elf.header.data                                  [keyword]
+      elf.header.entrypoint                            [long]
+      elf.header.object_version                        [keyword]
+      elf.header.os_abi                                [keyword]
+      elf.header.type                                  [keyword]
+      elf.header.version                               [keyword]
+      ... and 16 more
+    envoyproxy.*
+      envoyproxy                                       [object]
+      envoyproxy.authority                             [keyword]
+      envoyproxy.log_type                              [keyword]
+      envoyproxy.proxy_type                            [keyword]
+      envoyproxy.request_id                            [keyword]
+      envoyproxy.response_flags                        [keyword]
+      envoyproxy.upstream_service_time                 [long]
+    error.*
+      error                                            [object]
+      error.code                                       [keyword]
+      error.id                                         [keyword]
+      error.message                                    [match_only_text]
+      error.stack_trace                                [wildcard]
+      error.type                                       [keyword]
+    event.*
+      event                                            [object]
+      event.action                                     [keyword]
+      event.agent_id_status                            [keyword]
+      event.category                                   [keyword]
+      event.code                                       [keyword]
+      event.created                                    [date]
+      event.dataset                                    [keyword]
+      event.duration                                   [long]
+      event.end                                        [date]
+      event.hash                                       [keyword]
+      event.id                                         [keyword]
+      event.ingested                                   [date]
+      event.kind                                       [keyword]
+      event.module                                     [keyword]
+      event.original                                   [keyword]
+      ... and 12 more
+    faas.*
+      faas                                             [object]
+      faas.coldstart                                   [boolean]
+      faas.execution                                   [keyword]
+      faas.trigger                                     [nested]
+      faas.trigger.request_id                          [keyword]
+      faas.trigger.type                                [keyword]
+    fields                                             [object]
+    file.*
+      file                                             [object]
+      file.accessed                                    [date]
+      file.attributes                                  [keyword]
+      file.code_signature                              [object]
+      file.code_signature.digest_algorithm             [keyword]
+      file.code_signature.exists                       [boolean]
+      file.code_signature.signing_id                   [keyword]
+      file.code_signature.status                       [keyword]
+      file.code_signature.subject_name                 [keyword]
+      file.code_signature.team_id                      [keyword]
+      file.code_signature.timestamp                    [date]
+      file.code_signature.trusted                      [boolean]
+      file.code_signature.valid                        [boolean]
+      file.created                                     [date]
+      file.ctime                                       [date]
+      ... and 90 more
+    fileset.*
+      fileset                                          [object]
+      fileset.name                                     [keyword]
+    forcepoint.*
+      forcepoint                                       [object]
+      forcepoint.virus_id                              [keyword]
+    fortinet.*
+      fortinet                                         [object]
+      fortinet.file                                    [object]
+      fortinet.file.hash                               [object]
+      fortinet.file.hash.crc32                         [keyword]
+      fortinet.firewall                                [object]
+      fortinet.firewall.acct_stat                      [keyword]
+      fortinet.firewall.acktime                        [keyword]
+      fortinet.firewall.act                            [keyword]
+      fortinet.firewall.action                         [keyword]
+      fortinet.firewall.activity                       [keyword]
+      fortinet.firewall.addr                           [ip]
+      fortinet.firewall.addr_type                      [keyword]
+      fortinet.firewall.addrgrp                        [keyword]
+      fortinet.firewall.adgroup                        [keyword]
+      fortinet.firewall.admin                          [keyword]
+      ... and 421 more
+    full_log                                           [keyword]
+    gcp.*
+      gcp                                              [object]
+      gcp.audit                                        [object]
+      gcp.audit.authentication_info                    [object]
+      gcp.audit.authentication_info.authority_selector [keyword]
+      gcp.audit.authentication_info.principal_email    [keyword]
+      gcp.audit.method_name                            [keyword]
+      gcp.audit.num_response_items                     [long]
+      gcp.audit.request                                [object]
+      gcp.audit.request.filter                         [keyword]
+      gcp.audit.request.name                           [keyword]
+      gcp.audit.request.proto_name                     [keyword]
+      gcp.audit.request.resource_name                  [keyword]
+      gcp.audit.request_metadata                       [object]
+      gcp.audit.request_metadata.caller_ip             [ip]
+      gcp.audit.request_metadata.caller_supplied_user_agent [keyword]
+      ... and 50 more
+    geo.*
+      geo                                              [object]
+      geo.city_name                                    [keyword]
+      geo.continent_code                               [keyword]
+      geo.continent_name                               [keyword]
+      geo.country_iso_code                             [keyword]
+      geo.country_name                                 [keyword]
+      geo.location                                     [geo_point]
+      geo.name                                         [keyword]
+      geo.postal_code                                  [keyword]
+      geo.region_iso_code                              [keyword]
+      geo.region_name                                  [keyword]
+      geo.timezone                                     [keyword]
+    google_workspace.*
+      google_workspace                                 [object]
+      google_workspace.actor                           [object]
+      google_workspace.actor.key                       [keyword]
+      google_workspace.actor.type                      [keyword]
+      google_workspace.admin                           [object]
+      google_workspace.admin.alert                     [object]
+      google_workspace.admin.alert.name                [keyword]
+      google_workspace.admin.api                       [object]
+      google_workspace.admin.api.client                [object]
+      google_workspace.admin.api.client.name           [keyword]
+      google_workspace.admin.api.scopes                [keyword]
+      google_workspace.admin.application               [object]
+      google_workspace.admin.application.asp_id        [keyword]
+      google_workspace.admin.application.edition       [keyword]
+      google_workspace.admin.application.enabled       [keyword]
+      ... and 173 more
+    group.*
+      group                                            [object]
+      group.domain                                     [keyword]
+      group.id                                         [keyword]
+      group.name                                       [keyword]
+    haproxy.*
+      haproxy                                          [object]
+      haproxy.backend_name                             [keyword]
+      haproxy.backend_queue                            [long]
+      haproxy.bind_name                                [keyword]
+      haproxy.bytes_read                               [long]
+      haproxy.connection_wait_time_ms                  [long]
+      haproxy.connections                              [object]
+      haproxy.connections.active                       [long]
+      haproxy.connections.backend                      [long]
+      haproxy.connections.frontend                     [long]
+      haproxy.connections.retries                      [long]
+      haproxy.connections.server                       [long]
+      haproxy.error_message                            [text]
+      haproxy.frontend_name                            [keyword]
+      haproxy.http                                     [object]
+      ... and 19 more
+    hash.*
+      hash                                             [object]
+      hash.md5                                         [keyword]
+      hash.sha1                                        [keyword]
+      hash.sha256                                      [keyword]
+      hash.sha512                                      [keyword]
+      hash.ssdeep                                      [keyword]
+    host.*
+      host                                             [object]
+      host.architecture                                [keyword]
+      host.containerized                               [boolean]
+      host.cpu                                         [object]
+      host.cpu.usage                                   [scaled_float]
+      host.disk                                        [object]
+      host.disk.read                                   [object]
+      host.disk.read.bytes                             [long]
+      host.disk.write                                  [object]
+      host.disk.write.bytes                            [long]
+      host.domain                                      [keyword]
+      host.geo                                         [object]
+      host.geo.city_name                               [keyword]
+      host.geo.continent_code                          [keyword]
+      host.geo.continent_name                          [keyword]
+      ... and 32 more
+    host_role                                          [keyword]
+    http.*
+      http                                             [object]
+      http.request                                     [object]
+      http.request.body                                [object]
+      http.request.body.bytes                          [long]
+      http.request.body.content                        [wildcard]
+      http.request.bytes                               [long]
+      http.request.id                                  [keyword]
+      http.request.method                              [keyword]
+      http.request.mime_type                           [keyword]
+      http.request.referrer                            [keyword]
+      http.response                                    [object]
+      http.response.body                               [object]
+      http.response.body.bytes                         [long]
+      http.response.body.content                       [wildcard]
+      http.response.bytes                              [long]
+      ... and 3 more
+    ibmmq.*
+      ibmmq                                            [object]
+      ibmmq.errorlog                                   [object]
+      ibmmq.errorlog.action                            [keyword]
+      ibmmq.errorlog.arithinsert                       [keyword]
+      ibmmq.errorlog.code                              [keyword]
+      ibmmq.errorlog.commentinsert                     [keyword]
+      ibmmq.errorlog.errordescription                  [text]
+      ibmmq.errorlog.explanation                       [keyword]
+      ibmmq.errorlog.installation                      [keyword]
+      ibmmq.errorlog.qmgr                              [keyword]
+    icinga.*
+      icinga                                           [object]
+      icinga.debug                                     [object]
+      icinga.debug.facility                            [keyword]
+      icinga.main                                      [object]
+      icinga.main.facility                             [keyword]
+      icinga.startup                                   [object]
+      icinga.startup.facility                          [keyword]
+    icmp.*
+      icmp                                             [object]
+      icmp.code                                        [keyword]
+      icmp.type                                        [keyword]
+    id                                                 [keyword]
+    igmp.*
+      igmp                                             [object]
+      igmp.type                                        [keyword]
+    iis.*
+      iis                                              [object]
+      iis.access                                       [object]
+      iis.access.cookie                                [keyword]
+      iis.access.server_name                           [keyword]
+      iis.access.site_name                             [keyword]
+      iis.access.sub_status                            [long]
+      iis.access.win32_status                          [long]
+      iis.error                                        [object]
+      iis.error.queue_name                             [keyword]
+      iis.error.reason_phrase                          [keyword]
+    input.*
+      input                                            [object]
+      input.type                                       [keyword]
+    interface.*
+      interface                                        [object]
+      interface.alias                                  [keyword]
+      interface.id                                     [keyword]
+      interface.name                                   [keyword]
+    iptables.*
+      iptables                                         [object]
+      iptables.ether_type                              [long]
+      iptables.flow_label                              [long]
+      iptables.fragment_flags                          [keyword]
+      iptables.fragment_offset                         [long]
+      iptables.icmp                                    [object]
+      iptables.icmp.code                               [long]
+      iptables.icmp.id                                 [long]
+      iptables.icmp.parameter                          [long]
+      iptables.icmp.redirect                           [ip]
+      iptables.icmp.seq                                [long]
+      iptables.icmp.type                               [long]
+      iptables.id                                      [long]
+      iptables.incomplete_bytes                        [long]
+      iptables.input_device                            [keyword]
+      ... and 18 more
+    jolokia.*
+      jolokia                                          [object]
+      jolokia.agent                                    [object]
+      jolokia.agent.id                                 [keyword]
+      jolokia.agent.version                            [keyword]
+      jolokia.secured                                  [boolean]
+      jolokia.server                                   [object]
+      jolokia.server.product                           [keyword]
+      jolokia.server.vendor                            [keyword]
+      jolokia.server.version                           [keyword]
+      jolokia.url                                      [keyword]
+    juniper.*
+      juniper                                          [object]
+      juniper.srx                                      [object]
+      juniper.srx.action                               [keyword]
+      juniper.srx.action_detail                        [keyword]
+      juniper.srx.alert                                [keyword]
+      juniper.srx.apbr_rule_type                       [keyword]
+      juniper.srx.application                          [keyword]
+      juniper.srx.application_category                 [keyword]
+      juniper.srx.application_characteristics          [keyword]
+      juniper.srx.application_name                     [keyword]
+      juniper.srx.application_sub_category             [keyword]
+      juniper.srx.attack_name                          [keyword]
+      juniper.srx.category                             [keyword]
+      juniper.srx.client_ip                            [ip]
+      juniper.srx.connection_hit_rate                  [long]
+      ... and 83 more
+    kafka.*
+      kafka                                            [object]
+      kafka.block_timestamp                            [date]
+      kafka.key                                        [keyword]
+      kafka.log                                        [object]
+      kafka.log.class                                  [keyword]
+      kafka.log.component                              [keyword]
+      kafka.log.thread                                 [keyword]
+      kafka.log.trace                                  [object]
+      kafka.log.trace.class                            [keyword]
+      kafka.log.trace.message                          [text]
+      kafka.offset                                     [long]
+      kafka.partition                                  [long]
+      kafka.topic                                      [keyword]
+    kibana.*
+      kibana                                           [object]
+      kibana.add_to_spaces                             [keyword]
+      kibana.authentication_provider                   [keyword]
+      kibana.authentication_realm                      [keyword]
+      kibana.authentication_type                       [keyword]
+      kibana.delete_from_spaces                        [keyword]
+      kibana.log                                       [object]
+      kibana.log.meta                                  [object]
+      kibana.log.meta.req                              [object]
+      kibana.log.meta.req.headers                      [flattened]
+      kibana.log.meta.res                              [object]
+      kibana.log.meta.res.headers                      [flattened]
+      kibana.log.state                                 [keyword]
+      kibana.log.tags                                  [keyword]
+      kibana.lookup_realm                              [keyword]
+      ... and 5 more
+    kubernetes.*
+      kubernetes                                       [object]
+      kubernetes.annotations                           [object]
+      kubernetes.annotations.*                         [object]
+      kubernetes.container                             [object]
+      kubernetes.container.name                        [keyword]
+      kubernetes.deployment                            [object]
+      kubernetes.deployment.name                       [keyword]
+      kubernetes.labels                                [object]
+      kubernetes.labels.*                              [object]
+      kubernetes.namespace                             [keyword]
+      kubernetes.node                                  [object]
+      kubernetes.node.hostname                         [keyword]
+      kubernetes.node.name                             [keyword]
+      kubernetes.pod                                   [object]
+      kubernetes.pod.ip                                [ip]
+      ... and 8 more
+    labels                                             [object]
+    location                                           [keyword]
+    log.*
+      log                                              [object]
+      log.file                                         [object]
+      log.file.device_id                               [keyword]
+      log.file.inode                                   [keyword]
+      log.file.path                                    [keyword]
+      log.flags                                        [keyword]
+      log.level                                        [keyword]
+      log.logger                                       [keyword]
+      log.offset                                       [long]
+      log.origin                                       [object]
+      log.origin.file                                  [object]
+      log.origin.file.line                             [long]
+      log.origin.file.name                             [keyword]
+      log.origin.function                              [keyword]
+      log.source                                       [object]
+      ... and 9 more
+    log_source                                         [keyword]
+    logstash.*
+      logstash                                         [object]
+      logstash.log                                     [object]
+      logstash.log.log_event                           [object]
+      logstash.log.log_event.action                    [keyword]
+      logstash.log.module                              [keyword]
+      logstash.log.pipeline_id                         [keyword]
+      logstash.log.thread                              [keyword]
+      logstash.slowlog                                 [object]
+      logstash.slowlog.event                           [keyword]
+      logstash.slowlog.module                          [keyword]
+      logstash.slowlog.plugin_name                     [keyword]
+      logstash.slowlog.plugin_params                   [keyword]
+      logstash.slowlog.plugin_params_object            [object]
+      logstash.slowlog.plugin_type                     [keyword]
+      logstash.slowlog.thread                          [keyword]
+      ... and 1 more
+    lumberjack                                         [flattened]
+    manager.*
+      manager                                          [object]
+      manager.name                                     [keyword]
+    message                                            [match_only_text]
+    metadata                                           [flattened]
+    microsoft.*
+      microsoft                                        [object]
+      microsoft.defender_atp                           [object]
+      microsoft.defender_atp.assignedTo                [keyword]
+      microsoft.defender_atp.classification            [keyword]
+      microsoft.defender_atp.determination             [keyword]
+      microsoft.defender_atp.evidence                  [object]
+      microsoft.defender_atp.evidence.aadUserId        [keyword]
+      microsoft.defender_atp.evidence.accountName      [keyword]
+      microsoft.defender_atp.evidence.domainName       [keyword]
+      microsoft.defender_atp.evidence.entityType       [keyword]
+      microsoft.defender_atp.evidence.ipAddress        [ip]
+      microsoft.defender_atp.evidence.userPrincipalName [keyword]
+      microsoft.defender_atp.incidentId                [keyword]
+      microsoft.defender_atp.investigationId           [keyword]
+      microsoft.defender_atp.investigationState        [keyword]
+      ... and 50 more
+    misp.*
+      misp                                             [object]
+      misp.attack_pattern                              [object]
+      misp.attack_pattern.description                  [text]
+      misp.attack_pattern.id                           [keyword]
+      misp.attack_pattern.kill_chain_phases            [keyword]
+      misp.attack_pattern.name                         [keyword]
+      misp.campaign                                    [object]
+      misp.campaign.aliases                            [text]
+      misp.campaign.description                        [text]
+      misp.campaign.first_seen                         [date]
+      misp.campaign.id                                 [keyword]
+      misp.campaign.last_seen                          [date]
+      misp.campaign.name                               [keyword]
+      misp.campaign.objective                          [keyword]
+      misp.course_of_action                            [object]
+      ... and 91 more
+    mongodb.*
+      mongodb                                          [object]
+      mongodb.log                                      [object]
+      mongodb.log.component                            [keyword]
+      mongodb.log.context                              [keyword]
+      mongodb.log.id                                   [long]
+    mssql.*
+      mssql                                            [object]
+      mssql.log                                        [object]
+      mssql.log.origin                                 [keyword]
+    mysql.*
+      mysql                                            [object]
+      mysql.slowlog                                    [object]
+      mysql.slowlog.bytes_received                     [long]
+      mysql.slowlog.bytes_sent                         [long]
+      mysql.slowlog.current_user                       [keyword]
+      mysql.slowlog.filesort                           [boolean]
+      mysql.slowlog.filesort_on_disk                   [boolean]
+      mysql.slowlog.full_join                          [boolean]
+      mysql.slowlog.full_scan                          [boolean]
+      mysql.slowlog.innodb                             [object]
+      mysql.slowlog.innodb.io_r_bytes                  [long]
+      mysql.slowlog.innodb.io_r_ops                    [long]
+      mysql.slowlog.innodb.io_r_wait                   [object]
+      mysql.slowlog.innodb.io_r_wait.sec               [long]
+      mysql.slowlog.innodb.pages_distinct              [long]
+      ... and 36 more
+    mysqlenterprise.*
+      mysqlenterprise                                  [object]
+      mysqlenterprise.audit                            [object]
+      mysqlenterprise.audit.account                    [object]
+      mysqlenterprise.audit.account.host               [keyword]
+      mysqlenterprise.audit.account.user               [keyword]
+      mysqlenterprise.audit.class                      [keyword]
+      mysqlenterprise.audit.connection_data            [object]
+      mysqlenterprise.audit.connection_data.connection_attributes [flattened]
+      mysqlenterprise.audit.connection_data.connection_type [keyword]
+      mysqlenterprise.audit.connection_data.db         [keyword]
+      mysqlenterprise.audit.connection_data.status     [long]
+      mysqlenterprise.audit.connection_id              [keyword]
+      mysqlenterprise.audit.general_data               [object]
+      mysqlenterprise.audit.general_data.command       [keyword]
+      mysqlenterprise.audit.general_data.query         [keyword]
+      ... and 17 more
+    nats.*
+      nats                                             [object]
+      nats.log                                         [object]
+      nats.log.client                                  [object]
+      nats.log.client.id                               [long]
+      nats.log.msg                                     [object]
+      nats.log.msg.bytes                               [long]
+      nats.log.msg.error                               [object]
+      nats.log.msg.error.message                       [text]
+      nats.log.msg.max_messages                        [long]
+      nats.log.msg.queue_group                         [text]
+      nats.log.msg.reply_to                            [keyword]
+      nats.log.msg.sid                                 [long]
+      nats.log.msg.subject                             [keyword]
+      nats.log.msg.type                                [keyword]
+    netflow.*
+      netflow                                          [object]
+      netflow.absolute_error                           [double]
+      netflow.address_pool_high_threshold              [long]
+      netflow.address_pool_low_threshold               [long]
+      netflow.address_port_mapping_high_threshold      [long]
+      netflow.address_port_mapping_low_threshold       [long]
+      netflow.address_port_mapping_per_user_high_threshold [long]
+      netflow.afc_protocol                             [long]
+      netflow.afc_protocol_name                        [keyword]
+      netflow.anonymization_flags                      [long]
+      netflow.anonymization_technique                  [long]
+      netflow.application_business-relevance           [long]
+      netflow.application_category_name                [keyword]
+      netflow.application_description                  [keyword]
+      netflow.application_group_name                   [keyword]
+      ... and 1309 more
+    network.*
+      network                                          [object]
+      network.application                              [keyword]
+      network.bytes                                    [long]
+      network.community_id                             [keyword]
+      network.direction                                [keyword]
+      network.forwarded_ip                             [ip]
+      network.iana_number                              [keyword]
+      network.inner                                    [object]
+      network.inner.vlan                               [object]
+      network.inner.vlan.id                            [keyword]
+      network.inner.vlan.name                          [keyword]
+      network.interface                                [object]
+      network.interface.name                           [keyword]
+      network.name                                     [keyword]
+      network.packets                                  [long]
+      ... and 6 more
+    nginx.*
+      nginx                                            [object]
+      nginx.error                                      [object]
+      nginx.error.connection_id                        [long]
+      nginx.ingress_controller                         [object]
+      nginx.ingress_controller.http                    [object]
+      nginx.ingress_controller.http.request            [object]
+      nginx.ingress_controller.http.request.id         [keyword]
+      nginx.ingress_controller.http.request.length     [long]
+      nginx.ingress_controller.http.request.time       [double]
+      nginx.ingress_controller.upstream                [object]
+      nginx.ingress_controller.upstream.alternative_name [keyword]
+      nginx.ingress_controller.upstream.ip             [ip]
+      nginx.ingress_controller.upstream.name           [keyword]
+      nginx.ingress_controller.upstream.port           [long]
+      nginx.ingress_controller.upstream.response       [object]
+      ... and 7 more
+    o365.*
+      o365                                             [object]
+      o365.audit                                       [object]
+      o365.audit.AADGroupId                            [keyword]
+      o365.audit.ActorContextId                        [keyword]
+      o365.audit.ActorIpAddress                        [keyword]
+      o365.audit.ActorUserId                           [keyword]
+      o365.audit.ActorYammerUserId                     [keyword]
+      o365.audit.AlertEntityId                         [keyword]
+      o365.audit.AlertId                               [keyword]
+      o365.audit.AlertType                             [keyword]
+      o365.audit.AppId                                 [keyword]
+      o365.audit.ApplicationDisplayName                [keyword]
+      o365.audit.ApplicationId                         [keyword]
+      o365.audit.AzureActiveDirectoryEventType         [keyword]
+      o365.audit.Category                              [keyword]
+      ... and 96 more
+    object.*
+      object                                           [object]
+      object.key                                       [keyword]
+    observer.*
+      observer                                         [object]
+      observer.egress                                  [object]
+      observer.egress.interface                        [object]
+      observer.egress.interface.alias                  [keyword]
+      observer.egress.interface.id                     [keyword]
+      observer.egress.interface.name                   [keyword]
+      observer.egress.vlan                             [object]
+      observer.egress.vlan.id                          [keyword]
+      observer.egress.vlan.name                        [keyword]
+      observer.egress.zone                             [keyword]
+      observer.geo                                     [object]
+      observer.geo.city_name                           [keyword]
+      observer.geo.continent_code                      [keyword]
+      observer.geo.continent_name                      [keyword]
+      observer.geo.country_iso_code                    [keyword]
+      ... and 33 more
+    okta.*
+      okta                                             [object]
+      okta.actor                                       [object]
+      okta.actor.alternate_id                          [keyword]
+      okta.actor.display_name                          [keyword]
+      okta.actor.id                                    [keyword]
+      okta.actor.type                                  [keyword]
+      okta.authentication_context                      [object]
+      okta.authentication_context.authentication_provider [keyword]
+      okta.authentication_context.authentication_step  [long]
+      okta.authentication_context.credential_provider  [keyword]
+      okta.authentication_context.credential_type      [keyword]
+      okta.authentication_context.external_session_id  [keyword]
+      okta.authentication_context.interface            [keyword]
+      okta.client                                      [object]
+      okta.client.device                               [keyword]
+      ... and 54 more
+    oracle.*
+      oracle                                           [object]
+      oracle.database_audit                            [object]
+      oracle.database_audit.action                     [keyword]
+      oracle.database_audit.action_number              [keyword]
+      oracle.database_audit.client                     [object]
+      oracle.database_audit.client.address             [keyword]
+      oracle.database_audit.client.terminal            [keyword]
+      oracle.database_audit.client.user                [keyword]
+      oracle.database_audit.comment_text               [text]
+      oracle.database_audit.database                   [object]
+      oracle.database_audit.database.host              [keyword]
+      oracle.database_audit.database.id                [keyword]
+      oracle.database_audit.database.user              [keyword]
+      oracle.database_audit.entry                      [object]
+      oracle.database_audit.entry.id                   [keyword]
+      ... and 16 more
+    orchestrator.*
+      orchestrator                                     [object]
+      orchestrator.api_version                         [keyword]
+      orchestrator.cluster                             [object]
+      orchestrator.cluster.name                        [keyword]
+      orchestrator.cluster.url                         [keyword]
+      orchestrator.cluster.version                     [keyword]
+      orchestrator.namespace                           [keyword]
+      orchestrator.organization                        [keyword]
+      orchestrator.resource                            [object]
+      orchestrator.resource.name                       [keyword]
+      orchestrator.resource.type                       [keyword]
+      orchestrator.type                                [keyword]
+    organization.*
+      organization                                     [object]
+      organization.id                                  [keyword]
+      organization.name                                [keyword]
+    os.*
+      os                                               [object]
+      os.family                                        [keyword]
+      os.full                                          [keyword]
+      os.kernel                                        [keyword]
+      os.name                                          [keyword]
+      os.platform                                      [keyword]
+      os.type                                          [keyword]
+      os.version                                       [keyword]
+    osquery.*
+      osquery                                          [object]
+      osquery.result                                   [object]
+      osquery.result.action                            [keyword]
+      osquery.result.calendar_time                     [keyword]
+      osquery.result.host_identifier                   [keyword]
+      osquery.result.name                              [keyword]
+      osquery.result.unix_time                         [long]
+    package.*
+      package                                          [object]
+      package.architecture                             [keyword]
+      package.build_version                            [keyword]
+      package.checksum                                 [keyword]
+      package.description                              [keyword]
+      package.install_scope                            [keyword]
+      package.installed                                [date]
+      package.license                                  [keyword]
+      package.name                                     [keyword]
+      package.path                                     [keyword]
+      package.reference                                [keyword]
+      package.size                                     [long]
+      package.type                                     [keyword]
+      package.version                                  [keyword]
+    panw.*
+      panw                                             [object]
+      panw.panos                                       [object]
+      panw.panos.action                                [keyword]
+      panw.panos.actionflags                           [keyword]
+      panw.panos.attempted_gateways                    [keyword]
+      panw.panos.auth_method                           [keyword]
+      panw.panos.client_os                             [keyword]
+      panw.panos.client_os_ver                         [keyword]
+      panw.panos.client_ver                            [keyword]
+      panw.panos.connect_method                        [keyword]
+      panw.panos.datasource                            [keyword]
+      panw.panos.datasourcename                        [keyword]
+      panw.panos.datasourcetype                        [keyword]
+      panw.panos.description                           [keyword]
+      panw.panos.destination                           [object]
+      ... and 54 more
+    pe.*
+      pe                                               [object]
+      pe.architecture                                  [keyword]
+      pe.company                                       [keyword]
+      pe.description                                   [keyword]
+      pe.file_version                                  [keyword]
+      pe.imphash                                       [keyword]
+      pe.original_file_name                            [keyword]
+      pe.product                                       [keyword]
+    pensando.*
+      pensando                                         [object]
+      pensando.dfw                                     [object]
+      pensando.dfw.action                              [keyword]
+      pensando.dfw.app_id                              [long]
+      pensando.dfw.destination_address                 [keyword]
+      pensando.dfw.destination_port                    [long]
+      pensando.dfw.direction                           [keyword]
+      pensando.dfw.protocol                            [keyword]
+      pensando.dfw.rule_id                             [keyword]
+      pensando.dfw.session_id                          [long]
+      pensando.dfw.session_state                       [keyword]
+      pensando.dfw.source_address                      [keyword]
+      pensando.dfw.source_port                         [long]
+      pensando.dfw.timestamp                           [date]
+    postgresql.*
+      postgresql                                       [object]
+      postgresql.log                                   [object]
+      postgresql.log.application_name                  [keyword]
+      postgresql.log.backend_type                      [keyword]
+      postgresql.log.client_addr                       [keyword]
+      postgresql.log.client_port                       [keyword]
+      postgresql.log.command_tag                       [keyword]
+      postgresql.log.context                           [keyword]
+      postgresql.log.core_id                           [alias]
+      postgresql.log.database                          [keyword]
+      postgresql.log.detail                            [keyword]
+      postgresql.log.error                             [object]
+      postgresql.log.error.code                        [alias]
+      postgresql.log.hint                              [keyword]
+      postgresql.log.internal_query                    [keyword]
+      ... and 13 more
+    predecoder.*
+      predecoder                                       [object]
+      predecoder.hostname                              [keyword]
+      predecoder.program_name                          [keyword]
+      predecoder.timestamp                             [keyword]
+    previous_log                                       [keyword]
+    previous_output                                    [keyword]
+    process.*
+      process                                          [object]
+      process.args                                     [keyword]
+      process.args_count                               [long]
+      process.code_signature                           [object]
+      process.code_signature.digest_algorithm          [keyword]
+      process.code_signature.exists                    [boolean]
+      process.code_signature.signing_id                [keyword]
+      process.code_signature.status                    [keyword]
+      process.code_signature.subject_name              [keyword]
+      process.code_signature.team_id                   [keyword]
+      process.code_signature.timestamp                 [date]
+      process.code_signature.trusted                   [boolean]
+      process.code_signature.valid                     [boolean]
+      process.command_line                             [wildcard]
+      process.elf                                      [object]
+      ... and 135 more
+    rabbitmq.*
+      rabbitmq                                         [object]
+      rabbitmq.log                                     [object]
+      rabbitmq.log.pid                                 [keyword]
+    redis.*
+      redis                                            [object]
+      redis.log                                        [object]
+      redis.log.role                                   [keyword]
+      redis.slowlog                                    [object]
+      redis.slowlog.args                               [keyword]
+      redis.slowlog.cmd                                [keyword]
+      redis.slowlog.duration                           [object]
+      redis.slowlog.duration.us                        [long]
+      redis.slowlog.id                                 [long]
+      redis.slowlog.key                                [keyword]
+    registry.*
+      registry                                         [object]
+      registry.data                                    [object]
+      registry.data.bytes                              [keyword]
+      registry.data.strings                            [wildcard]
+      registry.data.type                               [keyword]
+      registry.hive                                    [keyword]
+      registry.key                                     [keyword]
+      registry.path                                    [keyword]
+      registry.value                                   [keyword]
+    related.*
+      related                                          [object]
+      related.hash                                     [keyword]
+      related.hosts                                    [keyword]
+      related.ip                                       [ip]
+      related.user                                     [keyword]
+    rsa.*
+      rsa                                              [object]
+      rsa.counters                                     [object]
+      rsa.counters.dclass_c1                           [long]
+      rsa.counters.dclass_c1_str                       [keyword]
+      rsa.counters.dclass_c2                           [long]
+      rsa.counters.dclass_c2_str                       [keyword]
+      rsa.counters.dclass_c3                           [long]
+      rsa.counters.dclass_c3_str                       [keyword]
+      rsa.counters.dclass_r1                           [keyword]
+      rsa.counters.dclass_r1_str                       [keyword]
+      rsa.counters.dclass_r2                           [keyword]
+      rsa.counters.dclass_r2_str                       [keyword]
+      rsa.counters.dclass_r3                           [keyword]
+      rsa.counters.dclass_r3_str                       [keyword]
+      rsa.counters.event_counter                       [long]
+      ... and 676 more
+    rule.*
+      rule                                             [object]
+      rule.author                                      [keyword]
+      rule.category                                    [keyword]
+      rule.cis                                         [keyword]
+      rule.cis_csc                                     [keyword]
+      rule.cis_csc_v7                                  [keyword]
+      rule.cis_csc_v8                                  [keyword]
+      rule.cis_level                                   [keyword]
+      rule.description                                 [keyword]
+      rule.firedtimes                                  [long]
+      rule.frequency                                   [long]
+      rule.gdpr                                        [keyword]
+      rule.gdpr_IV                                     [keyword]
+      rule.gpg13                                       [keyword]
+      rule.gpg_13                                      [keyword]
+      ... and 24 more
+    salesforce.*
+      salesforce                                       [object]
+      salesforce.access_mode                           [keyword]
+      salesforce.apex                                  [object]
+      salesforce.apex.action                           [keyword]
+      salesforce.apex.callout_time                     [keyword]
+      salesforce.apex.class_name                       [keyword]
+      salesforce.apex.client_name                      [keyword]
+      salesforce.apex.cpu_time                         [keyword]
+      salesforce.apex.db_blocks                        [keyword]
+      salesforce.apex.db_cpu_time                      [keyword]
+      salesforce.apex.db_total_time                    [keyword]
+      salesforce.apex.entity                           [keyword]
+      salesforce.apex.entity_name                      [keyword]
+      salesforce.apex.entry_point                      [keyword]
+      salesforce.apex.event_type                       [keyword]
+      ... and 93 more
+    santa.*
+      santa                                            [object]
+      santa.action                                     [keyword]
+      santa.certificate                                [object]
+      santa.certificate.common_name                    [keyword]
+      santa.certificate.sha256                         [keyword]
+      santa.decision                                   [keyword]
+      santa.disk                                       [object]
+      santa.disk.bsdname                               [keyword]
+      santa.disk.bus                                   [keyword]
+      santa.disk.fs                                    [keyword]
+      santa.disk.model                                 [keyword]
+      santa.disk.mount                                 [keyword]
+      santa.disk.serial                                [keyword]
+      santa.disk.volume                                [keyword]
+      santa.mode                                       [keyword]
+      ... and 1 more
+    server.*
+      server                                           [object]
+      server.address                                   [keyword]
+      server.as                                        [object]
+      server.as.number                                 [long]
+      server.as.organization                           [object]
+      server.as.organization.name                      [keyword]
+      server.bytes                                     [long]
+      server.domain                                    [keyword]
+      server.geo                                       [object]
+      server.geo.city_name                             [keyword]
+      server.geo.continent_code                        [keyword]
+      server.geo.continent_name                        [keyword]
+      server.geo.country_iso_code                      [keyword]
+      server.geo.country_name                          [keyword]
+      server.geo.location                              [geo_point]
+      ... and 27 more
+    service.*
+      service                                          [object]
+      service.address                                  [keyword]
+      service.environment                              [keyword]
+      service.ephemeral_id                             [keyword]
+      service.id                                       [keyword]
+      service.name                                     [keyword]
+      service.node                                     [object]
+      service.node.name                                [keyword]
+      service.node.roles                               [keyword]
+      service.origin                                   [object]
+      service.origin.address                           [keyword]
+      service.origin.environment                       [keyword]
+      service.origin.ephemeral_id                      [keyword]
+      service.origin.id                                [keyword]
+      service.origin.name                              [keyword]
+      ... and 19 more
+    snyk.*
+      snyk                                             [object]
+      snyk.audit                                       [object]
+      snyk.audit.content                               [flattened]
+      snyk.audit.org_id                                [keyword]
+      snyk.audit.project_id                            [keyword]
+      snyk.projects                                    [flattened]
+      snyk.related                                     [object]
+      snyk.related.projects                            [keyword]
+      snyk.vulnerabilities                             [object]
+      snyk.vulnerabilities.credit                      [keyword]
+      snyk.vulnerabilities.cvss3                       [keyword]
+      snyk.vulnerabilities.disclosure_time             [date]
+      snyk.vulnerabilities.exploit_maturity            [keyword]
+      snyk.vulnerabilities.id                          [keyword]
+      snyk.vulnerabilities.identifiers                 [object]
+      ... and 23 more
+    sophos.*
+      sophos                                           [object]
+      sophos.xg                                        [object]
+      sophos.xg.action                                 [keyword]
+      sophos.xg.activityname                           [keyword]
+      sophos.xg.ap                                     [keyword]
+      sophos.xg.app_category                           [keyword]
+      sophos.xg.app_filter_policy_id                   [keyword]
+      sophos.xg.app_is_cloud                           [keyword]
+      sophos.xg.app_name                               [keyword]
+      sophos.xg.app_resolved_by                        [keyword]
+      sophos.xg.app_risk                               [keyword]
+      sophos.xg.app_technology                         [keyword]
+      sophos.xg.appfilter_policy_id                    [long]
+      sophos.xg.application                            [keyword]
+      sophos.xg.application_category                   [keyword]
+      ... and 192 more
+    source.*
+      source                                           [object]
+      source.address                                   [keyword]
+      source.as                                        [object]
+      source.as.number                                 [long]
+      source.as.organization                           [object]
+      source.as.organization.name                      [keyword]
+      source.bytes                                     [long]
+      source.domain                                    [keyword]
+      source.geo                                       [object]
+      source.geo.city_name                             [keyword]
+      source.geo.continent_code                        [keyword]
+      source.geo.continent_name                        [keyword]
+      source.geo.country_iso_code                      [keyword]
+      source.geo.country_name                          [keyword]
+      source.geo.location                              [geo_point]
+      ... and 29 more
+    span.*
+      span                                             [object]
+      span.id                                          [keyword]
+    stream                                             [keyword]
+    suricata.*
+      suricata                                         [object]
+      suricata.eve                                     [object]
+      suricata.eve.alert                               [object]
+      suricata.eve.alert.affected_product              [keyword]
+      suricata.eve.alert.attack_target                 [keyword]
+      suricata.eve.alert.capec_id                      [keyword]
+      suricata.eve.alert.category                      [keyword]
+      suricata.eve.alert.classtype                     [keyword]
+      suricata.eve.alert.created_at                    [date]
+      suricata.eve.alert.cve                           [keyword]
+      suricata.eve.alert.cvss_v2_base                  [keyword]
+      suricata.eve.alert.cvss_v2_temporal              [keyword]
+      suricata.eve.alert.cvss_v3_base                  [keyword]
+      suricata.eve.alert.cvss_v3_temporal              [keyword]
+      suricata.eve.alert.cwe_id                        [keyword]
+      ... and 230 more
+    syscheck.*
+      syscheck                                         [object]
+      syscheck.changed_attributes                      [keyword]
+      syscheck.diff                                    [keyword]
+      syscheck.event                                   [keyword]
+      syscheck.gid_after                               [keyword]
+      syscheck.gname_after                             [keyword]
+      syscheck.inode_after                             [long]
+      syscheck.inode_before                            [long]
+      syscheck.md5_after                               [keyword]
+      syscheck.md5_before                              [keyword]
+      syscheck.mode                                    [keyword]
+      syscheck.mtime_after                             [keyword]
+      syscheck.mtime_before                            [keyword]
+      syscheck.path                                    [keyword]
+      syscheck.perm_after                              [keyword]
+      ... and 9 more
+    syslog.*
+      syslog                                           [object]
+      syslog.facility                                  [long]
+      syslog.facility_label                            [keyword]
+      syslog.priority                                  [long]
+      syslog.severity_label                            [keyword]
+    system.*
+      system                                           [object]
+      system.auth                                      [object]
+      system.auth.ssh                                  [object]
+      system.auth.ssh.dropped_ip                       [ip]
+      system.auth.ssh.event                            [keyword]
+      system.auth.ssh.method                           [keyword]
+      system.auth.ssh.signature                        [keyword]
+      system.auth.sudo                                 [object]
+      system.auth.sudo.command                         [keyword]
+      system.auth.sudo.error                           [keyword]
+      system.auth.sudo.pwd                             [keyword]
+      system.auth.sudo.tty                             [keyword]
+      system.auth.sudo.user                            [keyword]
+      system.auth.useradd                              [object]
+      system.auth.useradd.home                         [keyword]
+      ... and 1 more
+    tags                                               [keyword]
+    threat.*
+      threat                                           [object]
+      threat.enrichments                               [nested]
+      threat.enrichments.indicator                     [object]
+      threat.enrichments.indicator.as                  [object]
+      threat.enrichments.indicator.as.number           [long]
+      threat.enrichments.indicator.as.organization     [object]
+      threat.enrichments.indicator.as.organization.name [keyword]
+      threat.enrichments.indicator.confidence          [keyword]
+      threat.enrichments.indicator.description         [keyword]
+      threat.enrichments.indicator.email               [object]
+      threat.enrichments.indicator.email.address       [keyword]
+      threat.enrichments.indicator.file                [object]
+      threat.enrichments.indicator.file.accessed       [date]
+      threat.enrichments.indicator.file.attributes     [keyword]
+      threat.enrichments.indicator.file.code_signature [object]
+      ... and 363 more
+    timeseries.*
+      timeseries                                       [object]
+      timeseries.instance                              [keyword]
+    timestamp                                          [keyword]
+    tls.*
+      tls                                              [object]
+      tls.cipher                                       [keyword]
+      tls.client                                       [object]
+      tls.client.certificate                           [keyword]
+      tls.client.certificate_chain                     [keyword]
+      tls.client.hash                                  [object]
+      tls.client.hash.md5                              [keyword]
+      tls.client.hash.sha1                             [keyword]
+      tls.client.hash.sha256                           [keyword]
+      tls.client.issuer                                [keyword]
+      tls.client.ja3                                   [keyword]
+      tls.client.not_after                             [date]
+      tls.client.not_before                            [date]
+      tls.client.server_name                           [keyword]
+      tls.client.subject                               [keyword]
+      ... and 73 more
+    trace.*
+      trace                                            [object]
+      trace.id                                         [keyword]
+    traefik.*
+      traefik                                          [object]
+      traefik.access                                   [object]
+      traefik.access.backend_url                       [keyword]
+      traefik.access.frontend_name                     [keyword]
+      traefik.access.geoip                             [object]
+      traefik.access.geoip.city_name                   [alias]
+      traefik.access.geoip.continent_name              [alias]
+      traefik.access.geoip.country_iso_code            [alias]
+      traefik.access.geoip.location                    [alias]
+      traefik.access.geoip.region_iso_code             [alias]
+      traefik.access.geoip.region_name                 [alias]
+      traefik.access.request_count                     [long]
+      traefik.access.user_agent                        [object]
+      traefik.access.user_agent.name                   [alias]
+      traefik.access.user_agent.original               [alias]
+      ... and 3 more
+    transaction.*
+      transaction                                      [object]
+      transaction.id                                   [keyword]
+    url.*
+      url                                              [object]
+      url.domain                                       [keyword]
+      url.extension                                    [keyword]
+      url.fragment                                     [keyword]
+      url.full                                         [wildcard]
+      url.original                                     [wildcard]
+      url.password                                     [keyword]
+      url.path                                         [wildcard]
+      url.port                                         [long]
+      url.query                                        [keyword]
+      url.registered_domain                            [keyword]
+      url.scheme                                       [keyword]
+      url.subdomain                                    [keyword]
+      url.top_level_domain                             [keyword]
+      url.username                                     [keyword]
+    user.*
+      user                                             [object]
+      user.audit                                       [object]
+      user.audit.group                                 [object]
+      user.audit.group.id                              [keyword]
+      user.audit.group.name                            [keyword]
+      user.audit.id                                    [keyword]
+      user.audit.name                                  [keyword]
+      user.changes                                     [object]
+      user.changes.domain                              [keyword]
+      user.changes.email                               [keyword]
+      user.changes.full_name                           [keyword]
+      user.changes.group                               [object]
+      user.changes.group.domain                        [keyword]
+      user.changes.group.id                            [keyword]
+      user.changes.group.name                          [keyword]
+      ... and 58 more
+    user_agent.*
+      user_agent                                       [object]
+      user_agent.device                                [object]
+      user_agent.device.name                           [keyword]
+      user_agent.name                                  [keyword]
+      user_agent.original                              [keyword]
+      user_agent.os                                    [object]
+      user_agent.os.family                             [keyword]
+      user_agent.os.full                               [keyword]
+      user_agent.os.full_name                          [keyword]
+      user_agent.os.kernel                             [keyword]
+      user_agent.os.name                               [keyword]
+      user_agent.os.platform                           [keyword]
+      user_agent.os.type                               [keyword]
+      user_agent.os.version                            [keyword]
+      user_agent.version                               [keyword]
+    vlan.*
+      vlan                                             [object]
+      vlan.id                                          [keyword]
+      vlan.name                                        [keyword]
+    vt_checked                                         [boolean]
+    vt_checked_at                                      [keyword]
+    vt_harmless                                        [long]
+    vt_malicious                                       [long]
+    vt_reason                                          [keyword]
+    vt_risk_score                                      [long]
+    vt_severity                                        [keyword]
+    vt_suspicious                                      [long]
+    vt_type                                            [keyword]
+    vt_undetected                                      [long]
+    vulnerability.*
+      vulnerability                                    [object]
+      vulnerability.category                           [keyword]
+      vulnerability.classification                     [keyword]
+      vulnerability.description                        [keyword]
+      vulnerability.enumeration                        [keyword]
+      vulnerability.id                                 [keyword]
+      vulnerability.reference                          [keyword]
+      vulnerability.report_id                          [keyword]
+      vulnerability.scanner                            [object]
+      vulnerability.scanner.vendor                     [keyword]
+      vulnerability.score                              [object]
+      vulnerability.score.base                         [float]
+      vulnerability.score.environmental                [float]
+      vulnerability.score.temporal                     [float]
+      vulnerability.score.version                      [keyword]
+      ... and 1 more
+    winlog.*
+      winlog                                           [object]
+      winlog.activity_id                               [keyword]
+      winlog.channel                                   [keyword]
+      winlog.event_data                                [object]
+      winlog.flags                                     [keyword]
+      winlog.keywords                                  [keyword]
+      winlog.level                                     [keyword]
+      winlog.opcode                                    [keyword]
+      winlog.process_id                                [keyword]
+      winlog.provider_guid                             [keyword]
+      winlog.provider_name                             [keyword]
+      winlog.session                                   [keyword]
+      winlog.severity                                  [keyword]
+      winlog.task                                      [keyword]
+      winlog.thread_id                                 [keyword]
+      ... and 1 more
+    x509.*
+      x509                                             [object]
+      x509.alternative_names                           [keyword]
+      x509.issuer                                      [object]
+      x509.issuer.common_name                          [keyword]
+      x509.issuer.country                              [keyword]
+      x509.issuer.distinguished_name                   [keyword]
+      x509.issuer.locality                             [keyword]
+      x509.issuer.organization                         [keyword]
+      x509.issuer.organizational_unit                  [keyword]
+      x509.issuer.state_or_province                    [keyword]
+      x509.not_after                                   [date]
+      x509.not_before                                  [date]
+      x509.public_key_algorithm                        [keyword]
+      x509.public_key_curve                            [keyword]
+      x509.public_key_exponent                         [long]
+      ... and 12 more
+    zeek.*
+      zeek                                             [object]
+      zeek.capture_loss                                [object]
+      zeek.capture_loss.acks                           [long]
+      zeek.capture_loss.gaps                           [long]
+      zeek.capture_loss.peer                           [keyword]
+      zeek.capture_loss.percent_lost                   [double]
+      zeek.capture_loss.ts_delta                       [long]
+      zeek.connection                                  [object]
+      zeek.connection.history                          [keyword]
+      zeek.connection.icmp                             [object]
+      zeek.connection.icmp.code                        [long]
+      zeek.connection.icmp.type                        [long]
+      zeek.connection.inner_vlan                       [long]
+      zeek.connection.local_orig                       [boolean]
+      zeek.connection.local_resp                       [boolean]
+      ... and 601 more
+    zookeeper.*
+      zookeeper                                        [object]
+      zookeeper.audit                                  [object]
+      zookeeper.audit.acl                              [keyword]
+      zookeeper.audit.result                           [keyword]
+      zookeeper.audit.session                          [keyword]
+      zookeeper.audit.user                             [keyword]
+      zookeeper.audit.znode                            [keyword]
+      zookeeper.audit.znode_type                       [keyword]
+    zoom.*
+      zoom                                             [object]
+      zoom.account                                     [object]
+      zoom.account.account_alias                       [keyword]
+      zoom.account.account_name                        [keyword]
+      zoom.account.account_support_email               [keyword]
+      zoom.account.account_support_name                [keyword]
+      zoom.account.email                               [keyword]
+      zoom.account.owner_email                         [keyword]
+      zoom.account.owner_id                            [keyword]
+      zoom.account_id                                  [keyword]
+      zoom.chat_channel                                [object]
+      zoom.chat_channel.id                             [keyword]
+      zoom.chat_channel.name                           [keyword]
+      zoom.chat_channel.type                           [keyword]
+      zoom.chat_message                                [object]
+      ... and 154 more
+
+  SAMPLE DOCUMENT (from .ds-wazuh-alerts-4.x-2026.04.23-2026.04.23-000001):
+    @timestamp                                         = 2026-04-23T21:43:16.144Z
+    agent.id                                           = 002
+    agent.name                                         = victim-dvwa
+    data.sca.check.command                             = ['findmnt -kn /tmp']
+    data.sca.check.compliance.cis                      = 1.1.2.1
+    data.sca.check.compliance.cis_csc_v7               = 14.6
+    data.sca.check.compliance.cis_csc_v8               = 3.3
+    data.sca.check.compliance.hipaa                    = 164.308(a)(3)(i),164.308(a)(3)(ii)(A),164.312(a)(1)
+    data.sca.check.compliance.iso_27001-2013           = A.9.1.1
+    data.sca.check.compliance.mitre_mitigations        = M1022
+    data.sca.check.compliance.mitre_tactics            = TA0005
+    data.sca.check.compliance.mitre_techniques         = T1499,T1499.001
+    data.sca.check.compliance.nist_sp_800-53           = AC-5,AC-6
+    data.sca.check.compliance.soc_2                    = CC5.2,CC6.1
+    data.sca.check.description                         = The /tmp directory is a world-writable directory used for temporary storage by a...
+    data.sca.check.id                                  = 19000
+    data.sca.check.rationale                           = Making /tmp its own file system allows an administrator to set additional mount ...
+    data.sca.check.references                          = https://www.freedesktop.org/wiki/Software/systemd/APIFileSystems/,https://www.fr...
+    data.sca.check.remediation                         = For specific configuration requirements of the /tmp mount for your environment, ...
+    data.sca.check.result                              = failed
+    data.sca.check.title                               = Ensure /tmp is a separate partition.
+    data.sca.policy                                    = CIS Ubuntu Linux 20.04 LTS Benchmark v2.0.0
+    data.sca.scan_id                                   = 372410741
+    data.sca.type                                      = check
+    decoder.name                                       = sca
+    id                                                 = 1776980596.28589468
+    input.type                                         = log
+    location                                           = sca
+    manager.name                                       = 9d5f24d4475f
+    rule.cis                                           = ['1.1.2.1']
+    rule.cis_csc_v7                                    = ['14.6']
+    rule.cis_csc_v8                                    = ['3.3']
+    rule.description                                   = CIS Ubuntu Linux 20.04 LTS Benchmark v2.0.0: Ensure /tmp is a separate partition...
+    rule.firedtimes                                    = 176
+    rule.gdpr                                          = ['IV_35.7.d']
+    rule.groups                                        = ['sca']
+    rule.hipaa                                         = ['164.308(a)(3)(i)', '164.308(a)(3)(ii)(A)', '164.312(a)(1)']
+    rule.id                                            = 19007
+    rule.iso_27001-2013                                = ['A.9.1.1']
+    rule.level                                         = 7
+    ... and 10 more fields
+
+======================================================================
+  INDEX: soc-logs-enriched-*
+======================================================================
+
+  FIELDS (198 total):
+    @timestamp                                         [date]
+    @version                                           [text]
+    alert.*
+      alert                                            [object]
+      alert.action                                     [text]
+      alert.category                                   [text]
+      alert.gid                                        [long]
+      alert.metadata                                   [object]
+      alert.metadata.confidence                        [text]
+      alert.metadata.created_at                        [text]
+      alert.metadata.performance_impact                [text]
+      alert.metadata.signature_severity                [text]
+      alert.metadata.updated_at                        [text]
+      alert.rev                                        [long]
+      alert.severity                                   [long]
+      alert.signature                                  [text]
+      alert.signature_id                               [long]
+    anomaly.*
+      anomaly                                          [object]
+      anomaly.app_proto                                [text]
+      anomaly.event                                    [text]
+      anomaly.layer                                    [text]
+      anomaly.type                                     [text]
+    app_proto                                          [text]
+    app_proto_orig                                     [text]
+    community_id                                       [text]
+    description                                        [text]
+    dest_geoip.*
+      dest_geoip                                       [object]
+      dest_geoip.city_name                             [text]
+      dest_geoip.country_code2                         [text]
+      dest_geoip.country_name                          [text]
+      dest_geoip.location                              [geo_point]
+      dest_geoip.region_name                           [text]
+    dest_ip                                            [text]
+    dest_port                                          [long]
+    direction                                          [text]
+    dns.*
+      dns                                              [object]
+      dns.aa                                           [boolean]
+      dns.additionals                                  [object]
+      dns.additionals.opt                              [object]
+      dns.additionals.opt.code                         [long]
+      dns.additionals.opt.data                         [text]
+      dns.additionals.rdata                            [text]
+      dns.additionals.rrname                           [text]
+      dns.additionals.rrtype                           [text]
+      dns.additionals.ttl                              [long]
+      dns.answers                                      [object]
+      dns.answers.rdata                                [text]
+      dns.answers.rrname                               [text]
+      dns.answers.rrtype                               [text]
+      dns.answers.ttl                                  [long]
+      ... and 30 more
+    environment                                        [text]
+    event.*
+      event                                            [object]
+      event.original                                   [text]
+    event_type                                         [text]
+    file_name                                          [text]
+    file_path                                          [text]
+    fileinfo.*
+      fileinfo                                         [object]
+      fileinfo.filename                                [text]
+      fileinfo.gaps                                    [boolean]
+      fileinfo.size                                    [long]
+      fileinfo.state                                   [text]
+      fileinfo.stored                                  [boolean]
+      fileinfo.tx_id                                   [long]
+    files.*
+      files                                            [object]
+      files.filename                                   [text]
+      files.gaps                                       [boolean]
+      files.size                                       [long]
+      files.state                                      [text]
+      files.stored                                     [boolean]
+      files.tx_id                                      [long]
+    flow.*
+      flow                                             [object]
+      flow.bytes_toclient                              [long]
+      flow.bytes_toserver                              [long]
+      flow.dest_ip                                     [text]
+      flow.dest_port                                   [long]
+      flow.pkts_toclient                               [long]
+      flow.pkts_toserver                               [long]
+      flow.src_ip                                      [text]
+      flow.src_port                                    [long]
+      flow.start                                       [date]
+    flow_id                                            [long]
+    geoip_note                                         [text]
+    host.*
+      host                                             [object]
+      host.name                                        [text]
+    http.*
+      http                                             [object]
+      http.hostname                                    [text]
+      http.http_content_type                           [text]
+      http.http_method                                 [text]
+      http.http_port                                   [long]
+      http.http_user_agent                             [text]
+      http.length                                      [long]
+      http.protocol                                    [text]
+      http.status                                      [long]
+      http.url                                         [text]
+    icmp_code                                          [long]
+    icmp_type                                          [long]
+    in_iface                                           [text]
+    ip_v                                               [long]
+    log.*
+      log                                              [object]
+      log.file                                         [object]
+      log.file.path                                    [text]
+    malicious                                          [long]
+    metadata.*
+      metadata                                         [object]
+      metadata.flowints                                [object]
+      metadata.flowints.http                           [object]
+      metadata.flowints.http.anomaly                   [object]
+      metadata.flowints.http.anomaly.count             [long]
+    misp_event_id                                      [text]
+    mitre_tactic                                       [text]
+    mitre_technique                                    [text]
+    packet                                             [text]
+    packet_info.*
+      packet_info                                      [object]
+      packet_info.linktype                             [long]
+      packet_info.linktype_name                        [text]
+    payload                                            [text]
+    payload_printable                                  [text]
+    pkt_src                                            [text]
+    proto                                              [text]
+    rule_name                                          [text]
+    severity                                           [text]
+    src_geoip.*
+      src_geoip                                        [object]
+      src_geoip.as_org                                 [text]
+      src_geoip.city_name                              [text]
+      src_geoip.country_code2                          [text]
+      src_geoip.country_name                           [text]
+      src_geoip.location                               [geo_point]
+      src_geoip.region_name                            [text]
+    src_ip                                             [text]
+    src_port                                           [long]
+    ssh.*
+      ssh                                              [object]
+      ssh.client                                       [object]
+      ssh.client.proto_version                         [text]
+      ssh.client.software_version                      [text]
+      ssh.server                                       [object]
+      ssh.server.proto_version                         [text]
+      ssh.server.software_version                      [text]
+    stream                                             [long]
+    tags                                               [text]
+    target_index                                       [text]
+    tc_progress                                        [text]
+    test                                               [text]
+    threat_intel_info                                  [text]
+    timestamp                                          [date]
+    tls.*
+      tls                                              [object]
+      tls.client_alpns                                 [text]
+      tls.fingerprint                                  [text]
+      tls.from_proto                                   [text]
+      tls.issuerdn                                     [text]
+      tls.ja3                                          [object]
+      tls.ja3.hash                                     [text]
+      tls.ja3.string                                   [text]
+      tls.ja3s                                         [object]
+      tls.ja3s.hash                                    [text]
+      tls.ja3s.string                                  [text]
+      tls.ja4                                          [text]
+      tls.notafter                                     [date]
+      tls.notbefore                                    [date]
+      tls.serial                                       [text]
+      ... and 6 more
+    ts_progress                                        [text]
+    tx_id                                              [long]
+    type                                               [text]
+    vt_malicious                                       [long]
+    vt_severity                                        [text]
+
+  SAMPLE DOCUMENT (from soc-logs-enriched-2026.04.30):
+    @timestamp                                         = 2026-04-30T22:39:49.436781712Z
+    @version                                           = 1
+    community_id                                       = 1:Wl52dD3JEOyDcj+BE1NJlySNi4c=
+    dest_ip                                            = 172.18.0.8
+    dest_port                                          = 1515
+    event.original                                     = {"timestamp":"2026-04-30T22:39:49.372205+0000","flow_id":1645243439961894,"in_if...
+    event_type                                         = tls
+    flow_id                                            = 1645243439961894
+    geoip_note                                         = IP not in GeoLite2 database
+    host.name                                          = 1fe2abf16e5f
+    in_iface                                           = br-63d3dfcd6f1b
+    ip_v                                               = 4
+    log.file.path                                      = /var/log/suricata/eve.json
+    pkt_src                                            = wire/pcap
+    proto                                              = TCP
+    src_ip                                             = 172.18.0.28
+    src_port                                           = 54630
+    tags                                               = []
+    target_index                                       = soc-logs-enriched
+    timestamp                                          = 2026-04-30T22:39:49.372205+0000
+    tls.ja4                                            = t13i590900_a33745022dd6_5ac7197df9d2
+    tls.version                                        = TLS 1.3
+    type                                               = SuricataIDPS
+
+======================================================================
+  INDEX: logstash-*
+======================================================================
+
+  FIELDS (0 total):
+
+  ⚠ No documents found in logstash-*
+
+======================================================================
+  INDEX: logs-*
+======================================================================
+
+  FIELDS (168 total):
+    @timestamp                                         [date]
+    agent.*
+      agent                                            [object]
+      agent.build                                      [object]
+      agent.build.original                             [keyword]
+      agent.ephemeral_id                               [keyword]
+      agent.id                                         [keyword]
+      agent.name                                       [keyword]
+      agent.type                                       [keyword]
+      agent.version                                    [keyword]
+    cloud.*
+      cloud                                            [object]
+      cloud.account                                    [object]
+      cloud.account.id                                 [keyword]
+      cloud.availability_zone                          [keyword]
+      cloud.image                                      [object]
+      cloud.image.id                                   [keyword]
+      cloud.instance                                   [object]
+      cloud.instance.id                                [keyword]
+      cloud.instance.name                              [keyword]
+      cloud.machine                                    [object]
+      cloud.machine.type                               [keyword]
+      cloud.project                                    [object]
+      cloud.project.id                                 [keyword]
+      cloud.provider                                   [keyword]
+      cloud.region                                     [keyword]
+    component.*
+      component                                        [object]
+      component.binary                                 [keyword]
+      component.dataset                                [keyword]
+      component.id                                     [wildcard]
+      component.old_state                              [keyword]
+      component.state                                  [keyword]
+      component.type                                   [keyword]
+    container.*
+      container                                        [object]
+      container.id                                     [keyword]
+      container.image                                  [object]
+      container.image.name                             [keyword]
+      container.labels                                 [object]
+      container.name                                   [keyword]
+    data_stream.*
+      data_stream                                      [object]
+      data_stream.dataset                              [constant_keyword]
+      data_stream.namespace                            [constant_keyword]
+      data_stream.type                                 [constant_keyword]
+    ecs.*
+      ecs                                              [object]
+      ecs.version                                      [keyword]
+    elastic_agent.*
+      elastic_agent                                    [object]
+      elastic_agent.id                                 [keyword]
+      elastic_agent.process                            [keyword]
+      elastic_agent.snapshot                           [boolean]
+      elastic_agent.version                            [keyword]
+    error.*
+      error                                            [object]
+      error.message                                    [match_only_text]
+    event.*
+      event                                            [object]
+      event.action                                     [keyword]
+      event.agent_id_status                            [keyword]
+      event.category                                   [keyword]
+      event.dataset                                    [constant_keyword]
+      event.ingested                                   [date]
+      event.kind                                       [keyword]
+      event.module                                     [constant_keyword]
+      event.outcome                                    [keyword]
+      event.timezone                                   [keyword]
+      event.type                                       [keyword]
+    fleet.*
+      fleet                                            [object]
+      fleet.access                                     [object]
+      fleet.access.apikey                              [object]
+      fleet.access.apikey.id                           [keyword]
+      fleet.agent                                      [object]
+      fleet.agent.id                                   [keyword]
+      fleet.policy                                     [object]
+      fleet.policy.id                                  [keyword]
+    host.*
+      host                                             [object]
+      host.architecture                                [keyword]
+      host.containerized                               [boolean]
+      host.domain                                      [keyword]
+      host.hostname                                    [keyword]
+      host.id                                          [keyword]
+      host.ip                                          [ip]
+      host.mac                                         [keyword]
+      host.name                                        [keyword]
+      host.os                                          [object]
+      host.os.build                                    [keyword]
+      host.os.codename                                 [keyword]
+      host.os.family                                   [keyword]
+      host.os.kernel                                   [keyword]
+      host.os.name                                     [keyword]
+      ... and 4 more
+    http.*
+      http                                             [object]
+      http.request                                     [object]
+      http.request.body                                [object]
+      http.request.body.bytes                          [long]
+      http.request.id                                  [keyword]
+      http.request.method                              [keyword]
+      http.response                                    [object]
+      http.response.body                               [object]
+      http.response.body.bytes                         [long]
+      http.response.status_code                        [long]
+      http.version                                     [keyword]
+    input.*
+      input                                            [object]
+      input.type                                       [keyword]
+    log.*
+      log                                              [object]
+      log.file                                         [object]
+      log.file.path                                    [keyword]
+      log.level                                        [keyword]
+      log.offset                                       [long]
+      log.syslog                                       [object]
+      log.syslog.appname                               [keyword]
+      log.syslog.hostname                              [keyword]
+      log.syslog.procid                                [keyword]
+    message                                            [match_only_text]
+    monitoring.*
+      monitoring                                       [object]
+      monitoring.metrics                               [object]
+      monitoring.metrics.libbeat                       [object]
+      monitoring.metrics.libbeat.pipeline              [object]
+      monitoring.metrics.libbeat.pipeline.events       [object]
+      monitoring.metrics.libbeat.pipeline.events.active [long]
+      monitoring.metrics.libbeat.pipeline.events.published [long]
+      monitoring.metrics.libbeat.pipeline.events.total [long]
+      monitoring.metrics.libbeat.pipeline.queue        [object]
+      monitoring.metrics.libbeat.pipeline.queue.acked  [long]
+      monitoring.metrics.libbeat.pipeline.queue.filled [object]
+      monitoring.metrics.libbeat.pipeline.queue.max_events [long]
+    policy_id                                          [keyword]
+    process.*
+      process                                          [object]
+      process.name                                     [keyword]
+      process.pid                                      [long]
+    related.*
+      related                                          [object]
+      related.hosts                                    [keyword]
+      related.ip                                       [ip]
+      related.user                                     [keyword]
+    source.*
+      source                                           [object]
+      source.address                                   [keyword]
+      source.ip                                        [ip]
+      source.port                                      [long]
+    system.*
+      system                                           [object]
+      system.auth                                      [object]
+      system.auth.ssh                                  [object]
+      system.auth.ssh.dropped_ip                       [ip]
+      system.auth.ssh.event                            [keyword]
+      system.auth.ssh.method                           [keyword]
+      system.auth.ssh.signature                        [keyword]
+      system.auth.sudo                                 [object]
+      system.auth.sudo.command                         [keyword]
+      system.auth.sudo.error                           [keyword]
+      system.auth.sudo.pwd                             [keyword]
+      system.auth.sudo.tty                             [keyword]
+      system.auth.sudo.user                            [keyword]
+      system.auth.syslog                               [object]
+      system.auth.syslog.version                       [keyword]
+      ... and 4 more
+    tags                                               [keyword]
+    unit.*
+      unit                                             [object]
+      unit.id                                          [wildcard]
+      unit.old_state                                   [keyword]
+      unit.state                                       [keyword]
+      unit.type                                        [keyword]
+    url.*
+      url                                              [object]
+      url.full                                         [wildcard]
+    user.*
+      user                                             [object]
+      user.effective                                   [object]
+      user.effective.name                              [keyword]
+      user.id                                          [keyword]
+      user.name                                        [keyword]
+    version                                            [keyword]
+
+  SAMPLE DOCUMENT (from .ds-logs-elastic_agent-default-2026.04.17-000001):
+    @timestamp                                         = 2026-05-04T11:50:11.351Z
+    agent.ephemeral_id                                 = 9e5a8edd-58a9-4914-9b55-aed24ffa3731
+    agent.id                                           = 1c4221fb-1943-434e-b584-6ee10768da1b
+    agent.name                                         = victim-iot
+    agent.type                                         = filebeat
+    agent.version                                      = 8.13.0
+    data_stream.dataset                                = elastic_agent
+    data_stream.namespace                              = default
+    data_stream.type                                   = logs
+    ecs.version                                        = 8.0.0
+    elastic_agent.id                                   = 1c4221fb-1943-434e-b584-6ee10768da1b
+    elastic_agent.snapshot                             = False
+    elastic_agent.version                              = 8.13.0
+    event.agent_id_status                              = verified
+    event.dataset                                      = elastic_agent
+    event.ingested                                     = 2026-05-04T11:50:21Z
+    host.architecture                                  = x86_64
+    host.containerized                                 = False
+    host.hostname                                      = victim-iot
+    host.ip                                            = ['172.18.0.17']
+    host.mac                                           = ['16-C9-1A-6B-B2-19']
+    host.name                                          = victim-iot
+    host.os.codename                                   = focal
+    host.os.family                                     = debian
+    host.os.kernel                                     = 6.6.87.2-microsoft-standard-WSL2
+    host.os.name                                       = Ubuntu
+    host.os.platform                                   = ubuntu
+    host.os.type                                       = linux
+    host.os.version                                    = 20.04.6 LTS (Focal Fossa)
+    input.type                                         = filestream
+    log.file.device_id                                 = 2112
+    log.file.inode                                     = 1798
+    log.file.path                                      = /opt/elastic-agent/data/elastic-agent-1eb18c/logs/elastic-agent-20260504.ndjson
+    log.level                                          = info
+    log.offset                                         = 2747015
+    log.origin.file.line                               = 122
+    log.origin.file.name                               = upgrade/upgrade.go
+    log.source                                         = elastic-agent
+    message                                            = Source URI changed from "https://artifacts.elastic.co/downloads/" to "https://ar...
+
+======================================================================
+  DONE — share this output to get perfectly mapped rules
+======================================================================
+

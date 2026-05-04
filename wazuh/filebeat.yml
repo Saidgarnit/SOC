@@ -17,7 +17,7 @@ setup.ilm.enabled: false
 output.elasticsearch:
   hosts: ['http://elasticsearch:9200']
   username: elastic
-  password: "SOCstack2026!"
+  password: "sYVfKJCe2RCfELjf=GLa"
 
 logging.level: info
 logging.to_files: true
