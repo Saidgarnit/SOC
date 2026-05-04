@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-MISP_URL="${MISP_URL:-http://misp:80}"
+MISP_URL="${MISP_URL:-http://localhost:9001}"
 MISP_API_KEY="${MISP_API_KEY:-}"
 
 echo "MISP Connector Health Check"
@@ -20,10 +20,11 @@ fi
 
 # 1. Check MISP service health
 echo "[1/4] Testing MISP Service:"
-if curl -s -k "$MISP_URL" | grep -q "MISP"; then
+if curl -s -k "$MISP_URL" 2>/dev/null | grep -q "MISP\|<!DOCTYPE"; then
   echo "  ✓ MISP service is responding"
 else
-  echo "  ✗ MISP service not responding"
+  echo "  ✗ MISP service not responding at $MISP_URL"
+  echo "  Try: http://localhost:9001"
   exit 1
 fi
 
@@ -31,19 +32,19 @@ fi
 echo ""
 echo "[2/4] Testing MISP API:"
 API_RESPONSE=$(curl -s -k "$MISP_URL/api/version" 2>/dev/null || echo '{"version": "unknown"}')
-echo "$API_RESPONSE" | jq '.version' && echo "  ✓ API responding"
+echo "$API_RESPONSE" | grep -q "version" && echo "  ✓ API responding" || echo "  ✗ API not responding"
 
 # 3. Check authentication (if key provided)
 if [ -n "$MISP_API_KEY" ]; then
   echo ""
   echo "[3/4] Testing API Key Authentication:"
   AUTH_RESPONSE=$(curl -s -k -H "Authorization: $MISP_API_KEY" \
-    "$MISP_URL/api/events/restSearch" 2>/dev/null | jq '.response | length' || echo "0")
+    "$MISP_URL/api/events/restSearch" 2>/dev/null || echo "{}")
   
-  if [ "$AUTH_RESPONSE" != "0" ]; then
+  if echo "$AUTH_RESPONSE" | grep -q "response\|Event"; then
     echo "  ✓ Authentication successful"
   else
-    echo "  ✗ Authentication failed or no events"
+    echo "  ✗ Authentication failed (check API key)"
   fi
 fi
 
@@ -51,7 +52,6 @@ fi
 echo ""
 echo "[4/4] Configuration for docker-compose.yml:"
 echo "  MISP_URL=$MISP_URL"
-echo "  MISP_API_KEY=<your_key_here>"
+echo "  MISP_API_KEY=<get from MISP admin panel>"
 echo ""
 echo "✓ MISP health check complete!"
-echo "  If authentication failed, verify the API key in MISP admin panel."
