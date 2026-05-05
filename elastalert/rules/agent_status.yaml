@@ -1,9 +1,20 @@
-alert: slack
+alert:
+- slack
 alert_text_type: alert_text_only
-alert_text: "Wazuh Agent Status Change\nAgent: {0}\nRule: {1}"
+alert_text: "\n\U0001F5A5\uFE0F *Wazuh \u2014 Agent Status Change*\n-----------------------------------------\n\
+  \U0001F552 *Timestamp:* {0}\n\U0001F464 *Host:* {1}\n\U0001F4CA *Level:* {2}\n\U0001F6E1\
+  \uFE0F *MITRE:* {3}\n\U0001F30D *GeoIP:* {4}\n\U0001F4DD *Summary:* {5}\n-----------------------------------------\n\
+  \U0001F50E *Context:*\n\U0001F511 *User:* {6}\n\U0001F4BB *Process:* {7}\n-----------------------------------------\n\
+  \U0001F517 *Kibana:* http://localhost:5601\n"
 alert_text_args:
-  - agent.name
-  - rule.description
+- '@timestamp'
+- agent.name
+- rule.level
+- rule.mitre.id
+- GeoLocation.city_name
+- rule.description
+- data.win.eventdata.targetUserName
+- data.win.eventdata.parentProcessName
 filter:
 - query:
     bool:
@@ -14,7 +25,7 @@ filter:
           rule.id: '501'
       minimum_should_match: 1
 index: .ds-wazuh-alerts-4.x-*
-name: "Wazuh — Agent Status Change"
+name: "Wazuh \u2014 Agent Status Change"
 query_key: agent.name
 realert:
   hours: 2

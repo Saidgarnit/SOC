@@ -394,7 +394,7 @@ services:
         limits:
           memory: 512m
           cpus: "2"
-    command: -i eth0
+    command: -i br-a213411967d6 --set default-rule-path=/var/lib/suricata/rules -s /var/lib/suricata/rules/suricata.rules
     restart: unless-stopped
   rabbitmq:
     image: rabbitmq:3.12-management-alpine

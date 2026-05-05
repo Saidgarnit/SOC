@@ -1,5 +1,10 @@
-alert: slack
-alert_text: 'Auth Brute Force: %(agent.name)s from %(data.srcip)s'
+alert:
+- slack
+alert_text: "\n\u26A1 *Wazuh \u2014 Authentication Brute Force*\n-----------------------------------------\n\
+  \U0001F552 *Timestamp:* {0}\n\U0001F464 *Host:* {1}\n\U0001F4CA *Level:* {2}\n\U0001F6E1\
+  \uFE0F *MITRE:* {3}\n\U0001F30D *GeoIP:* {4}\n\U0001F4DD *Summary:* {5}\n-----------------------------------------\n\
+  \U0001F50E *Context:*\n\U0001F310 *Src IP:* {6}\n\U0001F3AF *Dst IP:* {7}\n-----------------------------------------\n\
+  \U0001F517 *Kibana:* http://localhost:5601\n"
 alert_text_type: alert_text_only
 filter:
 - query:
@@ -22,3 +27,12 @@ slack_webhook_url: https://hooks.slack.com/services/T0ASP9FEPUZ/B0AT4LL61PA/FsRI
 timeframe:
   minutes: 2
 type: frequency
+alert_text_args:
+- '@timestamp'
+- agent.name
+- rule.level
+- rule.mitre.id
+- GeoLocation.city_name
+- rule.description
+- srcip
+- dstip
