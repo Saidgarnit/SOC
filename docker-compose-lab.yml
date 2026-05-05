@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   fleet-server:
     image: docker.elastic.co/elastic-agent/elastic-agent:8.13.0
@@ -8,7 +9,7 @@ services:
       - FLEET_SERVER_ENABLE=1
       - FLEET_SERVER_ELASTICSEARCH_HOST=http://elasticsearch:9200
       - FLEET_SERVER_ELASTICSEARCH_USERNAME=elastic
-      - FLEET_SERVER_ELASTICSEARCH_PASSWORD=sYVfKJCe2RCfELjf=GLa
+      - FLEET_SERVER_ELASTICSEARCH_PASSWORD=SOCstack2026!
       - FLEET_SERVER_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXRva2VuLTE6ZEJVUy10d1ZUVy02d2ZYY0FkNmZoUQ
       - FLEET_SERVER_POLICY_ID=fleet-server-policy
       - FLEET_SERVER_INSECURE_HTTP=1
@@ -19,8 +20,6 @@ services:
     networks:
       - soc-net
     restart: unless-stopped
-    volumes:
-      - fleet-server-data:/usr/share/elastic-agent
   victim-ubuntu:
     build:
       context: ./lab/victim-ubuntu
@@ -47,11 +46,8 @@ services:
     volumes:
       - yara-ubuntu-www:/var/www/html
       - yara-ubuntu-tmp:/tmp
-      - elastic-agent-ubuntu:/opt/elastic-agent
   victim-metasploitable:
-    build:
-      context: .
-      dockerfile: lab/victim-metasploitable/Dockerfile
+    image: tleemcjr/metasploitable2
     container_name: victim-metasploitable
     mem_limit: 400m
     hostname: victim-metasploitable
@@ -65,8 +61,6 @@ services:
       - "8889:80"
       - "2122:21"
     restart: unless-stopped
-    volumes:
-      - ./lab/metasploitable-syslog.conf:/etc/syslog.conf:ro
     labels:
       wazuh.skip: i386-incompatible
   victim-dvwa:
@@ -89,8 +83,6 @@ services:
       ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
     restart: unless-stopped
     volumes:
-      - elastic-agent-dvwa:/opt/elastic-agent
-      - ./lab/victim-dvwa/entrypoint.sh:/entrypoint.sh:ro
       - yara-dvwa:/var/www/html
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-iot:
@@ -116,11 +108,9 @@ services:
       ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
     restart: unless-stopped
     volumes:
-      - elastic-agent-iot:/opt/elastic-agent
-      - ./lab/victim-iot/entrypoint.sh:/entrypoint.sh:ro
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   kali-attacker:
-    image: kali-attacker-persistent:latest
+    image: kalilinux/kali-rolling
     container_name: kali-attacker
     hostname: kali-attacker
     networks:
@@ -143,8 +133,6 @@ services:
     restart: unless-stopped
     privileged: true
     volumes:
-      - elastic-agent-database:/opt/elastic-agent
-      - ./lab/victim-database/entrypoint.sh:/entrypoint.sh:ro
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-mail:
     build:
@@ -161,8 +149,6 @@ services:
     restart: unless-stopped
     privileged: true
     volumes:
-      - elastic-agent-mail:/opt/elastic-agent
-      - ./lab/victim-mail/entrypoint.sh:/entrypoint.sh:ro
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-dns:
     build:
@@ -175,8 +161,6 @@ services:
       - soc-net
     restart: unless-stopped
     volumes:
-      - elastic-agent-dns:/opt/elastic-agent
-      - ./lab/victim-dns/entrypoint.sh:/entrypoint.sh:ro
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-jenkins:
     build:
@@ -192,8 +176,6 @@ services:
     restart: unless-stopped
     privileged: true
     volumes:
-      - elastic-agent-jenkins:/opt/elastic-agent
-      - ./lab/victim-jenkins/entrypoint.sh:/entrypoint.sh:ro
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-ftp:
     image: fauria/vsftpd
@@ -201,7 +183,6 @@ services:
     mem_limit: 400m
     hostname: victim-ftp
     environment:
-      ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
       FTP_USER: ftpuser
       FTP_PASS: password123
       PASV_MIN_PORT: "21100"
@@ -215,37 +196,24 @@ services:
     networks:
       - soc-net
     restart: unless-stopped
-    entrypoint:
-      - /bin/bash
-      - /entrypoint-ftp.sh
     volumes:
       - yara-ftp:/home/vsftpd
-      - elastic-agent-ftp:/opt/elastic-agent
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
-      - ./wazuh-agent/entrypoint-ftp.sh:/entrypoint-ftp.sh:ro
-      - wazuh_ossec_ftp:/var/ossec
     privileged: true
   victim-webapi:
     image: raesene/bwapp
     container_name: victim-webapi
     mem_limit: 512m
     hostname: victim-webapi
-    environment:
-      ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
     ports:
       - "8892:80"
     networks:
       - soc-net
     restart: unless-stopped
-    entrypoint:
-      - /bin/bash
-      - /entrypoint-webapi.sh
+    command: ["/run.sh"]
     volumes:
       - victim_webapi_mysql:/var/lib/mysql
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
-      - ./wazuh-agent/entrypoint-webapi.sh:/entrypoint-webapi.sh:ro
-      - wazuh_ossec_webapi:/var/ossec
-      - elastic-agent-webapi:/opt/elastic-agent
   victim-windows:
     build:
       context: ./lab/victim-windows
@@ -261,8 +229,6 @@ services:
     restart: unless-stopped
     privileged: true
     volumes:
-      - elastic-agent-windows:/opt/elastic-agent
-      - ./lab/victim-windows/entrypoint.sh:/entrypoint.sh:ro
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
 networks:
   soc-net:
@@ -276,21 +242,5 @@ volumes:
   yara-ubuntu-tmp:
     external: true
   yara-ftp:
-  elastic-agent-ftp:
     external: true
   victim_webapi_mysql:
-  elastic-agent-dvwa:
-  elastic-agent-mail:
-  elastic-agent-dns:
-  elastic-agent-iot:
-  elastic-agent-windows:
-  elastic-agent-database:
-  elastic-agent-jenkins:
-  elastic-agent-webapi:
-    external: true
-  elastic-agent-ubuntu:
-  fleet-server-data:
-  wazuh_ossec_ftp:
-    external: true
-  wazuh_ossec_webapi:
-    external: true

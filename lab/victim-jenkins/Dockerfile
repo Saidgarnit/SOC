@@ -29,3 +29,9 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 8080
 # Override the base image ENTRYPOINT so our script controls startup
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Wazuh agent starter (called by docker-compose.wazuh-agents.yml override)
+
+# start-wazuh.sh stub (called by docker-compose.wazuh-agents.yml)
+COPY start-wazuh-stub.sh /usr/local/bin/start-wazuh.sh
+RUN chmod +x /usr/local/bin/start-wazuh.sh

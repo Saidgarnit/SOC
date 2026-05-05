@@ -25,6 +25,18 @@ filebeat.inputs:
       host_role: vuln-linux
     fields_under_root: true
 
+
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/suricata/eve.json
+    json.message_key: message
+    json.keys_under_root: true
+    json.add_error_key: true
+    fields:
+      log_source: suricata
+    fields_under_root: true
+
 setup.template.enabled: false
 setup.ilm.enabled: false
 
@@ -32,9 +44,17 @@ output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
   username: "elastic"
   password: "sYVfKJCe2RCfELjf=GLa"
-  index: "wazuh-alerts-4.x-%{+yyyy.MM.dd}"
+  indices:
+    - index: "suricata-alerts-%{+yyyy.MM.dd}"
+      when.equals:
+        log_source: suricata
+    - index: "wazuh-alerts-4.x-%{+yyyy.MM.dd}"
+      when.equals:
+        log_source: wazuh
+    - index: "syslog-%{+yyyy.MM.dd}"
+      when.equals:
+        log_source: metasploitable
   allow_older_versions: true
-  action: "index"
 
 logging.level: info
 logging.to_stderr: true

@@ -27,3 +27,9 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 EXPOSE 25 143 993
 CMD ["/entrypoint.sh"]
+
+# Wazuh agent starter (called by docker-compose.wazuh-agents.yml override)
+
+# start-wazuh.sh stub (called by docker-compose.wazuh-agents.yml)
+COPY start-wazuh-stub.sh /usr/local/bin/start-wazuh.sh
+RUN chmod +x /usr/local/bin/start-wazuh.sh

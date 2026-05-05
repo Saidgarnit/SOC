@@ -1,5 +1,5 @@
 alert: slack
-alert_text: 'Webshell: {agent.name} - {rule.description} from {data.srcip}'
+alert_text: 'Webshell: %(agent.name)s - %(rule.description)s from %(data.srcip)s'
 alert_text_type: alert_text_only
 filter:
 - query:
@@ -10,7 +10,7 @@ filter:
       - range:
           rule.level:
             gte: 10
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: "Wazuh \u2014 Webshell Indicator"
 query_key: agent.name
 realert:
@@ -18,5 +18,5 @@ realert:
 slack_icon_emoji: ':ghost:'
 slack_msg_color: danger
 slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+slack_webhook_url: https://hooks.slack.com/services/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
 type: any

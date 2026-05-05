@@ -11,3 +11,18 @@
 - Auth: JWT (Basic wazuh:wazuh to get token)
 - Get token: curl -s -k -u wazuh:wazuh -X POST https://localhost:55000/security/user/authenticate
 - Use token: curl -k -H "Authorization: Bearer <TOKEN>" https://localhost:55000/agents
+
+## Monitoring Architecture Notes
+| Endpoint | Wazuh Agent | Fleet Agent | Suricata (Network) |
+|----------|-------------|-------------|-------------------|
+| victim-ubuntu | ✅ | ✅ | ✅ |
+| victim-dvwa | ✅ | ✅ | ✅ |
+| victim-iot | ✅ | ✅ | ✅ |
+| victim-windows | ✅ | ✅ | ✅ |
+| victim-mail | ✅ | ✅ | ✅ |
+| victim-dns | ✅ | ✅ | ✅ |
+| victim-jenkins | ✅ | ✅ | ✅ |
+| victim-database | ✅ | ✅ | ✅ |
+| victim-webapi | ✅ | ✅ | ✅ |
+| victim-ftp | ❌ (no shell) | ✅ | ✅ |
+| victim-metasploitable | Syslog only | ❌ (legacy) | ✅ |
