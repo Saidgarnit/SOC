@@ -1,5 +1,10 @@
-alert: slack
-alert_text: 'Web Attack: %(agent.name)s - %(rule.description)s from %(data.srcip)s'
+alert:
+- slack
+alert_text: "\n\U0001F578\uFE0F *Web Attacks (Wazuh)*\n-----------------------------------------\n\
+  \U0001F552 *Timestamp:* {0}\n\U0001F464 *Host:* {1}\n\U0001F4CA *Level:* {2}\n\U0001F6E1\
+  \uFE0F *MITRE:* {3}\n\U0001F30D *GeoIP:* {4}\n\U0001F4DD *Summary:* {5}\n-----------------------------------------\n\
+  \U0001F50E *Context:*\n\U0001F511 *User:* {6}\n\U0001F4BB *Process:* {7}\n-----------------------------------------\n\
+  \U0001F517 *Kibana:* http://localhost:5601\n"
 alert_text_type: alert_text_only
 filter:
 - query:
@@ -13,7 +18,16 @@ query_key: agent.name
 realert:
   minutes: 5
 slack_icon_emoji: ':spider_web:'
-slack_msg_color: danger
+slack_msg_color: warning
 slack_username_override: SOC Alerts
 slack_webhook_url: https://hooks.slack.com/services/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
 type: any
+alert_text_args:
+- '@timestamp'
+- agent.name
+- rule.level
+- rule.mitre.id
+- GeoLocation.city_name
+- rule.description
+- data.win.eventdata.targetUserName
+- data.win.eventdata.parentProcessName

@@ -1,0 +1,35 @@
+name: "CRITICAL ALERT — Gmail Notification"
+type: any
+index: .ds-wazuh-alerts-4.x-*
+filter:
+- range:
+    rule.level:
+      gte: 12
+alert:
+  - email
+email:
+  - "garnitsaid01@gmail.com"
+from_addr: "garnitsaid01@gmail.com"
+smtp_host: "smtp.gmail.com"
+smtp_port: 587
+smtp_ssl: false
+smtp_starttls: true
+smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
+alert_text: |
+  🚨 CRITICAL SECURITY ALERT 🚨
+
+  Rule      : {0}
+  Host      : {1}
+  Level     : {2}
+  Description: {3}
+
+  Please investigate immediately.
+  Kibana: http://localhost:5601
+alert_text_type: alert_text_only
+alert_text_args:
+  - rule.description
+  - agent.name
+  - rule.level
+  - rule.description
+realert:
+  minutes: 30

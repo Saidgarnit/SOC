@@ -1,10 +1,19 @@
-alert: slack
-alert_text: 'Brute Force: {0} from {1} to {2}:{3}'
+alert:
+- slack
+alert_text: "\n\U0001F4A5 *Suricata IDS \u2014 Brute Force*\n-----------------------------------------\n\
+  \U0001F552 *Timestamp:* {0}\n\U0001F464 *Host:* {1}\n\U0001F4CA *Level:* {2}\n\U0001F6E1\
+  \uFE0F *MITRE:* {3}\n\U0001F30D *GeoIP:* {4}\n\U0001F4DD *Summary:* {5}\n-----------------------------------------\n\
+  \U0001F50E *Context:*\n\U0001F310 *Src IP:* {6}\n\U0001F3AF *Dst IP:* {7}\n-----------------------------------------\n\
+  \U0001F517 *Kibana:* http://localhost:5601\n"
 alert_text_args:
-  - alert.signature
-  - src_ip
-  - dest_ip
-  - dest_port
+- '@timestamp'
+- agent.name
+- rule.level
+- rule.mitre.id
+- GeoLocation.city_name
+- rule.description
+- src_ip
+- dest_ip
 alert_text_type: alert_text_only
 filter:
 - query:
@@ -19,7 +28,7 @@ filter:
           - match_phrase:
               alert.signature: FTP Brute Force
 index: suricata-alerts-*
-name: "Suricata IDS — Brute Force"
+name: "Suricata IDS \u2014 Brute Force"
 query_key:
 - src_ip
 - dest_ip
