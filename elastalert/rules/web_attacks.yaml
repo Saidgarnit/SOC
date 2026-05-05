@@ -1,33 +1,34 @@
-alert:
-- slack
-alert_text: "\n\U0001F578\uFE0F *Web Attacks (Wazuh)*\n-----------------------------------------\n\
-  \U0001F552 *Timestamp:* {0}\n\U0001F464 *Host:* {1}\n\U0001F4CA *Level:* {2}\n\U0001F6E1\
-  \uFE0F *MITRE:* {3}\n\U0001F30D *GeoIP:* {4}\n\U0001F4DD *Summary:* {5}\n-----------------------------------------\n\
-  \U0001F50E *Context:*\n\U0001F511 *User:* {6}\n\U0001F4BB *Process:* {7}\n-----------------------------------------\n\
-  \U0001F517 *Kibana:* http://localhost:5601\n"
-alert_text_type: alert_text_only
+name: "🕷️ Wazuh — Web Attack"
+type: any
+index: .ds-wazuh-alerts-4.x-*
+realert:
+  minutes: 5
+query_key: agent.name
 filter:
 - query:
     bool:
       must:
       - match:
           rule.groups: web
-index: .ds-wazuh-alerts-4.x-*
-name: Web Attacks (Wazuh)
-query_key: agent.name
-realert:
-  minutes: 5
-slack_icon_emoji: ':spider_web:'
-slack_msg_color: warning
-slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/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
-type: any
+
+alert:
+- slack
+alert_text_type: alert_text_only
+alert_text: "\n🕷️ *Wazuh — Web Attack*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nHost: {1} ({2})\nLevel: {3} | Rule: {4}\nDescription: {5}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMITRE ATT&CK:\n  Tactic: {6}\n  Technique: {7}\n  ID: {8}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nAttacker IP: {9}\nFull Log: {10}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nKibana: http://localhost:5601\n"
 alert_text_args:
 - '@timestamp'
 - agent.name
+- agent.ip
 - rule.level
-- rule.mitre.id
-- GeoLocation.city_name
+- rule.id
 - rule.description
-- data.win.eventdata.targetUserName
-- data.win.eventdata.parentProcessName
+- rule.mitre.tactic
+- rule.mitre.technique
+- rule.mitre.id
+- data.srcip
+- full_log
+
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: SOC Alerts
+slack_icon_emoji: ':spider_web:'
+slack_msg_color: danger
