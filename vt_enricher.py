@@ -16,7 +16,9 @@ ES_USER    = os.getenv("ES_USER", "elastic")
 ES_PASS    = os.getenv("ES_PASS", "")
 ES_AUTH    = (ES_USER, ES_PASS) if ES_PASS else None
 VT_API_URL = "https://www.virustotal.com/api/v3"
-POLL_INTERVAL = 30
+POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "300"))
+DAILY_QUOTA_LIMIT = 450  # Stop at 450 to leave buffer
+daily_call_count = 0
 
 # ── VirusTotal Functions ─────────────────────────────
 def check_ip(ip):
@@ -155,6 +157,11 @@ def main():
                 time.sleep(1)
         else:
             print(f"[*] No new alerts to enrich — sleeping {POLL_INTERVAL}s")
+# Handle quota exceeded
+        if response.status_code == 429:
+            print("[!] VT quota exceeded — sleeping 1 hour")
+            time.sleep(3600)
+            continue
         time.sleep(POLL_INTERVAL)
 
 if __name__ == "__main__":

@@ -30,3 +30,6 @@ for c in victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail victim-
 done
 
 echo "✅ Lab is Clean and Healthy."
+
+# Start vt-enricher (paused if quota exceeded, auto-restarts at midnight)
+docker start vt-enricher 2>/dev/null || true

@@ -2,7 +2,7 @@
 
 # RECONNAISSANCE
 alert icmp any any -> $HOME_NET any (msg:"ICMP Ping Detected"; sid:1000001; rev:2;)
-alert tcp any any -> $HOME_NET any (msg:"Port Scan SYN"; flags:S; threshold:type threshold,track by_src,count 20,seconds 10; sid:1000003; rev:3;)
+alert tcp any any -> $HOME_NET any (msg:"Port Scan SYN"; flags:S; threshold:type threshold,track by_src,count 5,seconds 3; sid:1000003; rev:3;)
 alert tcp any any -> $HOME_NET any (msg:"Nmap NULL Scan"; flags:0; threshold:type threshold,track by_src,count 5,seconds 10; sid:1000004; rev:2;)
 
 # INITIAL ACCESS
