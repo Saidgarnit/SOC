@@ -45,3 +45,9 @@ EXPOSE 22 21 80
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/entrypoint.sh"]
 RUN ln -sf /opt/elastic-agent /usr/share/elastic-agent
+
+# Wazuh agent starter (called by docker-compose.wazuh-agents.yml override)
+
+# start-wazuh.sh stub (called by docker-compose.wazuh-agents.yml)
+COPY start-wazuh-stub.sh /usr/local/bin/start-wazuh.sh
+RUN chmod +x /usr/local/bin/start-wazuh.sh

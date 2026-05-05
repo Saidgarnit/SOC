@@ -1,0 +1,20 @@
+$TTL 604800
+@   IN  SOA lab.local. admin.lab.local. (
+            2         ; Serial
+            604800    ; Refresh
+            86400     ; Retry
+            2419200   ; Expire
+            604800 )  ; Negative Cache TTL
+;
+@               IN  NS      ns.lab.local.
+ns              IN  A       172.18.0.6
+dvwa            IN  A       172.18.0.17
+webapi          IN  A       172.18.0.18
+jenkins         IN  A       172.18.0.19
+metasploitable  IN  A       172.18.0.23
+ubuntu          IN  A       172.18.0.20
+database        IN  A       172.18.0.12
+mail            IN  A       172.18.0.21
+iot             IN  A       172.18.0.24
+windows         IN  A       172.18.0.25
+ftp             IN  A       172.18.0.26

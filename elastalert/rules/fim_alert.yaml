@@ -1,5 +1,5 @@
 alert: slack
-alert_text: 'FIM Alert: {agent.name} - {syscheck.path} - {syscheck.event}'
+alert_text: 'FIM Alert: %(agent.name)s - {syscheck.path} - {syscheck.event}'
 alert_text_type: alert_text_only
 filter:
 - query:
@@ -7,7 +7,7 @@ filter:
       must:
       - match:
           rule.groups: syscheck
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: "Wazuh \u2014 File Integrity Alert"
 query_key: agent.name
 realert:
@@ -15,5 +15,5 @@ realert:
 slack_icon_emoji: ':file_folder:'
 slack_msg_color: warning
 slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+slack_webhook_url: https://hooks.slack.com/services/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
 type: any

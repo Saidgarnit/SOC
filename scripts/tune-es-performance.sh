@@ -15,7 +15,7 @@ echo ""
 
 # 1. Check current settings
 echo "[1/4] Current Cluster Health:"
-curl -s "http://$ES_HOST/_cluster/health" | jq '{status, active_shards, relocating_shards, initializing_shards}'
+curl -s -u "$ES_USER:$ES_PASS" "http://$ES_HOST/_cluster/health" | jq '{status, active_shards, relocating_shards, initializing_shards}'
 
 # 2. Optimize index refresh interval
 echo ""
@@ -34,7 +34,7 @@ curl -s -X PUT "http://$ES_HOST/_settings" \
 # 4. Check stats
 echo ""
 echo "[4/4] Cluster Health After Tuning:"
-curl -s "http://$ES_HOST/_cluster/health" | jq '{status, active_shards}'
+curl -s -u "$ES_USER:$ES_PASS" "http://$ES_HOST/_cluster/health" | jq '{status, active_shards}'
 
 echo ""
 echo "✓ Performance tuning complete!"

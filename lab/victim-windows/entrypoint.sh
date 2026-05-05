@@ -1,18 +1,29 @@
 #!/bin/bash
+
+# Start Samba
+service smbd start 2>/dev/null || true
+service nmbd start 2>/dev/null || true
+echo "[windows] SMB started"
+
 # ── victim-windows entrypoint ──────────────────────────────────────────
 # Services
 rsyslogd 2>/dev/null || true
 python3 /usr/local/bin/fake-win-events.py &
-/var/ossec/bin/wazuh-modulesd &
-sleep 3
-# Auto-enroll if no client.keys (e.g. after full container recreate)
-if [ ! -s /var/ossec/etc/client.keys ]; then
-    echo "[wazuh] No enrollment found — enrolling with wazuh-manager..."
-    /var/ossec/bin/agent-auth -m wazuh-manager -p 1515 -A victim-windows 2>/dev/null || true
-    sleep 2
-fi
-/var/ossec/bin/wazuh-agentd 2>/dev/null || true
 
+# ── Wazuh auto-enroll (survives reboot) ──────────────────────
+/var/ossec/bin/wazuh-modulesd 2>/dev/null &
+sleep 2
+if [ ! -s /var/ossec/etc/client.keys ]; then
+    echo "[wazuh] No enrollment — enrolling with wazuh-manager..."
+    rm -f /var/ossec/var/run/wazuh-agentd-*.pid 2>/dev/null
+    for attempt in 1 2 3 4 5; do
+        /var/ossec/bin/agent-auth -m wazuh-manager -p 1515 -A "$(hostname)" 2>/dev/null && break
+        echo "[wazuh] Attempt $attempt failed, retrying in 10s..."
+        sleep 10
+    done
+fi
+rm -f /var/ossec/var/run/wazuh-agentd-*.pid 2>/dev/null
+/var/ossec/bin/wazuh-agentd 2>/dev/null || true
 AGENT_BIN=$(find /opt/elastic-agent/data/ -name "elastic-agent" -type f -executable 2>/dev/null | head -1)
 
 echo "[fleet] Waiting for fleet-server..."

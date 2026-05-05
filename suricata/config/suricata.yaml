@@ -38,7 +38,7 @@ outputs:
             threads: no
 
 af-packet:
-  - interface: br-63d3dfcd6f1b
+  - interface: eth0
     cluster-id: 99
     cluster-type: cluster_flow
     defrag: yes

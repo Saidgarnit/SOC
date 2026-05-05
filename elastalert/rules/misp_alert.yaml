@@ -1,5 +1,5 @@
 alert: slack
-alert_text: 'MISP Match: Event {misp_event_id} - {src_ip} to {dest_ip}:{dest_port}'
+alert_text: 'MISP Match: Event {misp_event_id} - %(src_ip)s to %(dest_ip)s:{dest_port}'
 alert_text_type: alert_text_only
 filter:
 - query:
@@ -15,5 +15,5 @@ realert:
 slack_icon_emoji: ':red_circle:'
 slack_msg_color: danger
 slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+slack_webhook_url: https://hooks.slack.com/services/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
 type: any

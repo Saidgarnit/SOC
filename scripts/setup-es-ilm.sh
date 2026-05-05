@@ -36,7 +36,7 @@ ILM_POLICY='{
   }
 }'
 
-RESPONSE=$(curl -s -X PUT "http://$ES_HOST/_ilm/policy/soc-policy" \
+RESPONSE=$(curl -s -u "$ES_USER:$ES_PASS" -X PUT "http://$ES_HOST/_ilm/policy/soc-policy" \
   -H "Content-Type: application/json" \
   -d "$ILM_POLICY")
 

@@ -1,22 +1,25 @@
 alert: slack
-alert_text: 'Agent Status: {agent.name} - {rule.description}'
 alert_text_type: alert_text_only
+alert_text: "Wazuh Agent Status Change\nAgent: {0}\nRule: {1}"
+alert_text_args:
+  - agent.name
+  - rule.description
 filter:
 - query:
     bool:
-      minimum_should_match: 1
       should:
       - term:
           rule.id: '506'
       - term:
           rule.id: '501'
-index: wazuh-alerts-*
-name: "Wazuh \u2014 Agent Status Change"
+      minimum_should_match: 1
+index: .ds-wazuh-alerts-4.x-*
+name: "Wazuh — Agent Status Change"
 query_key: agent.name
 realert:
-  minutes: 15
+  hours: 2
 slack_icon_emoji: ':robot_face:'
 slack_msg_color: warning
 slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/YOUR_REAL_WEBHOOK
+slack_webhook_url: https://hooks.slack.com/services/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
 type: any
