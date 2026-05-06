@@ -1,25 +1,39 @@
-name: "⬆️ Wazuh — Privilege Escalation"
+name: "⬆️  Privilege Escalation — Wazuh"
 type: any
 index: .ds-wazuh-alerts-4.x-*
 realert:
-  minutes: 10
+  minutes: 15
 query_key: agent.name
 filter:
 - query:
     bool:
       minimum_should_match: 1
       should:
-      - match:
-          rule.groups: priv_esc
-      - match:
-          rule.groups: sudo
+      - terms:
+          rule.groups:
+          - priv_esc
+      - terms:
+          rule.groups:
+          - sudo
 
 alert:
 - slack
 alert_text_type: alert_text_only
-alert_text: "\n⬆️ *Wazuh — Privilege Escalation*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nHost: {1} ({2})\nLevel: {3} | Rule: {4}\nDescription: {5}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMITRE ATT&CK:\n  Tactic: {6}\n  Technique: {7}\n  ID: {8}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nUser: {9}\nFull Log: {10}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nKibana: http://localhost:5601\n"
+alert_text: |
+  ⬆️  *Privilege Escalation*
+  `WAZUH / Privilege Abuse`
+
+  🕐 `{0}`
+  🖥️  Host: {1}  ({2})
+  📋 Level: {3}  Rule: {4}
+  📝 {5}
+
+  👤 User: {9}
+
+  🎯 MITRE: {8} — {6} / {7}
+  📊 http://localhost:5601
 alert_text_args:
-- '@timestamp'
+- "@timestamp"
 - agent.name
 - agent.ip
 - rule.level
@@ -29,9 +43,8 @@ alert_text_args:
 - rule.mitre.technique
 - rule.mitre.id
 - data.dstuser
-- full_log
 
 slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: SOC Alerts
-slack_icon_emoji: ':arrow_double_up:'
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":arrow_double_up:"
 slack_msg_color: danger

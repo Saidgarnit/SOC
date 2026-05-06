@@ -1,15 +1,16 @@
-name: "🐚 Wazuh — Webshell Indicator"
+name: "👾 Webshell Indicator — Wazuh"
 type: any
 index: .ds-wazuh-alerts-4.x-*
 realert:
-  minutes: 15
+  minutes: 20
 query_key: agent.name
 filter:
 - query:
     bool:
       must:
-      - match:
-          rule.groups: web
+      - terms:
+          rule.groups:
+          - web
       - range:
           rule.level:
             gte: 10
@@ -17,9 +18,22 @@ filter:
 alert:
 - slack
 alert_text_type: alert_text_only
-alert_text: "\n🐚 *Wazuh — Webshell Indicator*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nHost: {1} ({2})\nLevel: {3} | Rule: {4}\nDescription: {5}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMITRE ATT&CK:\n  Tactic: {6}\n  Technique: {7}\n  ID: {8}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nAttacker IP: {9}\nFull Log: {10}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nKibana: http://localhost:5601\n"
+alert_text: |
+  👾 *Webshell Indicator*
+  `WAZUH / Post-Exploitation`
+
+  🕐 `{0}`
+  🖥️  Host: {1}  ({2})
+  📋 Level: {3}  Rule: {4}
+  📝 {5}
+
+  🔴 Attacker: {9}
+
+  🎯 MITRE: {8} — {6} / {7}
+  ⚠️  Immediate Investigation Required
+  📊 http://localhost:5601
 alert_text_args:
-- '@timestamp'
+- "@timestamp"
 - agent.name
 - agent.ip
 - rule.level
@@ -29,9 +43,8 @@ alert_text_args:
 - rule.mitre.technique
 - rule.mitre.id
 - data.srcip
-- full_log
 
 slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: SOC Alerts
-slack_icon_emoji: ':ghost:'
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":ghost:"
 slack_msg_color: danger

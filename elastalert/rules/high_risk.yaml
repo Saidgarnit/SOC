@@ -1,8 +1,8 @@
-name: "🚨 Wazuh — High Risk Event"
+name: "🚨 High Risk Event — Level 13+"
 type: any
 index: .ds-wazuh-alerts-4.x-*
 realert:
-  minutes: 5
+  minutes: 20
 query_key: agent.name
 filter:
 - query:
@@ -15,9 +15,22 @@ filter:
 alert:
 - slack
 alert_text_type: alert_text_only
-alert_text: "\n🚨 *Wazuh — High Risk Event*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nHost: {1} ({2})\nLevel: {3} | Rule: {4}\nDescription: {5}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMITRE ATT&CK:\n  Tactic: {6}\n  Technique: {7}\n  ID: {8}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSource IP: {9}\nTarget User: {10}\nFull Log: {11}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nKibana: http://localhost:5601\n"
+alert_text: |
+  🚨 *High Risk Event*
+  `WAZUH / Critical Detection`
+
+  🕐 `{0}`
+  🖥️  Host: {1}  ({2})
+  📋 Level: {3}  Rule: {4}
+  📝 {5}
+
+  🔴 Src:  {9}
+  👤 User: {10}
+
+  🎯 MITRE: {8} — {6} / {7}
+  📊 http://localhost:5601
 alert_text_args:
-- '@timestamp'
+- "@timestamp"
 - agent.name
 - agent.ip
 - rule.level
@@ -28,9 +41,8 @@ alert_text_args:
 - rule.mitre.id
 - data.srcip
 - data.dstuser
-- full_log
 
 slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: SOC Alerts
-slack_icon_emoji: ':rotating_light:'
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":rotating_light:"
 slack_msg_color: danger
