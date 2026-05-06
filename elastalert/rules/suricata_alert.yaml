@@ -1,11 +1,11 @@
-name: "🛰️ Suricata — C2 Beaconing"
+name: "📡 C2 Beaconing — Command & Control"
 type: frequency
 index: suricata-alerts-*
 num_events: 3
 timeframe:
   minutes: 10
 realert:
-  minutes: 60
+  hours: 2
 query_key:
 - src_ip
 - dest_ip
@@ -14,27 +14,80 @@ filter:
     bool:
       must:
       - match_phrase:
-          alert.signature: C2 Beaconing
+          alert.signature: "C2 Beaconing"
       must_not:
-      - term:
-          src_ip: "172.18.0.13"
+      - terms:
+          src_ip:
+          - "172.18.0.1"
+          - "172.18.0.2"
+          - "172.18.0.3"
+          - "172.18.0.4"
+          - "172.18.0.5"
+          - "172.18.0.6"
+          - "172.18.0.7"
+          - "172.18.0.8"
+          - "172.18.0.9"
+          - "172.18.0.10"
+          - "172.18.0.11"
+          - "172.18.0.12"
+          - "172.18.0.13"
+          - "172.18.0.14"
+          - "172.18.0.15"
+          - "172.18.0.16"
+          - "172.18.0.17"
+          - "172.18.0.18"
+          - "172.18.0.19"
+          - "172.18.0.20"
+          - "172.18.0.21"
+          - "172.18.0.22"
+          - "172.18.0.23"
+          - "172.18.0.24"
+          - "172.18.0.25"
+          - "172.18.0.26"
+          - "172.18.0.27"
+          - "172.18.0.28"
+          - "172.18.0.29"
+          - "172.18.0.30"
+          - "172.18.0.31"
+          - "172.18.0.32"
+          - "172.18.0.33"
+          - "172.18.0.34"
       - terms:
           dest_ip:
-          - 91.189.91.83
-          - 91.189.91.84
-          - 34.120.127.130
-          - 199.232.82.217
-          - 34.95.113.255
-          - 76.223.57.73
-          - 18.134.215.41
-          - 3.33.241.96
+          - "91.189.91.83"
+          - "91.189.91.84"
+          - "91.189.92.24"
+          - "34.120.127.130"
+          - "34.95.113.255"
+          - "34.54.88.138"
+          - "199.232.82.217"
+          - "76.223.57.73"
+          - "18.134.215.41"
+          - "18.169.61.189"
+          - "18.169.120.191"
+          - "18.168.172.238"
+          - "3.33.241.96"
+          - "99.84.9.2"
+          - "185.125.190.81"
 
 alert:
 - slack
 alert_text_type: alert_text_only
-alert_text: "\n🛰️ *Suricata — C2 Beaconing*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nSignature: {1}\nSeverity: {2} | Category: {3}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nNetwork:\n  Source: {4}:{5}\n  C2 Server: {6}:{7}\n  Proto: {8} | Interface: {9}\n  Community ID: {10}\n  Action: {11}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMITRE: T1071 — Application Layer Protocol\nKibana: http://localhost:5601\n"
+alert_text: |
+  📡 *C2 Beaconing Detected*
+  `SURICATA / Command & Control`
+
+  🕐 `{0}`
+  📋 Rule: {1}  Severity: {2}
+
+  🔴 Infected   {4} : {5}
+  🔵 C2 Server  {6} : {7}
+  📡 {8}  via  {9}
+
+  🔗 T1071 — Application Layer Protocol
+  📊 http://localhost:5601
 alert_text_args:
-- '@timestamp'
+- "@timestamp"
 - alert.signature
 - alert.severity
 - alert.category
@@ -44,10 +97,8 @@ alert_text_args:
 - dest_port
 - proto
 - in_iface
-- community_id
-- alert.action
 
 slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: SOC Alerts
-slack_icon_emoji: ':satellite:'
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":satellite:"
 slack_msg_color: danger

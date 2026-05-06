@@ -1,25 +1,39 @@
-name: "🔐 Wazuh — Failed Login"
+name: "🔐 Failed Login — Wazuh"
 type: frequency
 index: .ds-wazuh-alerts-4.x-*
-num_events: 3
+num_events: 5
 timeframe:
-  minutes: 1
+  minutes: 2
 realert:
-  minutes: 10
+  minutes: 20
 query_key: agent.name
 filter:
 - query:
     bool:
       must:
-      - match:
-          rule.groups: authentication_failed
+      - terms:
+          rule.groups:
+          - authentication_failed
 
 alert:
 - slack
 alert_text_type: alert_text_only
-alert_text: "\n🔐 *Wazuh — Failed Login*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nHost: {1} ({2})\nLevel: {3} | Rule: {4}\nDescription: {5}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMITRE ATT&CK:\n  Tactic: {6}\n  Technique: {7}\n  ID: {8}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSource IP: {9}\nTarget User: {10}\nFull Log: {11}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nKibana: http://localhost:5601\n"
+alert_text: |
+  🔐 *Failed Login Attempts*
+  `WAZUH / Authentication`
+
+  🕐 `{0}`
+  🖥️  Host: {1}  ({2})
+  📋 Level: {3}  Rule: {4}
+  📝 {5}
+
+  🔴 Src IP: {9}
+  👤 User:   {10}
+
+  🎯 MITRE: {8} — {6} / {7}
+  📊 http://localhost:5601
 alert_text_args:
-- '@timestamp'
+- "@timestamp"
 - agent.name
 - agent.ip
 - rule.level
@@ -30,9 +44,8 @@ alert_text_args:
 - rule.mitre.id
 - data.srcip
 - data.dstuser
-- full_log
 
 slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: SOC Alerts
-slack_icon_emoji: ':no_entry:'
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":key:"
 slack_msg_color: warning
