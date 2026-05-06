@@ -2,7 +2,7 @@
 ---
 vars:
   address-groups:
-    HOME_NET: "[172.18.0.0/16]"
+    HOME_NET: "[172.20.0.0/24]"
     EXTERNAL_NET: "!$HOME_NET"
 
 default-log-dir: /var/log/suricata/
@@ -38,7 +38,7 @@ outputs:
             threads: no
 
 af-packet:
-  - interface: br-63d3dfcd6f1b
+  - interface: eth0
     cluster-id: 99
     cluster-type: cluster_flow
     defrag: yes

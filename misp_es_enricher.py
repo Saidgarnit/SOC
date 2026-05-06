@@ -4,14 +4,22 @@ misp_es_enricher.py
 Fetches IOC IPs from MISP, finds matching docs in soc-logs-enriched-*,
 tags them with 'misp_threat_match' so Elastalert MISP rule fires.
 """
-import requests, json, urllib3
+import os
+import requests
+import json
+import urllib3
+
 urllib3.disable_warnings()
 
-MISP_URL  = "http://localhost:9001"
-MISP_KEY  = "rRdEjTAv2QETQKKjK1bXrzFqXxWfQPn6TskkUmCM"
-ES_URL    = "http://localhost:9200"
-ES_AUTH   = ("elastic", "sYVfKJCe2RCfELjf=GLa")
-ES_INDEX  = "soc-logs-enriched-*"
+MISP_URL = os.getenv("MISP_URL", "http://localhost:9001")
+MISP_KEY = os.getenv("MISP_API_KEY", "")
+ES_URL = os.getenv("ELASTICSEARCH_HOST", "https://localhost:9200")
+ES_USER = os.getenv("ELASTIC_USERNAME", "elastic")
+ES_PASS = os.getenv("ELASTIC_PASSWORD", "")
+ES_CA_CERT = os.getenv("ES_CA_CERT")
+ES_AUTH = (ES_USER, ES_PASS) if ES_PASS else None
+ES_VERIFY = ES_CA_CERT if ES_CA_CERT else True
+ES_INDEX = "soc-logs-enriched-*"
 
 print("[1] Fetching IOC IPs from MISP...")
 r = requests.get(
@@ -36,7 +44,7 @@ query = {
     "_source": ["src_ip", "dest_ip", "tags", "@timestamp"]
 }
 r = requests.get(f"{ES_URL}/{ES_INDEX}/_search",
-    auth=ES_AUTH, json=query)
+    auth=ES_AUTH, json=query, verify=ES_VERIFY)
 hits = r.json().get("hits", {}).get("hits", [])
 print(f"    Found {len(hits)} matching documents")
 
@@ -46,7 +54,7 @@ if not hits:
         {"terms": {"src_ip": ioc_ips}},
         {"terms": {"dest_ip": ioc_ips}}
     ]}}
-    r = requests.get(f"{ES_URL}/{ES_INDEX}/_search", auth=ES_AUTH, json=query)
+    r = requests.get(f"{ES_URL}/{ES_INDEX}/_search", auth=ES_AUTH, json=query, verify=ES_VERIFY)
     hits = r.json().get("hits", {}).get("hits", [])
     print(f"    Found {len(hits)} matching documents (src+dest check)")
 
@@ -62,6 +70,7 @@ for hit in hits:
     r = requests.post(
         f"{ES_URL}/{idx}/_update/{did}",
         auth=ES_AUTH,
+        verify=ES_VERIFY,
         json={"script": {
             "source": "if (!ctx._source.containsKey('tags')) { ctx._source.tags = [] } ctx._source.tags.add('misp_threat_match'); ctx._source.threat_intel_info = params.info",
             "params": {"info": f"MISP IOC match: {src.get('src_ip', src.get('dest_ip', 'unknown'))}"}

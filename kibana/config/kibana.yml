@@ -1,11 +1,14 @@
 # Kibana configuration
 server.host: "0.0.0.0"
 server.shutdownTimeout: "5s"
-elasticsearch.hosts: ["http://elasticsearch:9200"]
+server.ssl.enabled: true
+server.ssl.certificate: /usr/share/kibana/config/certs/certs/kibana.crt
+server.ssl.key: /usr/share/kibana/config/certs/certs/kibana.key
+server.publicBaseUrl: "https://localhost:5601"
+elasticsearch.hosts: ["https://elasticsearch:9200"]
+elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca/ca.crt"]
 monitoring.ui.container.elasticsearch.enabled: true
-xpack.security.encryptionKey: "60dc7ab801f4f962da3fc2d6c18f9923"
-xpack.encryptedSavedObjects.encryptionKey: "447ce0051a66de9478bdd5a449036a42"
-xpack.reporting.encryptionKey: "4b7543b890a04395d292c484273bf734"
+xpack.fleet.agents.fleet_server.hosts: ["https://fleet-server:8220"]
 
 # Task Manager tuning (fixes degraded status)
 xpack.task_manager.max_workers: 20

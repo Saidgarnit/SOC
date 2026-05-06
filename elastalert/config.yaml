@@ -5,8 +5,11 @@ buffer_time:
   minutes: 15
 es_host: elasticsearch
 es_port: 9200
-es_username: elastic
-es_password: "sYVfKJCe2RCfELjf=GLa"
+es_username: ${ELASTIC_USERNAME}
+es_password: ${ELASTIC_PASSWORD}
+use_ssl: true
+verify_certs: true
+ca_certs: /opt/elastalert/certs/ca/ca.crt
 writeback_index: elastalert_status
 alert_time_limit:
   days: 2
@@ -14,17 +17,17 @@ start_from_tail: true
 scroll_keepalive: 30s
 
 # SMTP settings kept so per-rule email works
-smtp_host: smtp.gmail.com
-smtp_port: 587
+smtp_host: ${SMTP_HOST}
+smtp_port: ${SMTP_PORT}
 smtp_ssl: false
 smtp_starttls: true
-from_addr: "garnitsaid01@gmail.com"
+from_addr: "${SMTP_FROM}"
 smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
-email_reply_to: "garnitsaid01@gmail.com"
+email_reply_to: "${SMTP_REPLY_TO}"
 
 # Global Slack webhook — override per-rule or set env SLACK_WEBHOOK_URL
 # Replace YOUR_REAL_WEBHOOK with your actual Slack incoming webhook URL
 # Example: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
-slack_webhook_url: "${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/YOUR_REAL_WEBHOOK}"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 
 # NO global alert: or email: here — each rule controls its own alerting

@@ -2,7 +2,7 @@
 # Run before wazuh-manager starts to pre-create required directories
 YEAR=$(date +%Y)
 MONTH=$(date +%b)
-BASE=/home/said/soc-stack/wazuh/logs
+BASE=/var/ossec/logs
 
 mkdir -p $BASE/alerts/$YEAR/$MONTH
 mkdir -p $BASE/archives/$YEAR/$MONTH

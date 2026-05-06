@@ -1,7 +1,8 @@
 #!/bin/sh
 rm -f /var/ossec/var/start-script-lock
-FLEET_URL="${FLEET_URL:-http://fleet-server:8220}"
-ENROLL_TOKEN="${ENROLL_TOKEN:-RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw==}"
+FLEET_URL="${FLEET_URL:-https://fleet-server:8220}"
+ENROLL_TOKEN="${FLEET_ENROLLMENT_TOKEN:-}"
+FLEET_CA_CERT="${FLEET_CA_CERT:-/etc/elastic-agent/certs/ca/ca.crt}"
 AGENT_DIR="/opt/elastic-agent"
 HOSTNAME="$(hostname)"
 
@@ -10,7 +11,7 @@ log() { echo "[entrypoint] $*"; }
 wait_for_fleet() {
     log "Waiting for Fleet Server at $FLEET_URL ..."
     for i in $(seq 1 30); do
-        STATUS=$(curl -sf "$FLEET_URL/api/status" 2>/dev/null \
+        STATUS=$(curl -sf --cacert "$FLEET_CA_CERT" "$FLEET_URL/api/status" 2>/dev/null \
                  | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
         if [ "$STATUS" = "HEALTHY" ] || [ "$STATUS" = "degraded" ]; then
             log "Fleet Server is $STATUS ✔"
@@ -24,11 +25,11 @@ wait_for_fleet() {
 }
 
 already_online() {
-    RESULT=$(curl -sf \
+    RESULT=$(curl -sf --cacert "$FLEET_CA_CERT" \
         -u "${ES_USER:-elastic}:${ES_PASS:-changeme}" \
         -H "Content-Type: application/json" \
         -d "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"local_metadata.host.hostname\":\"$HOSTNAME\"}},{\"term\":{\"status\":\"online\"}}]}}}" \
-        "http://${ES_HOST:-elasticsearch}:9200/.fleet-agents/_search" 2>/dev/null \
+        "https://${ES_HOST:-elasticsearch}:9200/.fleet-agents/_search" 2>/dev/null \
         | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['hits']['total']['value'])" 2>/dev/null)
     [ "${RESULT:-0}" -gt 0 ]
 }
@@ -45,7 +46,7 @@ enroll() {
     cd "$AGENT_DIR" && "$AGENT_BIN" enroll \
         --url="$FLEET_URL" \
         --enrollment-token="$ENROLL_TOKEN" \
-        --insecure -f
+        --certificate-authorities="$FLEET_CA_CERT" -f
     log "Enrollment complete ✔"
 }
 

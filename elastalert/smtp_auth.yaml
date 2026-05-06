@@ -1,2 +1,2 @@
-user: "garnitsaid01@gmail.com"
-password: "mrov tgks ycki iyvq"
+user: "${SMTP_USER}"
+password: "${SMTP_PASSWORD}"

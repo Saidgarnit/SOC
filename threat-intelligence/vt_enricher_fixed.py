@@ -11,10 +11,12 @@ from datetime import datetime, timezone
 
 # ── Config ──────────────────────────────────────────
 VT_API_KEY = os.getenv("VIRUSTOTAL_API_KEY", "")
-ES_HOST    = os.getenv("ES_HOST", "http://localhost:9200")
+ES_HOST    = os.getenv("ES_HOST", "https://elasticsearch:9200")
 ES_USER    = os.getenv("ES_USER", "elastic")
 ES_PASS    = os.getenv("ES_PASS", "")
+ES_CA_CERT = os.getenv("ES_CA_CERT")
 ES_AUTH    = (ES_USER, ES_PASS) if ES_PASS else None
+ES_VERIFY  = ES_CA_CERT if ES_CA_CERT else True
 VT_API_URL = "https://www.virustotal.com/api/v3"
 POLL_INTERVAL = 30
 
@@ -86,6 +88,7 @@ def get_recent_alerts(index="wazuh-alerts-*", size=10):
             json=query,
             headers={"Content-Type": "application/json"},
             auth=ES_AUTH,
+            verify=ES_VERIFY,
             timeout=10
         )
         if response.status_code == 200:
@@ -111,6 +114,7 @@ def update_alert(index, doc_id, vt_data, severity, score):
             json=update,
             headers={"Content-Type": "application/json"},
             auth=ES_AUTH,
+            verify=ES_VERIFY,
             timeout=10
         )
         return response.status_code == 200

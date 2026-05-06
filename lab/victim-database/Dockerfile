@@ -20,8 +20,11 @@ RUN curl -so elastic-agent.tar.gz \
     && rm elastic-agent.tar.gz \
     && ln -sf /opt/elastic-agent /usr/share/elastic-agent
 
-RUN sed -i "s|hosts: \[127.0.0.1:9200\]|hosts: [elasticsearch:9200]|g" \
+RUN sed -i "s|hosts: \[127.0.0.1:9200\]|hosts: [https://elasticsearch:9200]|g" \
     /opt/elastic-agent/elastic-agent.yml
+
+# Allow remote MySQL connections by default
+RUN sed -i "s/^bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
 
 # Create vulnerable MySQL setup
 RUN service mysql start || true

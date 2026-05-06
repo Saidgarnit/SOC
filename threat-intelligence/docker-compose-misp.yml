@@ -4,23 +4,23 @@ services:
     image: mysql:8.0
     container_name: misp-db
     environment:
-      MYSQL_ROOT_PASSWORD: misp_root_password
+      MYSQL_ROOT_PASSWORD: ${MISP_DB_ROOT_PASSWORD}
       MYSQL_DATABASE: misp
       MYSQL_USER: misp
-      MYSQL_PASSWORD: misp_password
+      MYSQL_PASSWORD: ${MISP_DB_PASSWORD}
     volumes:
       - misp-db-data:/var/lib/mysql
     networks:
-      - soc-net
+      - soc-internal
     restart: unless-stopped
 
   # MISP Redis Cache (set password to match what MISP/PHP expects)
   misp-redis:
     image: redis:7-alpine
     container_name: misp-redis
-    command: ["redis-server", "--requirepass", "redispassword"]
+    command: ["redis-server", "--requirepass", "${MISP_REDIS_PASSWORD}"]
     networks:
-      - soc-net
+      - soc-internal
     restart: unless-stopped
 
   # MISP Core
@@ -33,12 +33,12 @@ services:
     environment:
       - MYSQL_HOST=misp-db
       - MYSQL_USER=misp
-      - MYSQL_PASSWORD=misp_password
+      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
       - MYSQL_DATABASE=misp
       - REDIS_HOST=misp-redis
-      - MISP_ADMIN_EMAIL=admin@misp.local
-      - MISP_ADMIN_PASSWORD=Admin@123
-      - MISP_BASEURL=https://localhost
+      - MISP_ADMIN_EMAIL=${MISP_ADMIN_EMAIL}
+      - MISP_ADMIN_PASSWORD=${MISP_ADMIN_PASSWORD}
+      - MISP_BASEURL=${MISP_BASE_URL}
     depends_on:
       - misp-db
       - misp-redis
@@ -49,7 +49,8 @@ services:
       - ./misp-nginx/includes-misp:/etc/nginx/includes/misp:ro
       - ./misp-nginx/misp443:/etc/nginx/sites-enabled/misp443:ro
     networks:
-      - soc-net
+      - soc-management
+      - soc-internal
     restart: unless-stopped
 
 volumes:
@@ -58,6 +59,9 @@ volumes:
   misp-files:
 
 networks:
-  soc-net:
+  soc-internal:
     external: true
-    name: soc-stack_soc-net
+    name: soc-stack_soc-internal
+  soc-management:
+    external: true
+    name: soc-stack_soc-management

@@ -15,9 +15,11 @@ setup.template.overwrite: true
 setup.ilm.enabled: false
 
 output.elasticsearch:
-  hosts: ['http://elasticsearch:9200']
-  username: elastic
-  password: "sYVfKJCe2RCfELjf=GLa"
+  hosts: ['${ELASTICSEARCH_HOST}']
+  username: ${ELASTIC_USERNAME}
+  password: "${ELASTIC_PASSWORD}"
+  ssl.certificate_authorities: ['/var/ossec/etc/certs/ca/ca.crt']
+  ssl.verification_mode: full
 
 logging.level: info
 logging.to_files: true
