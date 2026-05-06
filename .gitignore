@@ -1,6 +1,10 @@
 # Permission denied dirs
 wazuh/logs/
 wazuh/config/
+wazuh/alerts/
+wazuh/archives/
+wazuh/agent-keys/
+wazuh/client.keys
 lab/elastic-agent-bin/
 venv/
 
@@ -8,11 +12,22 @@ venv/
 wazuh/config/shared/default/merged.mg
 *.bak
 *.pre-*
+wazuh/ossec.conf.bak*
+wazuh/ossec.conf.mergebak*
 
 # Secrets (keep these local only)
 .env
+.env.*
+!.env.example
 suricata/logs/
+# Generated configs/logs
+*.log
+elastalert/config.yaml
+elastalert/smtp_auth.yaml
+elastalert/rendered_rules/
+threat-intelligence/cache/misp_iocs.json
 # Large binaries - not for git
 lab/victim-windows/elastic-agent-bin/
 suricata/logs/
 logstash/geoip/*.mmdb
+elasticsearch/kibana-token.txt

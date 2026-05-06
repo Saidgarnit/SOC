@@ -26,24 +26,13 @@ filebeat.inputs:
     fields_under_root: true
 
 
-  - type: log
-    enabled: true
-    paths:
-      - /var/log/suricata/eve.json
-    json.message_key: message
-    json.keys_under_root: true
-    json.add_error_key: true
-    fields:
-      log_source: suricata
-    fields_under_root: true
-
 setup.template.enabled: false
 setup.ilm.enabled: false
 
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
-  username: "elastic"
-  password: "sYVfKJCe2RCfELjf=GLa"
+  username: "${ELASTIC_USERNAME}"
+  password: "${ELASTIC_PASSWORD}"
   indices:
     - index: "suricata-alerts-%{+yyyy.MM.dd}"
       when.equals:

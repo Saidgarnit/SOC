@@ -38,7 +38,7 @@ outputs:
             threads: no
 
 af-packet:
-  - interface: br-a213411967d6
+  - interface: eth0
     cluster-id: 99
     cluster-type: cluster_flow
     defrag: yes
@@ -71,6 +71,21 @@ app-layer:
 
 rule-files:
   - /etc/suricata/rules/local.rules
+  - /etc/suricata/rules/rules/emerging-malware.rules
+  - /etc/suricata/rules/rules/emerging-exploit.rules
+  - /etc/suricata/rules/rules/emerging-exploit_kit.rules
+  - /etc/suricata/rules/rules/emerging-scan.rules
+  - /etc/suricata/rules/rules/emerging-web_server.rules
+  - /etc/suricata/rules/rules/emerging-web_specific_apps.rules
+  - /etc/suricata/rules/rules/emerging-sql.rules
+  - /etc/suricata/rules/rules/emerging-dns.rules
+  - /etc/suricata/rules/rules/emerging-ftp.rules
+  - /etc/suricata/rules/rules/emerging-shellcode.rules
+  - /etc/suricata/rules/rules/emerging-policy.rules
+  - /etc/suricata/rules/rules/tor.rules
+  - /etc/suricata/rules/rules/botcc.rules
+  - /etc/suricata/rules/rules/compromised.rules
+  - /etc/suricata/rules/rules/threatview_CS_c2.rules
 
 classification-file: /etc/suricata/classification.config
 reference-config-file: /etc/suricata/reference.config

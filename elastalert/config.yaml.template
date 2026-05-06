@@ -1,0 +1,25 @@
+rules_folder: /opt/elastalert/rendered_rules
+run_every:
+  minutes: 1
+buffer_time:
+  minutes: 15
+es_host: ${ELASTICSEARCH_HOST:-elasticsearch}
+es_port: ${ELASTICSEARCH_PORT:-9200}
+es_username: ${ELASTIC_USERNAME}
+es_password: ${ELASTIC_PASSWORD}
+writeback_index: elastalert_status
+alert_time_limit:
+  days: 2
+start_from_tail: true
+scroll_keepalive: 30s
+
+# SMTP settings kept so per-rule email works
+smtp_host: ${SMTP_HOST:-smtp.gmail.com}
+smtp_port: ${SMTP_PORT:-587}
+smtp_ssl: ${SMTP_SSL:-false}
+smtp_starttls: ${SMTP_STARTTLS:-true}
+from_addr: ${SMTP_FROM}
+smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
+email_reply_to: ${SMTP_FROM}
+
+# NO global alert: or email: here — each rule controls its own alerting

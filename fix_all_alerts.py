@@ -9,7 +9,7 @@ SMTP = {
     'from_addr': 'garnitsaid01@gmail.com',
 }
 SLACK = {
-    'slack_webhook_url': 'https://hooks.slack.com/services/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',
+    'slack_webhook_url': '${SLACK_WEBHOOK_URL}
     'slack_username_override': 'SOC-Alert-Bot',
     'slack_emoji_override': ':rotating_light:',
     'slack_msg_color': 'danger',

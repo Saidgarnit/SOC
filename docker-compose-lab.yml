@@ -7,17 +7,17 @@ services:
     environment:
       - FLEET_SERVER_ENABLE=1
       - FLEET_SERVER_ELASTICSEARCH_HOST=http://elasticsearch:9200
-      - FLEET_SERVER_ELASTICSEARCH_USERNAME=elastic
-      - FLEET_SERVER_ELASTICSEARCH_PASSWORD=SOCstack2026!
-      - FLEET_SERVER_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXRva2VuLTE6ZEJVUy10d1ZUVy02d2ZYY0FkNmZoUQ
-      - FLEET_SERVER_POLICY_ID=fleet-server-policy
+      - FLEET_SERVER_ELASTICSEARCH_USERNAME=${FLEET_SERVER_ELASTICSEARCH_USERNAME}
+      - FLEET_SERVER_ELASTICSEARCH_PASSWORD=${FLEET_SERVER_ELASTICSEARCH_PASSWORD}
+      - FLEET_SERVER_SERVICE_TOKEN=${FLEET_SERVER_SERVICE_TOKEN}
+      - FLEET_SERVER_POLICY_ID=${FLEET_SERVER_POLICY_ID:-fleet-server-policy}
       - FLEET_SERVER_INSECURE_HTTP=1
-      - FLEET_SERVER_HOST=0.0.0.0
+      - FLEET_SERVER_HOST=${FLEET_SERVER_HOST:-0.0.0.0}
       - FLEET_URL=http://fleet-server:8220
     ports:
-      - "8220:8220"
+      - "127.0.0.1:8220:8220"
     networks:
-      - soc-net
+      - soc-core
     restart: unless-stopped
   victim-ubuntu:
     build:
@@ -25,7 +25,6 @@ services:
       dockerfile: Dockerfile
     container_name: victim-ubuntu
     mem_limit: 400m
-    privileged: true
     cap_add:
       - SYS_ADMIN
       - SYS_PTRACE
@@ -34,13 +33,14 @@ services:
       - seccomp:unconfined
     hostname: victim-ubuntu
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "2222:22"
-      - "8888:80"
-      - "2121:21"
+      - "127.0.0.1:2222:22"
+      - "127.0.0.1:8888:80"
+      - "127.0.0.1:2121:21"
     environment:
-      ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
+      ELASTIC_TOKEN: ${ELASTIC_AGENT_ENROLLMENT_TOKEN}
     restart: unless-stopped
     volumes:
       - yara-ubuntu-www:/var/www/html
@@ -50,15 +50,15 @@ services:
     container_name: victim-metasploitable
     mem_limit: 400m
     hostname: victim-metasploitable
-    privileged: true
     tty: true
     stdin_open: true
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "2223:22"
-      - "8889:80"
-      - "2122:21"
+      - "127.0.0.1:2223:22"
+      - "127.0.0.1:8889:80"
+      - "127.0.0.1:2122:21"
     restart: unless-stopped
     labels:
       wazuh.skip: i386-incompatible
@@ -66,7 +66,6 @@ services:
     image: victim-dvwa-img:latest
     container_name: victim-dvwa
     mem_limit: 400m
-    privileged: true
     cap_add:
       - SYS_ADMIN
       - SYS_PTRACE
@@ -75,11 +74,12 @@ services:
       - seccomp:unconfined
     hostname: victim-dvwa
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "8890:80"
+      - "127.0.0.1:8890:80"
     environment:
-      ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
+      ELASTIC_TOKEN: ${ELASTIC_AGENT_ENROLLMENT_TOKEN}
     restart: unless-stopped
     volumes:
       - yara-dvwa:/var/www/html
@@ -90,7 +90,6 @@ services:
       dockerfile: Dockerfile
     container_name: victim-iot
     mem_limit: 400m
-    privileged: true
     cap_add:
       - SYS_ADMIN
       - SYS_PTRACE
@@ -99,12 +98,13 @@ services:
       - seccomp:unconfined
     hostname: victim-iot
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "1883:1883"
-      - "8891:8080"
+      - "127.0.0.1:1883:1883"
+      - "127.0.0.1:8891:8080"
     environment:
-      ELASTIC_TOKEN: MGZOcm5aMEJCMGI0TGVLWGlvcVg6ZVpuQmljTFdTN2VlTjlEVzh6ajhSZw==
+      ELASTIC_TOKEN: ${ELASTIC_AGENT_ENROLLMENT_TOKEN}
     restart: unless-stopped
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
@@ -113,7 +113,8 @@ services:
     container_name: kali-attacker
     hostname: kali-attacker
     networks:
-      - soc-net
+      - soc-attack
+      - soc-victims
     stdin_open: true
     tty: true
     command: bash -c "apt-get update -qq && apt-get install -y -qq nmap hydra curl netcat-openbsd nikto sqlmap 2>/dev/null; tail -f /dev/null"
@@ -126,11 +127,11 @@ services:
     mem_limit: 512m
     hostname: victim-database
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     restart: unless-stopped
-    privileged: true
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-mail:
@@ -141,12 +142,12 @@ services:
     mem_limit: 400m
     hostname: victim-mail
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "2525:25"
-      - "1143:143"
+      - "127.0.0.1:2525:25"
+      - "127.0.0.1:1143:143"
     restart: unless-stopped
-    privileged: true
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-dns:
@@ -157,7 +158,8 @@ services:
     mem_limit: 400m
     hostname: victim-dns
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     restart: unless-stopped
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
@@ -169,11 +171,11 @@ services:
     mem_limit: 512m
     hostname: victim-jenkins
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "9090:8080"
+      - "127.0.0.1:9090:8080"
     restart: unless-stopped
-    privileged: true
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-ftp:
@@ -183,31 +185,32 @@ services:
     hostname: victim-ftp
     environment:
       FTP_USER: ftpuser
-      FTP_PASS: password123
+      FTP_PASS: ${FTP_PASS:-password123}
       PASV_MIN_PORT: "21100"
       PASV_MAX_PORT: "21110"
       ANONYMOUS_ENABLE: "YES"
       LOCAL_ENABLE: "YES"
       WRITE_ENABLE: "YES"
     ports:
-      - "2124:21"
-      - "21100-21110:21100-21110"
+      - "127.0.0.1:2124:21"
+      - "127.0.0.1:21100-21110:21100-21110"
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     restart: unless-stopped
     volumes:
       - yara-ftp:/home/vsftpd
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
-    privileged: true
   victim-webapi:
     image: raesene/bwapp
     container_name: victim-webapi
     mem_limit: 512m
     hostname: victim-webapi
     ports:
-      - "8892:80"
+      - "127.0.0.1:8892:80"
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     restart: unless-stopped
     command: ["/run.sh"]
     volumes:
@@ -221,18 +224,24 @@ services:
     mem_limit: 400m
     hostname: victim-windows
     networks:
-      - soc-net
+      - soc-core
+      - soc-victims
     ports:
-      - "4445:445"
-      - "1390:139"
+      - "127.0.0.1:4445:445"
+      - "127.0.0.1:1390:139"
     restart: unless-stopped
-    privileged: true
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
 networks:
-  soc-net:
+  soc-core:
     external: true
-    name: soc-stack_soc-net
+    name: soc-core
+  soc-victims:
+    name: soc-victims
+    driver: bridge
+  soc-attack:
+    name: soc-attack
+    driver: bridge
 volumes:
   yara-dvwa:
     external: true

@@ -1,7 +1,7 @@
 import os
 
 rules_dir = '/home/said/soc-stack/elastalert/rules'
-slack_url = 'https://hooks.slack.com/services/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'
+slack_url = '${SLACK_WEBHOOK_URL}
 at = chr(64)
 dot = chr(46)
 email = 'garnitsaid01' + at + 'gmail' + dot + 'com'
@@ -62,7 +62,7 @@ def build(name, typ, index, extra_top, filters, subject, body, alert_list, email
     return '\n'.join(lines) + '\n'
 
 wazuh_idx = '.ds-wazuh-alerts-4.x-*'
-soc_idx = 'soc-logs-enriched-*'
+soc_idx = 'soc-logs-enriched*'
 
 def wazuh_body(title, icon, extra_lines=None):
     b = [

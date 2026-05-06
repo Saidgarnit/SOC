@@ -4,14 +4,14 @@ rules = {
     "suricata_alert.yaml": """
 name: Suricata Network IDS Alert
 type: any
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 filter:
   - term:
       event_type: "alert"
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":warning:"
 
@@ -46,7 +46,7 @@ alert_subject_args:
     "suricata_brute_force.yaml": """
 name: Suricata SSH/FTP Brute Force
 type: frequency
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 num_events: 5
 timeframe:
   minutes: 5
@@ -56,7 +56,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":rotating_light:"
 
@@ -86,7 +86,7 @@ alert_subject_args:
     "port_scan.yaml": """
 name: Port Scan Detection
 type: frequency
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 num_events: 10
 timeframe:
   minutes: 2
@@ -96,7 +96,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":mag:"
 
@@ -131,7 +131,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":spider_web:"
 
@@ -171,7 +171,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":key:"
 
@@ -206,7 +206,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":file_folder:"
 
@@ -244,7 +244,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":lock:"
 
@@ -279,7 +279,7 @@ filter:
 alert:
   - slack
   - email
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":rotating_light:"
 
@@ -327,7 +327,7 @@ filter:
 alert:
   - slack
   - email
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":arrow_up:"
 
@@ -368,7 +368,7 @@ filter:
 alert:
   - slack
   - email
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":arrows_counterclockwise:"
 
@@ -409,7 +409,7 @@ filter:
 alert:
   - slack
   - email
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":globe_with_meridians:"
 
@@ -442,14 +442,14 @@ alert_subject_args:
     "dns_exfiltration.yaml": """
 name: DNS Exfiltration
 type: any
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 filter:
   - query_string:
       query: 'alert.signature:(*DNS* OR *exfil*) AND event_type:alert'
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":dns:"
 
@@ -484,7 +484,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":file_cabinet:"
 
@@ -509,14 +509,14 @@ alert_subject_args:
     "mqtt_anomaly.yaml": """
 name: MQTT Anomaly Detection
 type: any
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 filter:
   - query_string:
       query: 'alert.signature:(*MQTT* OR *IoT*) AND event_type:alert'
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":satellite:"
 
@@ -539,14 +539,14 @@ alert_subject_args:
     "vt_alert.yaml": """
 name: VirusTotal Malicious Detection
 type: any
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 filter:
   - term:
       vt_malicious: "2"
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":biohazard_sign:"
 
@@ -566,14 +566,14 @@ alert_subject_args: []
     "misp_alert.yaml": """
 name: MISP IOC Match
 type: any
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 filter:
   - exists:
       field: "misp_ioc"
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":warning:"
 
@@ -601,7 +601,7 @@ filter:
 
 alert:
   - slack
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: "SOC-RANGE-ELASTALERT"
 slack_emoji_override: ":rotating_light:"
 

@@ -1,6 +1,6 @@
 name: "🎯 MISP — IOC Match"
 type: any
-index: soc-logs-enriched-*
+index: soc-logs-enriched*
 realert:
   minutes: 60
 query_key: src_ip
@@ -8,13 +8,13 @@ filter:
 - query:
     bool:
       must:
-      - exists:
-          field: misp_event_id
+      - term:
+          tags: "misp_threat_match"
 
 alert:
 - slack
 alert_text_type: alert_text_only
-alert_text: "\n🎯 *MISP — IOC Match*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nSignature: {1}\nSeverity: {2} | Category: {3}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nNetwork:\n  Source: {4}:{5}\n  Destination: {6}:{7}\n  Proto: {8} | Interface: {9}\n  Community ID: {10}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nThreat Intel Match — Investigate Immediately\nKibana: http://localhost:5601\n"
+alert_text: "\n🎯 *MISP — IOC Match*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nTime: {0}\nSignature: {1}\nSeverity: {2} | Category: {3}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nNetwork:\n  Source: {4}:{5}\n  Destination: {6}:{7}\n  Proto: {8} | Interface: {9}\n  Community ID: {10}\n  Threat Info: {11}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nThreat Intel Match — Investigate Immediately\nKibana: http://localhost:5601\n"
 alert_text_args:
 - '@timestamp'
 - alert.signature
@@ -27,8 +27,9 @@ alert_text_args:
 - proto
 - in_iface
 - community_id
+- threat_intel_info
 
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
 slack_username_override: SOC Alerts
 slack_icon_emoji: ':red_circle:'
 slack_msg_color: danger

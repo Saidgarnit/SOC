@@ -136,7 +136,7 @@ vt_lines = [
     "# vt_malicious is INTEGER in ES — use range, not string match",
     "name: vt_malicious_enrichment_alert",
     "type: any",
-    "index: soc-logs-enriched-*",
+    "index: soc-logs-enriched*",
     "",
     "filter:",
     "  - range:",
@@ -172,7 +172,7 @@ print("""
   B) docker exec -it kali-attacker bash -c "curl -s http://5.188.86.172 || true"
 
   C) curl -s -u elastic:sYVfKJCe2RCfELjf=GLa \\
-       "http://localhost:9200/soc-logs-enriched-*/_search?q=source_ip:5.188.86.172&size=1" \\
+       "http://localhost:9200/soc-logs-enriched*/_search?q=source_ip:5.188.86.172&size=1" \\
        | python3 -m json.tool | grep -E "misp|vt_"
 
   D) docker logs elastalert --tail 100 | grep -i misp

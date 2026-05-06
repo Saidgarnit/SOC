@@ -16,8 +16,8 @@ setup.ilm.enabled: false
 
 output.elasticsearch:
   hosts: ['http://elasticsearch:9200']
-  username: elastic
-  password: "sYVfKJCe2RCfELjf=GLa"
+  username: ${ELASTIC_USERNAME}
+  password: "${ELASTIC_PASSWORD}"
 
 logging.level: info
 logging.to_files: true

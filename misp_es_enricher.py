@@ -4,14 +4,21 @@ misp_es_enricher.py
 Fetches IOC IPs from MISP, finds matching docs in soc-logs-enriched-*,
 tags them with 'misp_threat_match' so Elastalert MISP rule fires.
 """
-import requests, json, urllib3
+import os
+import requests
+import urllib3
 urllib3.disable_warnings()
 
-MISP_URL  = "http://localhost:9001"
-MISP_KEY  = "rRdEjTAv2QETQKKjK1bXrzFqXxWfQPn6TskkUmCM"
-ES_URL    = "http://localhost:9200"
-ES_AUTH   = ("elastic", "sYVfKJCe2RCfELjf=GLa")
-ES_INDEX  = "soc-logs-enriched-*"
+MISP_URL = os.getenv("MISP_URL", "http://misp")
+MISP_KEY = os.getenv("MISP_API_KEY", "")
+ES_URL = os.getenv("ES_HOST", "http://elasticsearch:9200")
+ES_USER = os.getenv("ELASTIC_USERNAME", "elastic")
+ES_PASS = os.getenv("ELASTIC_PASSWORD", "")
+ES_AUTH = (ES_USER, ES_PASS) if ES_PASS else None
+ES_INDEX  = "soc-logs-enriched*"
+
+if not MISP_KEY:
+    raise SystemExit("MISP_API_KEY is not set.")
 
 print("[1] Fetching IOC IPs from MISP...")
 r = requests.get(

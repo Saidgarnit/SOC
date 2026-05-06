@@ -12,16 +12,24 @@
 
 set -euo pipefail
 
-ES_URL="http://elasticsearch:9200"
 ELASTIC_PASSWORD="${ELASTIC_PASSWORD:-changeme}"
 TOKEN_FILE="/output/kibana-token.txt"
+CURL_OPTS=()
+if [ "${ELASTIC_HTTP_SSL_ENABLED:-false}" = "true" ]; then
+    ES_URL="https://elasticsearch:9200"
+    CURL_OPTS=(-k)
+else
+    ES_URL="http://elasticsearch:9200"
+fi
+
+es_curl() { es_curl "${CURL_OPTS[@]}" "$@"; }
 
 log() { echo "[ES-INIT] $(date '+%H:%M:%S') $*"; }
 
 # ── Wait for ES to accept connections ────────────────────────
 log "Waiting for Elasticsearch to be ready..."
 for i in $(seq 1 60); do
-    if curl -sf -u "elastic:${ELASTIC_PASSWORD}" \
+    if es_curl -u "elastic:${ELASTIC_PASSWORD}" \
             "${ES_URL}/_cluster/health" > /dev/null 2>&1; then
         log "Elasticsearch is ready."
         break
@@ -36,10 +44,10 @@ done
 
 # ── Verify / set elastic password ────────────────────────────
 log "Verifying elastic user credentials..."
-if ! curl -sf -u "elastic:${ELASTIC_PASSWORD}" \
+if ! es_curl -u "elastic:${ELASTIC_PASSWORD}" \
         "${ES_URL}/_cluster/health" > /dev/null 2>&1; then
     log "Password mismatch – attempting reset from bootstrap credentials..."
-    curl -sf -X POST "${ES_URL}/_security/user/elastic/_password" \
+    es_curl -X POST "${ES_URL}/_security/user/elastic/_password" \
         -H "Content-Type: application/json" \
         -u "elastic:changeme" \
         -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
@@ -50,11 +58,11 @@ fi
 # ── Create Kibana service account token ──────────────────────
 log "Creating Kibana service account token..."
 # Delete old token if it exists so we get a fresh one
-curl -sf -X DELETE \
+es_curl -X DELETE \
     "${ES_URL}/_security/service/elastic/kibana/credential/token/soc_kibana_token" \
     -u "elastic:${ELASTIC_PASSWORD}" > /dev/null 2>&1 || true
 
-TOKEN_RESPONSE=$(curl -sf -X POST \
+TOKEN_RESPONSE=$(es_curl -X POST \
     "${ES_URL}/_security/service/elastic/kibana/credential/token/soc_kibana_token" \
     -H "Content-Type: application/json" \
     -u "elastic:${ELASTIC_PASSWORD}")
@@ -69,12 +77,51 @@ else
     mkdir -p "$(dirname ${TOKEN_FILE})"
     echo "${TOKEN}" > "${TOKEN_FILE}"
     log "Token written to ${TOKEN_FILE}"
-    log ">>> Add to .env:  KIBANA_SERVICE_TOKEN=${TOKEN}"
+log ">>> Add to .env:  KIBANA_SERVICE_TOKEN=${TOKEN}"
 fi
+
+# ── ILM policies (retention + rollover) ──────────────────────
+log "Applying ILM policies..."
+es_curl -X PUT --fail-with-body "${ES_URL}/_ilm/policy/soc-logs-rollover" \
+    -H "Content-Type: application/json" \
+    -u "elastic:${ELASTIC_PASSWORD}" \
+    -d '{
+        "policy": {
+          "phases": {
+            "hot": {
+              "actions": {
+                "rollover": {
+                  "max_age": "7d",
+                  "max_size": "20gb"
+                }
+              }
+            },
+            "delete": {
+              "min_age": "30d",
+              "actions": { "delete": {} }
+            }
+          }
+        }
+      }' > /dev/null || true
+
+es_curl -X PUT --fail-with-body "${ES_URL}/_ilm/policy/soc-retention-30d" \
+    -H "Content-Type: application/json" \
+    -u "elastic:${ELASTIC_PASSWORD}" \
+    -d '{
+        "policy": {
+          "phases": {
+            "delete": {
+              "min_age": "30d",
+              "actions": { "delete": {} }
+            }
+          }
+        }
+      }' > /dev/null || true
+log "ILM policies applied."
 
 # ── Default index template: 0 replicas for single-node ───────
 log "Applying default index template (0 replicas, single-node)..."
-curl -sf -X PUT --fail-with-body "${ES_URL}/_index_template/soc_default" \
+es_curl -X PUT --fail-with-body "${ES_URL}/_index_template/soc_default" \
     -H "Content-Type: application/json" \
     -u "elastic:${ELASTIC_PASSWORD}" \
     -d '{
@@ -82,17 +129,17 @@ curl -sf -X PUT --fail-with-body "${ES_URL}/_index_template/soc_default" \
         "priority": 0,
         "template": {
             "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
-                "refresh_interval": "5s"
-            }
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s"
+          }
         }
     }' > /dev/null || true
 log "Default template applied."
 
 # ── Wazuh index template ─────────────────────────────────────
 log "Applying Wazuh index template..."
-curl -sf -X PUT --fail-with-body "${ES_URL}/_index_template/wazuh_alerts" \
+es_curl -X PUT --fail-with-body "${ES_URL}/_index_template/wazuh_alerts" \
     -H "Content-Type: application/json" \
     -u "elastic:${ELASTIC_PASSWORD}" \
     -d '{
@@ -100,9 +147,10 @@ curl -sf -X PUT --fail-with-body "${ES_URL}/_index_template/wazuh_alerts" \
         "priority": 10,
         "template": {
             "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
-                "refresh_interval": "5s"
+              "number_of_shards": 1,
+              "number_of_replicas": 0,
+              "refresh_interval": "5s",
+              "index.lifecycle.name": "soc-retention-30d"
             },
             "mappings": {
                 "properties": {
@@ -133,29 +181,68 @@ log "Wazuh template applied."
 
 # ── SOC enriched logs template ────────────────────────────────
 log "Applying soc-logs-enriched index template..."
-curl -sf -X PUT --fail-with-body "${ES_URL}/_index_template/soc_logs_enriched" \
+es_curl -X PUT --fail-with-body "${ES_URL}/_index_template/soc_logs_enriched" \
     -H "Content-Type: application/json" \
     -u "elastic:${ELASTIC_PASSWORD}" \
     -d '{
-        "index_patterns": ["soc-logs-enriched-*"],
+        "index_patterns": ["soc-logs-enriched*"],
         "priority": 10,
         "template": {
-            "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
-                "refresh_interval": "5s"
-            }
+          "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s",
+            "index.lifecycle.name": "soc-logs-rollover",
+            "index.lifecycle.rollover_alias": "soc-logs-enriched"
+          }
         }
     }' > /dev/null || true
 log "soc-logs-enriched template applied."
 
+# ── Alerts (MISP/Threats) template ───────────────────────────
+log "Applying alerts-soc-threats index template..."
+es_curl -X PUT --fail-with-body "${ES_URL}/_index_template/alerts_soc_threats" \
+    -H "Content-Type: application/json" \
+    -u "elastic:${ELASTIC_PASSWORD}" \
+    -d '{
+        "index_patterns": ["alerts-soc-threats*"],
+        "priority": 10,
+        "template": {
+          "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s",
+            "index.lifecycle.name": "soc-logs-rollover",
+            "index.lifecycle.rollover_alias": "alerts-soc-threats"
+          }
+        }
+    }' > /dev/null || true
+log "alerts-soc-threats template applied."
+
+# ── Initialize rollover aliases ──────────────────────────────
+log "Ensuring rollover aliases exist..."
+create_rollover_alias() {
+  local alias="$1"
+  local index="${alias}-000001"
+  if ! es_curl -u "elastic:${ELASTIC_PASSWORD}" "${ES_URL}/_alias/${alias}" > /dev/null 2>&1; then
+    es_curl -X PUT "${ES_URL}/${index}" \
+      -H "Content-Type: application/json" \
+      -u "elastic:${ELASTIC_PASSWORD}" \
+      -d "{\"aliases\":{\"${alias}\":{\"is_write_index\":true}}}" > /dev/null || true
+    log "Created rollover alias ${alias} -> ${index}"
+  fi
+}
+
+create_rollover_alias "soc-logs-enriched"
+create_rollover_alias "alerts-soc-threats"
+
 # ── Retry failed shard allocations ───────────────────────────
 log "Retrying any failed shard allocations..."
-curl -sf -X POST "${ES_URL}/_cluster/reroute?retry_failed=true" \
+es_curl -X POST "${ES_URL}/_cluster/reroute?retry_failed=true" \
     -u "elastic:${ELASTIC_PASSWORD}" > /dev/null || true
 
 # ── Final health check ────────────────────────────────────────
-HEALTH=$(curl -sf -u "elastic:${ELASTIC_PASSWORD}" \
+HEALTH=$(es_curl -u "elastic:${ELASTIC_PASSWORD}" \
     "${ES_URL}/_cluster/health?pretty" | grep '"status"' | tr -d ' ",' | cut -d: -f2)
 log "Cluster health: ${HEALTH}"
 

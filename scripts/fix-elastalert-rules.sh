@@ -9,7 +9,7 @@
 #   4. Fixes index pattern for Suricata rules
 #
 # Usage:
-#   export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../...
+#   export SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
 #   export EMAIL_TO=security-team@example.com
 #   ./scripts/fix-elastalert-rules.sh
 #
@@ -28,7 +28,7 @@ loge() { echo "[ELASTALERT-FIX] ERROR: $*" >&2; }
 # ── Validate ──────────────────────────────────────────────────
 if [ -z "${WEBHOOK}" ]; then
     loge "SLACK_WEBHOOK_URL is not set."
-    loge "Export it before running: export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/..."
+    loge "Export it before running: export SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}"
     exit 1
 fi
 
@@ -51,7 +51,7 @@ for RULE_FILE in ${RULE_FILES}; do
     
     # ── 1. Replace placeholder webhook ───────────────────────
     if grep -q "YOUR_REAL_WEBHOOK" "${RULE_FILE}" 2>/dev/null; then
-        sed -i "s|https://hooks.slack.com/services/YOUR_REAL_WEBHOOK|${WEBHOOK}|g" "${RULE_FILE}"
+        sed -i "s|${SLACK_WEBHOOK_URL}" "${RULE_FILE}"
         log "  ✓ Replaced placeholder webhook URL"
     elif grep -q "slack_webhook_url:" "${RULE_FILE}" 2>/dev/null; then
         # Replace any existing webhook line
@@ -85,7 +85,7 @@ for RULE_FILE in ${RULE_FILES}; do
         if grep -q "^index:" "${RULE_FILE}" 2>/dev/null; then
             CURRENT_INDEX=$(grep "^index:" "${RULE_FILE}" | head -1)
             log "  ℹ Suricata rule index: ${CURRENT_INDEX}"
-            log "    → Ensure Logstash writes to same pattern (soc-logs-enriched-*)"
+            log "    → Ensure Logstash writes to same pattern (soc-logs-enriched*)"
         fi
     fi
 

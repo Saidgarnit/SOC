@@ -1,6 +1,6 @@
 name: Brute Force Attack Detected
 type: frequency
-index: soc-logs-enriched-*,alerts-soc-threats-*
+index: soc-logs-enriched*,alerts-soc-threats-*
 ignore_unavailable: true
 num_events: 5
 timeframe:

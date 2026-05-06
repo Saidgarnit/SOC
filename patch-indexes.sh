@@ -17,22 +17,22 @@ echo -e "╚══════════════════════�
 
 # Extract webhook
 WH=$(grep -rh "slack_webhook_url" "$R"/*.yaml 2>/dev/null | head -1 | sed 's/.*slack_webhook_url:[[:space:]]*//' | tr -d '"'"'"' \n)
-[ -z "$WH" ] && WH="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+[ -z "$WH" ] && WH="${SLACK_WEBHOOK_URL}"
 
-info "[1/3] Suricata rules → soc-logs-enriched-*"
+info "[1/3] Suricata rules → soc-logs-enriched*"
 
 python3 << 'PYEOF'
 import yaml
 import os
 
 R = os.path.expanduser("~/soc-stack/elastalert/rules")
-WH = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+WH = "${SLACK_WEBHOOK_URL}"
 
 rules = {
     "suricata_alert.yaml": {
         "name": "Suricata IDS — C2 Beaconing",
         "type": "frequency",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "num_events": 3,
         "timeframe": {"minutes": 10},
         "filter": [{"query": {"bool": {"must": [
@@ -52,7 +52,7 @@ rules = {
     "suricata_brute_force.yaml": {
         "name": "Suricata IDS — Brute Force",
         "type": "any",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "filter": [{"query": {"bool": {"must": [
             {"match": {"event_type": "alert"}},
             {"bool": {"should": [
@@ -74,7 +74,7 @@ rules = {
     "ftp_bruteforce.yaml": {
         "name": "Suricata IDS — FTP Brute Force",
         "type": "frequency",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "num_events": 5,
         "timeframe": {"minutes": 2},
         "filter": [{"query": {"bool": {"must": [
@@ -94,7 +94,7 @@ rules = {
     "port_scan.yaml": {
         "name": "Suricata IDS — Port Scan",
         "type": "any",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "filter": [{"query": {"bool": {"must": [
             {"match": {"event_type": "alert"}},
             {"bool": {"should": [
@@ -115,7 +115,7 @@ rules = {
     "dns_exfiltration.yaml": {
         "name": "Suricata IDS — DNS Exfiltration",
         "type": "any",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "filter": [{"query": {"bool": {"must": [
             {"match": {"event_type": "alert"}},
             {"bool": {"should": [
@@ -136,7 +136,7 @@ rules = {
     "mqtt_anomaly.yaml": {
         "name": "MQTT Anomaly Detection",
         "type": "any",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "filter": [{"query": {"bool": {"must": [
             {"match": {"event_type": "alert"}},
             {"match_phrase": {"alert.signature": "MQTT"}}
@@ -172,7 +172,7 @@ rules = {
     "misp_alert.yaml": {
         "name": "MISP IOC Match",
         "type": "any",
-        "index": "soc-logs-enriched-*",
+        "index": "soc-logs-enriched*",
         "filter": [{"query": {"bool": {"must": [{"exists": {"field": "misp_event_id"}}]}}}],
         "query_key": "src_ip",
         "realert": {"minutes": 60},
@@ -390,7 +390,7 @@ echo -e "\n\033[1;35m╔══════════════════�
 echo    "║          Index Patch Complete ✅              ║"
 echo    "╠══════════════════════════════════════════════════╣"
 echo    "║  18 Rules Deployed Successfully!               ║"
-echo    "║  SURICATA (6) → soc-logs-enriched-*             ║"
+echo    "║  SURICATA (6) → soc-logs-enriched*             ║"
 echo    "║  VT + MISP (2) → correct indexes                ║"
 echo    "║  WAZUH (10) → wazuh-alerts-*                    ║"
 echo -e "╚══════════════════════════════════════════════════╝\033[0m"

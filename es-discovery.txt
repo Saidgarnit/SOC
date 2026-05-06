@@ -56,7 +56,7 @@ Index Pattern                        Count  Health
     └─ opencti_stix_meta_relationships-000001         2572107 docs  616.6mb
     └─ opencti_stix_sighting_relationships-000001           0 docs  250b
     └─ suricata-alerts-2026.04.17                          30 docs  89.8kb
-  soc-logs-enriched-*               766724 docs  [green]
+  soc-logs-enriched*               766724 docs  [green]
     └─ soc-logs-enriched-2026.04.30                     98483 docs  52.5mb
     └─ soc-logs-enriched-2026.05.01                      1150 docs  4mb
     └─ soc-logs-enriched-2026.05.02                    137037 docs  111.4mb
@@ -1675,7 +1675,7 @@ Index Pattern                        Count  Health
     ... and 10 more fields
 
 ======================================================================
-  INDEX: soc-logs-enriched-*
+  INDEX: soc-logs-enriched*
 ======================================================================
 
   FIELDS (198 total):

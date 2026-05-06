@@ -85,7 +85,7 @@ for idx in indices:
     if "wazuh" in name:
         group = "wazuh-alerts-*"
     elif "soc-logs-enriched" in name:
-        group = "soc-logs-enriched-*"
+        group = "soc-logs-enriched*"
     elif "logstash" in name:
         group = "logstash-*"
     elif "logs-" in name:
@@ -111,7 +111,7 @@ for group, idxs in sorted(patterns.items()):
 # ── For each pattern group, show field mappings + sample doc ─────
 TARGET_GROUPS = {
     "wazuh-alerts-*":       "wazuh-alerts-*",
-    "soc-logs-enriched-*":  "soc-logs-enriched-*",
+    "soc-logs-enriched*":  "soc-logs-enriched*",
     "logstash-*":           "logstash-*",
     "logs-*  (Fleet/Elastic Agent)": "logs-*",
 }
