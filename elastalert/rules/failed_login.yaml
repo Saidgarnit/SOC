@@ -1,51 +1,28 @@
-name: "🔐 Failed Login — Wazuh"
-type: frequency
-index: .ds-wazuh-alerts-4.x-*
-num_events: 5
-timeframe:
-  minutes: 2
-realert:
-  minutes: 20
-query_key: agent.name
-filter:
-- query:
-    bool:
-      must:
-      - terms:
-          rule.groups:
-          - authentication_failed
-
 alert:
 - slack
-alert_text_type: alert_text_only
-alert_text: |
-  🔐 *Failed Login Attempts*
-  `WAZUH / Authentication`
-
-  🕐 `{0}`
-  🖥️  Host: {1}  ({2})
-  📋 Level: {3}  Rule: {4}
-  📝 {5}
-
-  🔴 Src IP: {9}
-  👤 User:   {10}
-
-  🎯 MITRE: {8} — {6} / {7}
-  📊 http://localhost:5601
+alert_text: "\U0001F7E1 Failed Login — {0} → {1}\n   AUTHENTICATION FAILURE\n\n  \
+  \ Source IP  : {0}\n   Target User: {2}\n   Host       : {1}\n   Rule       : {3}\n\
+  \   Rule ID    : {4}\n   Level      : {5}\n   Timestamp  : {6}\n   Kibana     :\
+  \ http://localhost:5601"
 alert_text_args:
-- "@timestamp"
-- agent.name
-- agent.ip
-- rule.level
-- rule.id
-- rule.description
-- rule.mitre.tactic
-- rule.mitre.technique
-- rule.mitre.id
 - data.srcip
+- agent.name
 - data.dstuser
-
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "SOC Alerts"
-slack_icon_emoji: ":key:"
+- rule.description
+- rule.id
+- rule.level
+- '@timestamp'
+alert_text_type: alert_text_only
+filter:
+- query:
+    query_string:
+      query: rule.groups:"authentication_failed" AND NOT rule.groups:"sshd"
+index: .ds-wazuh-alerts-4.x-*
+name: Failed Login Attempt
+realert:
+  minutes: 5
+slack_emoji_override: ':warning:'
 slack_msg_color: warning
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/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
+type: any

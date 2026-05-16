@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wazuh Agents Dashboard</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #1a1a2e; 
+            color: #eee; 
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: #16213e; 
+            padding: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        h1 { 
+            color: #00d9ff; 
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+        .stat-card h2 { margin: 0; font-size: 48px; }
+        .stat-card p { margin: 10px 0 0 0; color: #aaa; }
+        .active { color: #00ff88; }
+        .disconnected { color: #ff4444; }
+        .never { color: #ffaa00; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #0f3460;
+            padding: 15px;
+            text-align: left;
+            color: #00d9ff;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #0f3460;
+        }
+        tr:hover { background: #0f3460; }
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-active { background: #00ff88; color: #000; }
+        .status-disconnected { background: #ff4444; color: #fff; }
+        .status-never { background: #ffaa00; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Wazuh Agents - Health Dashboard</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <h2 class="active" id="active-count">0</h2>
+                <p>Active Agents</p>
+            </div>
+            <div class="stat-card">
+                <h2 class="disconnected" id="disconnected-count">0</h2>
+                <p>Disconnected</p>
+            </div>
+            <div class="stat-card">
+                <h2 class="never" id="never-count">0</h2>
+                <p>Never Connected</p>
+            </div>
+        </div>
+        
+        <table id="agents-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Agent Name</th>
+                    <th>Status</th>
+                    <th>Operating System</th>
+                    <th>IP Address</th>
+                    <th>Last Keep Alive</th>
+                </tr>
+            </thead>
+            <tbody id="agents-body">
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        // Replace this with your actual agent data from the API
+        const agentsData = [{"id": "000", "name": "41518b5427a5", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "127.0.0.1", "lastKeepAlive": "9999-12-31T23:59:59+00:00"}, {"id": "002", "name": "victim-ftp", "status": "active", "os": "CentOS Linux 7.9", "ip": "172.18.0.32", "lastKeepAlive": "2026-05-15T22:07:01+00:00"}, {"id": "011", "name": "victim-iot", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.16", "lastKeepAlive": "2026-05-15T22:07:05+00:00"}, {"id": "012", "name": "victim-ubuntu", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.19", "lastKeepAlive": "2026-05-15T22:07:05+00:00"}, {"id": "013", "name": "victim-windows", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.20", "lastKeepAlive": "2026-05-15T22:07:04+00:00"}, {"id": "014", "name": "victim-webapi", "status": "active", "os": "Ubuntu 14.04.3 LTS, Trusty Tahr", "ip": "172.18.0.21", "lastKeepAlive": "2026-05-15T22:07:06+00:00"}, {"id": "015", "name": "victim-dvwa", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.23", "lastKeepAlive": "2026-05-15T22:07:04+00:00"}, {"id": "016", "name": "victim-dns", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.3", "lastKeepAlive": "2026-05-15T22:07:04+00:00"}, {"id": "017", "name": "victim-jenkins", "status": "active", "os": "Debian GNU/Linux 13", "ip": "172.18.0.11", "lastKeepAlive": "2026-05-15T22:07:04+00:00"}, {"id": "018", "name": "victim-mail", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.22", "lastKeepAlive": "2026-05-15T22:07:04+00:00"}, {"id": "019", "name": "victim-database", "status": "active", "os": "Ubuntu 20.04.6 LTS", "ip": "172.18.0.14", "lastKeepAlive": "2026-05-15T22:07:04+00:00"}];
+        
+        let active = 0, disconnected = 0, never = 0;
+        const tbody = document.getElementById('agents-body');
+        
+        agentsData.forEach(agent => {
+            const status = agent.status;
+            if (status === 'active') active++;
+            else if (status === 'disconnected') disconnected++;
+            else if (status === 'never_connected') never++;
+            
+            const row = tbody.insertRow();
+            const statusClass = status === 'active' ? 'status-active' : 
+                              status === 'disconnected' ? 'status-disconnected' : 'status-never';
+            const statusText = status.replace('_', ' ').toUpperCase();
+            
+            row.innerHTML = `
+                <td>${agent.id}</td>
+                <td>${agent.name}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${agent.os || 'N/A'}</td>
+                <td>${agent.ip || 'N/A'}</td>
+                <td>${agent.lastKeepAlive || 'Never'}</td>
+            `;
+        });
+        
+        document.getElementById('active-count').textContent = active;
+        document.getElementById('disconnected-count').textContent = disconnected;
+        document.getElementById('never-count').textContent = never;
+    </script>
+</body>
+</html>

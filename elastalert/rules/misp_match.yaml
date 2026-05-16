@@ -1,0 +1,26 @@
+alert:
+- slack
+alert_text: "\U0001F310 MISP Threat Match — {0}\n   THREAT INTELLIGENCE\n\n   Host\
+  \       : {0}\n   MISP Event : {1}\n   IOC Type   : {2}\n   IOC Value  : {3}\n \
+  \  Rule       : {4}\n   Timestamp  : {5}\n   Kibana     : http://localhost:5601"
+alert_text_args:
+- agent.name
+- misp_event_id
+- misp_ioc_type
+- misp_ioc_value
+- rule.description
+- '@timestamp'
+alert_text_type: alert_text_only
+filter:
+- query:
+    query_string:
+      query: misp_matched:true
+index: .ds-wazuh-alerts-4.x-*
+name: MISP Threat Intelligence Match
+realert:
+  minutes: 30
+slack_emoji_override: ':globe_with_meridians:'
+slack_msg_color: danger
+slack_username_override: SOC Alerts
+slack_webhook_url: https://hooks.slack.com/services/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
+type: any

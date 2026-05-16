@@ -16,3 +16,20 @@ suricata/logs/
 lab/victim-windows/elastic-agent-bin/
 suricata/logs/
 logstash/geoip/*.mmdb
+
+# Elastic Agent binaries (large)
+lab/*/elastic-agent-bin/
+*.jar
+*.zip
+*.tar.gz
+*.bin
+
+# Large binaries / generated artifacts
+lab/*/elastic-agent-bin/
+*.apk
+*.db
+*.log
+*.tar.gz
+*.zip
+*.bin
+wazuh/agent-keys/*.key

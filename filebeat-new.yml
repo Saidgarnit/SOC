@@ -36,27 +36,23 @@ filebeat.inputs:
       log_source: suricata
     fields_under_root: true
 
+  # MISP Threat Intelligence
   - type: httpjson
     id: misp-threat-intel
     enabled: true
-    request.url: "https://172.18.0.27:443/events/restSearch/json"
-    request.ssl.verification_mode: none
-    request.timeout: 30s
+    request.url: "http://misp:80/events/restSearch/json"
     request.method: POST
     request.headers:
       Authorization: "S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t"
       Accept: "application/json"
       Content-Type: "application/json"
-      User-Agent: "MISP-Connector"
-    request.body:
-      returnObjects: "1"
-      limit: "100"
-      published: "1"
+    request.body: '{"returnObjects":"1","limit":"100","published":"1"}'
     interval: 5m
     fields:
       log_source: misp-threat-intel
     fields_under_root: true
 
+  # OpenCTI Threat Intelligence (STIX indicators)
   - type: httpjson
     id: opencti-threat-intel
     enabled: true
@@ -65,8 +61,8 @@ filebeat.inputs:
     request.headers:
       Authorization: "Bearer bbfe1ad3-c317-4efe-9f14-0ea298a9476d"
       Content-Type: "application/json"
-    request.body:
-      query: "{ indicators(first: 100) { edges { node { id name description pattern valid_from valid_until } } } }"
+    request.body: >
+      {"query": "{ indicators(first: 100) { edges { node { id name description pattern valid_from valid_until } } } }"}
     interval: 5m
     fields:
       log_source: opencti-threat-intel
@@ -92,7 +88,7 @@ output.elasticsearch:
     - index: "misp-threat-intel-%{+yyyy.MM.dd}"
       when.equals:
         log_source: misp-threat-intel
-    - index: "filebeat-opencti-intel-%{+yyyy.MM.dd}"
+    - index: "opencti-threat-intel-%{+yyyy.MM.dd}"
       when.equals:
         log_source: opencti-threat-intel
 

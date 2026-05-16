@@ -177,7 +177,7 @@ services:
     volumes:
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
   victim-ftp:
-    image: fauria/vsftpd
+    build: ./lab/victim-ftp
     container_name: victim-ftp
     mem_limit: 400m
     hostname: victim-ftp
@@ -196,8 +196,8 @@ services:
       - soc-net
     restart: unless-stopped
     volumes:
+      - ./wazuh/agent-keys/victim-ftp.key:/var/ossec/etc/client.keys:rw
       - yara-ftp:/home/vsftpd
-      - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
     privileged: true
   victim-webapi:
     image: raesene/bwapp

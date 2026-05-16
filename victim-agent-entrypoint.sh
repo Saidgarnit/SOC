@@ -1,7 +1,7 @@
 #!/bin/sh
 rm -f /var/ossec/var/start-script-lock
 FLEET_URL="${FLEET_URL:-http://fleet-server:8220}"
-ENROLL_TOKEN="${ENROLL_TOKEN:-RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw==}"
+ENROLL_TOKEN="${ENROLL_TOKEN:-ejgyZ01KNEJZOFhzcWFUT2RROEw6OC1LN2RDdWtSenU2UGZuc09ZRWRkQQ==}"
 AGENT_DIR="/opt/elastic-agent"
 HOSTNAME="$(hostname)"
 
@@ -25,7 +25,7 @@ wait_for_fleet() {
 
 already_online() {
     RESULT=$(curl -sf \
-        -u "${ES_USER:-elastic}:${ES_PASS:-changeme}" \
+        -u "${ES_USER:-elastic}:${ES_PASS:-sYVfKJCe2RCfELjf=GLa}" \
         -H "Content-Type: application/json" \
         -d "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"local_metadata.host.hostname\":\"$HOSTNAME\"}},{\"term\":{\"status\":\"online\"}}]}}}" \
         "http://${ES_HOST:-elasticsearch}:9200/.fleet-agents/_search" 2>/dev/null \

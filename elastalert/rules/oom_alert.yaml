@@ -1,0 +1,32 @@
+name: Out of Memory Event
+type: any
+index: .ds-wazuh-alerts-4.x-*
+filter:
+- query:
+    query_string:
+      query: 'rule.description:*oom* OR rule.description:*Out of memory*'
+alert:
+- slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: "SOC Alerts"
+slack_emoji_override: ":warning:"
+slack_msg_color: "warning"
+alert_text_type: alert_text_only
+alert_text: |
+  ⚠️ Out of Memory Event — {0}
+     SYSTEM RESOURCE ALERT
+
+     Host       : {0}
+     Rule       : {1}
+     Rule ID    : {2}
+     Level      : {3}
+     Timestamp  : {4}
+     Kibana     : http://localhost:5601
+alert_text_args:
+- agent.name
+- rule.description
+- rule.id
+- rule.level
+- "@timestamp"
+realert:
+  minutes: 15

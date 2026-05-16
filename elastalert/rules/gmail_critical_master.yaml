@@ -1,51 +1,61 @@
-name: "📧 CRITICAL — Gmail Notification"
+name: Critical Alert Master Notification
 type: any
 index: .ds-wazuh-alerts-4.x-*
-realert:
-  minutes: 30
 filter:
 - range:
     rule.level:
       gte: 12
-
 alert:
 - email
 email:
 - "garnitsaid01@gmail.com"
-from_addr: "garnitsaid01@gmail.com"
 smtp_host: "smtp.gmail.com"
 smtp_port: 587
 smtp_ssl: false
 smtp_starttls: true
+from_addr: "garnitsaid01@gmail.com"
 smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
+alert_subject: "🚨 CRITICAL SOC Alert: {0}"
+alert_subject_args:
+- rule.description
 alert_text_type: alert_text_only
 alert_text: |
-  CRITICAL SECURITY ALERT
-  ========================
-  Time        : {0}
-  Host        : {1}  ({2})
-  Level       : {3}  |  Rule: {4}
-  Description : {5}
-
-  MITRE ATT&CK
-  Tactic    : {6}
-  Technique : {7}
-  ID        : {8}
-
-  Network
-  Attacker  : {9}
-  User      : {10}
-
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚨 CRITICAL SECURITY ALERT
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏰ Timestamp  : {0}
+  🖥️  Host       : {1}
+  📍 Agent ID   : {2}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ALERT DETAILS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Rule ID       : {3}
+  Rule Name     : {4}
+  Severity      : {5}
+  MITRE Tactic  : {6}
+  MITRE Tech    : {7}
+  MITRE ID      : {8}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  EVENT CONTEXT
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Source IP     : {9}
+  Dest User     : {10}
+  Full Log      : {11}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Kibana: http://localhost:5601
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 alert_text_args:
-- "@timestamp"
+- '@timestamp'
 - agent.name
-- agent.ip
-- rule.level
+- agent.id
 - rule.id
 - rule.description
+- rule.level
 - rule.mitre.tactic
 - rule.mitre.technique
 - rule.mitre.id
 - data.srcip
 - data.dstuser
+- full_log
+realert:
+  minutes: 30

@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "🔧 SOC stack fixes (no restart)..."
-PASS="SOCstack2026!"
+source "$(dirname "$0")/.env"
+PASS="${ELASTIC_PASSWORD}"
 FLEET_TOKEN="RnNaRXA1MEI4VkhUS25sTHB5Wm86dE94alZLcjlTMXlPRXlISHJsODE4Zw=="
 WAZUH_MANAGER="wazuh-manager"
 ALL_VICTIMS="victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail victim-dns victim-jenkins victim-database victim-ftp victim-webapi victim-metasploitable"
@@ -38,3 +39,17 @@ for VICTIM in $ALL_VICTIMS; do
 done
 
 echo "🎉 All SOC Persistence Fixes Restored!"
+
+# ── MISP Poller: restart background loop ──
+echo "🔧 MISP Poller: starting background loop..."
+docker exec -d filebeat bash -c '
+  # Kill any existing poller loops
+  pkill -f "misp-poller.sh" 2>/dev/null
+  sleep 2
+  # Start fresh loop
+  while true; do
+    /usr/local/bin/misp-poller.sh 2>/dev/null
+    sleep 300
+  done
+'
+echo "  ✅ MISP poller loop started"

@@ -1,9 +1,9 @@
 alert:
 - slack
-alert_text: "\U0001F534 FTP Brute Force — {0} → {1}\n   AUTHENTICATION FAILURE\n\n\
+alert_text: "\U0001F534 SSH Brute Force — {0} → {1}\n   AUTHENTICATION FAILURE\n\n\
   \   Source IP  : {0}\n   Target User: {2}\n   Host       : {1}\n   Rule       :\
-  \ {3}\n   Rule ID    : {4}\n   Level      : {5}\n   Timestamp  : {6}\n   Kibana\
-  \     : http://localhost:5601"
+  \ {3}\n   Rule ID    : {4}\n   Level      : {5}\n   Timestamp  : {6}\n   MITRE \
+  \     : {7}\n   Kibana     : http://localhost:5601"
 alert_text_args:
 - data.srcip
 - agent.name
@@ -12,13 +12,14 @@ alert_text_args:
 - rule.id
 - rule.level
 - '@timestamp'
+- rule.mitre.id
 alert_text_type: alert_text_only
 filter:
 - query:
     query_string:
-      query: rule.groups:"authentication_failed" AND (rule.groups:"ftp" OR rule.groups:"vsftpd")
+      query: rule.groups:"authentication_failed" AND rule.groups:"sshd"
 index: .ds-wazuh-alerts-4.x-*
-name: FTP Brute Force Attack
+name: SSH Brute Force Attack
 num_events: 5
 realert:
   minutes: 10

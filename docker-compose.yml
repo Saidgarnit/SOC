@@ -149,6 +149,8 @@ services:
     image: opencti/connector-mitre:6.0.5
     container_name: connector-mitre
     restart: unless-stopped
+    mem_limit: 2g
+    memswap_limit: 2g
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -182,6 +184,8 @@ services:
       - ./wazuh/logs:/var/ossec/logs
       - ./wazuh/0-wazuh-init:/etc/cont-init.d/0-wazuh-init
       - ./wazuh/0a-setup-filebeat:/etc/cont-init.d/0a-setup-filebeat
+      - ./wazuh/1-set-api-password:/etc/cont-init.d/1-set-api-password
+      - ./wazuh/set_wazuh_pass.py:/tmp/set_wazuh_pass.py
       - ./wazuh/filebeat-template.yml:/filebeat-template.yml:ro
     restart: unless-stopped
     ports:
@@ -193,8 +197,8 @@ services:
       - INDEXER_URL=http://elasticsearch:9200
       - INDEXER_USERNAME=${ELASTIC_USERNAME}
       - INDEXER_PASSWORD=${ELASTIC_PASSWORD}
-      - WAZUH_API_USER=${WAZUH_API_USER}
-      - WAZUH_API_PASSWORD=${WAZUH_API_PASSWORD}
+      - API_USERNAME=${WAZUH_API_USER}
+      - API_PASSWORD=${WAZUH_API_PASSWORD}
     networks:
       - soc-net
     deploy:
@@ -204,7 +208,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - curl -sf -k -u wazuh:wazuh -X POST https://localhost:55000/security/user/authenticate | grep -q 'token'
+        - curl -sf -k -u wazuh:Wazuh1234! -X POST https://localhost:55000/security/user/authenticate | grep -q 'token'
       interval: 30s
       timeout: 10s
       retries: 5

@@ -13202,3 +13202,21 @@ bash: /var/www/html/config/config.inc.php: No such file or directory
 404[dvwa-db-init] 10:22:38 — DVWA setup.php triggered OK.
 [dvwa-db-init] 10:22:38 — EA-4 DVWA DB init complete. DVWA is ready at http://victim-dvwa/login.php
 [dvwa-db-init] 10:22:38 —   Default creds: admin / password
+🔧 SOC stack fixes (no restart)...
+🔧 Step 0: Ensuring Wazuh Manager accepts remote syslog...
+🔧 Step 1: Fleet-server health check...
+🔧 Step 2: Logging & Agent Persistence...
+  ✅ victim-ubuntu fixed
+  ✅ victim-dvwa fixed
+  ✅ victim-iot fixed
+  ✅ victim-windows fixed
+  ✅ victim-mail fixed
+  ✅ victim-dns fixed
+  ✅ victim-jenkins fixed
+  ✅ victim-database fixed
+  ✅ victim-ftp fixed
+  ✅ victim-webapi fixed
+  ✅ victim-metasploitable fixed
+🎉 All SOC Persistence Fixes Restored!
+🔧 MISP Poller: starting background loop...
+  ✅ MISP poller loop started
