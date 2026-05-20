@@ -10,6 +10,7 @@ FLEET_VICTIMS="victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail v
 # ── Step 0: Wazuh Manager Remote Syslog ──
 echo "🔧 Step 0: Ensuring Wazuh Manager accepts remote syslog..."
 docker exec $WAZUH_MANAGER python3 -c "import os; p='/var/ossec/etc/ossec.conf'; c=open(p).read(); open(p,'w').write(c.replace('<remote>', '\n  <remote>\n    <connection>syslog</connection>\n    <port>514</port>\n    <protocol>udp</protocol>\n    <allowed-ips>172.18.0.0/16</allowed-ips>\n  </remote>\n\n  <remote>', 1)) if 'syslog' not in c else None"
+docker exec $WAZUH_MANAGER rm -f /var/ossec/var/run/.wazuh-manager.lock /var/ossec/var/start-script-lock 2>/dev/null || true
 docker exec $WAZUH_MANAGER /var/ossec/bin/wazuh-control restart >/dev/null 2>&1
 
 # ── Step 1: Fleet-server health & recovery ──
@@ -34,6 +35,7 @@ for VICTIM in $ALL_VICTIMS; do
     fi
 
     # Start Wazuh
+    docker exec $VICTIM rm -f /var/ossec/var/run/.wazuh-agent.lock /var/ossec/var/start-script-lock 2>/dev/null || true
     docker exec $VICTIM /var/ossec/bin/wazuh-control start > /dev/null 2>&1
     echo "  ✅ $VICTIM fixed"
 done
