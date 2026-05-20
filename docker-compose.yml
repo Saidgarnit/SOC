@@ -180,6 +180,7 @@ services:
       - ./wazuh/wazuh-template.json:/etc/filebeat/wazuh-template.json
       - ./wazuh/init-dirs.sh:/init-dirs.sh:ro
       - ./wazuh/config/shared/default:/var/ossec/etc/shared/default:rw
+      - ./wazuh/lists:/var/ossec/etc/lists:ro
       - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf
       - ./wazuh/logs:/var/ossec/logs
       - ./wazuh/0-wazuh-init:/etc/cont-init.d/0-wazuh-init
