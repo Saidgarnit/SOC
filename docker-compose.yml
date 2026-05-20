@@ -522,6 +522,7 @@ services:
     image: redis:7-alpine
     container_name: opencti-redis
     restart: unless-stopped
+    command: redis-server --maxmemory 96mb --maxmemory-policy allkeys-lru
     networks:
       - soc-net
 
