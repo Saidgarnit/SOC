@@ -53,3 +53,124 @@ docker exec -d filebeat bash -c '
   done
 '
 echo "  ✅ MISP poller loop started"
+
+# ── Auth.log + rsyslog fix for all victims ──
+echo "🔧 Fixing auth.log permissions and rsyslog on all victims..."
+for VICTIM in victim-ubuntu victim-dvwa victim-jenkins victim-mail victim-dns \
+              victim-database victim-iot victim-webapi victim-windows; do
+  docker ps --format '{{.Names}}' | grep -q "^$VICTIM$" || continue
+  docker exec $VICTIM bash -c "
+    touch /var/log/auth.log 2>/dev/null
+    chown syslog:adm /var/log/auth.log 2>/dev/null
+    chmod 664 /var/log/auth.log 2>/dev/null
+    sed -i 's/#SyslogFacility AUTH/SyslogFacility AUTH/' /etc/ssh/sshd_config 2>/dev/null
+    pkill rsyslogd 2>/dev/null; rm -f /run/rsyslogd.pid; sleep 1
+    rsyslogd 2>/dev/null; sleep 1
+    pkill sshd 2>/dev/null; sleep 1; /usr/sbin/sshd 2>/dev/null
+  " 2>/dev/null && echo "  ✅ $VICTIM" || echo "  ⚠️ $VICTIM skipped"
+done
+
+# Install rsyslog on victim-iot if missing
+if docker ps --format '{{.Names}}' | grep -q "^victim-iot$"; then
+  docker exec victim-iot bash -c "
+    which rsyslogd 2>/dev/null || apt-get install -y rsyslog -qq 2>/dev/null
+  " 2>/dev/null
+fi
+
+# ── victim-webapi: Wazuh not in image, copy from victim-ubuntu ──
+echo "🔧 Ensuring victim-webapi has Wazuh agent..."
+if docker ps --format '{{.Names}}' | grep -q "^victim-webapi$"; then
+  WAZUH_RUNNING=$(docker exec victim-webapi pgrep -f wazuh-agentd 2>/dev/null)
+  if [ -z "$WAZUH_RUNNING" ]; then
+    echo "  Installing Wazuh into victim-webapi via host copy..."
+    docker cp victim-ubuntu:/var/ossec /tmp/wazuh-webapi-copy 2>/dev/null
+    docker cp /tmp/wazuh-webapi-copy victim-webapi:/var/ossec 2>/dev/null
+    rm -rf /tmp/wazuh-webapi-copy
+    docker exec victim-webapi bash -c "
+      groupadd -g 1000 wazuh 2>/dev/null || true
+      useradd -u 1000 -g 1000 -d /var/ossec -s /sbin/nologin wazuh 2>/dev/null || true
+      /var/ossec/bin/agent-auth -m wazuh-manager -A victim-webapi 2>/dev/null || true
+      sed -i 's|MANAGER_IP|wazuh-manager|g' /var/ossec/etc/ossec.conf 2>/dev/null || true
+      /var/ossec/bin/wazuh-control start 2>/dev/null
+    " && echo "  ✅ victim-webapi Wazuh started" || echo "  ⚠️ victim-webapi Wazuh failed"
+  else
+    echo "  ✅ victim-webapi Wazuh already running"
+  fi
+fi
+
+# ── vsftpd decoder + rule persistence ──
+echo "🔧 Ensuring vsftpd decoder and rule persist in wazuh-manager..."
+docker exec wazuh-manager bash -c '
+  # vsftpd decoder
+  DECODER="/var/ossec/etc/decoders/vsftpd_decoder.xml"
+  if [ ! -f "$DECODER" ]; then
+    cat > "$DECODER" << DECODER_EOF
+<decoder name="vsftpd">
+  <prematch>vsftpd</prematch>
+</decoder>
+<decoder name="vsftpd-login">
+  <parent>vsftpd</parent>
+  <regex>(\S+) \[(\S+)\] (FAIL LOGIN|OK LOGIN): Client "(\S+)"</regex>
+  <order>extra_data,dstuser,status,srcip</order>
+</decoder>
+DECODER_EOF
+    echo "  vsftpd decoder created"
+  fi
+
+  # vsftpd rule
+  RULE="/var/ossec/etc/rules/vsftpd_rules.xml"
+  if [ ! -f "$RULE" ]; then
+    cat > "$RULE" << RULE_EOF
+<group name="syslog,vsftpd,authentication_failed,">
+  <rule id="11403" level="5" overwrite="yes">
+    <decoded_as>vsftpd-login</decoded_as>
+    <match>FAIL LOGIN</match>
+    <description>vsftpd: Login failed accessing the FTP server.</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+</group>
+RULE_EOF
+    echo "  vsftpd rule created"
+    /var/ossec/bin/wazuh-control restart >/dev/null 2>&1
+  fi
+' && echo "  ✅ vsftpd decoder/rule ensured" || echo "  ⚠️ vsftpd decoder/rule failed"
+
+# ── MITRE ElastAlert rules persistence ──
+echo "🔧 Ensuring 5 MITRE ElastAlert rules are loaded..."
+for RULE in execution_tactic discovery_tactic collection_tactic c2_tactic resource_dev_tactic initial_access_tactic defense_evasion_tactic impact_tactic reconnaissance_tactic exfiltration_tactic ssh_bruteforce smb_bruteforce; do
+  SRC="$HOME/soc-stack/elastalert/rules/${RULE}.yaml"
+  if [ -f "$SRC" ]; then
+    docker cp "$SRC" elastalert:/opt/elastalert/rules/ 2>/dev/null && echo "  ✅ $RULE" || echo "  ⚠️ $RULE failed"
+  fi
+done
+docker exec victim-ubuntu bash -c "echo 'root:toor' | chpasswd" 2>/dev/null
+
+# Re-enable AR queue on all agents after restart
+for container in victim-ubuntu victim-dvwa victim-jenkins victim-ftp victim-mail victim-dns victim-database victim-windows victim-iot victim-webapi; do
+  docker exec $container /var/ossec/bin/wazuh-control restart 2>/dev/null
+done
+docker exec wazuh-manager /var/ossec/bin/wazuh-control restart
+
+# Stop unnecessary redis on victim containers only (MISP/OpenCTI use dedicated redis containers)
+for c in victim-ubuntu victim-dvwa victim-jenkins victim-windows victim-iot victim-database victim-mail victim-dns; do
+  docker exec $c pkill redis-server 2>/dev/null || true
+done
+
+# ── Clear ElastAlert dedup state for MITRE tactic rules on every start ─────
+echo "🔧 Clearing ElastAlert dedup state for MITRE tactic rules..."
+sleep 30
+for rule in \
+  "Initial Access Detected (TA0001)" \
+  "Exfiltration Detected (TA0010)" \
+  "Defense Evasion Detected (TA0005)" \
+  "Impact Detected (TA0040)" \
+  "Reconnaissance Detected (TA0043)"; do
+  curl -s -u elastic:"${ELASTIC_PASSWORD}" \
+    -X DELETE "http://localhost:9200/elastalert_status/_delete_by_query" \
+    -H 'Content-Type: application/json' \
+    -d "{\"query\":{\"match\":{\"rule_name\":\"${rule}\"}}}" > /dev/null
+done
+echo "  ✅ ElastAlert dedup state cleared"

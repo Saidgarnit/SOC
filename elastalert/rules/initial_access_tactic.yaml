@@ -1,0 +1,28 @@
+name: "Initial Access Detected (TA0001)"
+type: any
+index: wazuh-alerts-*
+filter:
+  - query:
+      bool:
+        minimum_should_match: 1
+        should:
+          - match_phrase:
+              rule.groups: "web"
+          - match_phrase:
+              rule.groups: "appsec"
+          - match_phrase:
+              rule.groups: "attack"
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_msg_color: "danger"
+alert_text: |
+  :door: *INITIAL ACCESS ATTEMPT* -- TA0001
+  Rule ID: {rule.id}
+  Description: {rule.description}
+  Agent: {agent.name}
+  Groups: {rule.groups}
+  MITRE: T1190 Exploit Public-Facing App
+alert_text_type: alert_text_only
+realert:
+  minutes: 1

@@ -1,0 +1,34 @@
+name: "Exfiltration Detected (TA0010)"
+type: any
+index: wazuh-alerts-*
+filter:
+  - query:
+      bool:
+        minimum_should_match: 1
+        should:
+          - match_phrase:
+              rule.groups: "accesslog"
+          - match_phrase:
+              rule.groups: "linuxkernel"
+          - query_string:
+              query: 'rule.description:*ftp* AND rule.level:[5 TO *]'
+          - query_string:
+              query: 'data.alert.signature:*ET*TROJAN* OR data.alert.signature:*ET*DNS*'
+          - terms:
+              rule.id: ["82000","82001","82002","31210","31211"]
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_msg_color: "danger"
+slack_username_override: "SOC Alerts"
+slack_emoji_override: ":warning:"
+alert_text: |
+  EXFILTRATION DETECTED -- TA0010
+  Rule ID: {rule.id}
+  Description: {rule.description}
+  Agent: {agent.name}
+  Groups: {rule.groups}
+  MITRE: T1048 Exfil over Alt Protocol / T1041 Exfil over C2
+alert_text_type: alert_text_only
+realert:
+  minutes: 1

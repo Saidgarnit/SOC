@@ -1,0 +1,28 @@
+name: "Reconnaissance Detected (TA0043)"
+type: any
+index: wazuh-alerts-*
+filter:
+  - query:
+      bool:
+        minimum_should_match: 1
+        should:
+          - match_phrase:
+              rule.groups: "accesslog"
+          - match_phrase:
+              rule.groups: "rootcheck"
+          - terms:
+              rule.id: ["31151", "31152", "31153", "40111", "40112"]
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_msg_color: "warning"
+alert_text: |
+  :mag: *RECONNAISSANCE DETECTED* -- TA0043
+  Rule ID: {rule.id}
+  Description: {rule.description}
+  Agent: {agent.name}
+  Groups: {rule.groups}
+  MITRE: T1595 Active Scanning / T1592 Host Discovery
+alert_text_type: alert_text_only
+realert:
+  minutes: 1

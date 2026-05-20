@@ -1,0 +1,29 @@
+name: "Impact Detected (TA0040)"
+type: any
+index: wazuh-alerts-*
+filter:
+  - query:
+      bool:
+        minimum_should_match: 1
+        should:
+          - range:
+              rule.level:
+                gte: 12
+          - match_phrase:
+              rule.groups: "service_availability"
+          - terms:
+              rule.id: ["533", "535", "2932"]
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_msg_color: "danger"
+alert_text: |
+  :boom: *IMPACT DETECTED* -- TA0040
+  Rule ID: {rule.id}
+  Level: {rule.level}
+  Description: {rule.description}
+  Agent: {agent.name}
+  MITRE: T1489 Service Stop / T1499 DoS
+alert_text_type: alert_text_only
+realert:
+  minutes: 1
