@@ -30,6 +30,13 @@ rsyslogd 2>/dev/null || service rsyslog start 2>/dev/null || true
     done
   fi
   
+  # Inject DNS query log collection for victim-dns
+  if [ "$(hostname)" = "victim-dns" ]; then
+    if ! grep -q "queries.log" /var/ossec/etc/ossec.conf 2>/dev/null; then
+      sed -i 's|</ossec_config>|  <localfile>\n    <log_format>syslog</log_format>\n    <location>/var/log/named/queries.log</location>\n  </localfile>\n</ossec_config>|' /var/ossec/etc/ossec.conf
+      echo "[wazuh] Added queries.log to ossec.conf"
+    fi
+  fi
   # Start Wazuh agent
   /var/ossec/bin/wazuh-agentd 2>/dev/null &
   sleep 2
@@ -73,3 +80,13 @@ rsyslogd 2>/dev/null || service rsyslog start 2>/dev/null || true
 
 # Keep container alive
 tail -f /dev/null
+
+# Fix auth.log permissions for rsyslog
+touch /var/log/auth.log
+chown syslog:adm /var/log/auth.log
+chmod 664 /var/log/auth.log
+# Restart rsyslog and sshd in correct order
+pkill rsyslogd 2>/dev/null; rm -f /run/rsyslogd.pid; sleep 1
+rsyslogd
+sleep 2
+pkill sshd 2>/dev/null; sleep 1; /usr/sbin/sshd 2>/dev/null &
