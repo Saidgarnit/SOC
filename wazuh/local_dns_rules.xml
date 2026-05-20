@@ -1,0 +1,25 @@
+<group name="dns,named,">
+
+  <rule id="500200" level="3">
+    <decoded_as>bind-query-log</decoded_as>
+    <description>DNS query logged by BIND9</description>
+    <group>dns,</group>
+  </rule>
+
+  <rule id="500201" level="10">
+    <if_sid>500200</if_sid>
+    <regex>\(\S{50,}\)</regex>
+    <description>DNS exfiltration suspected: unusually long subdomain query</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>dns,exfiltration,</group>
+  </rule>
+
+  <rule id="500202" level="10">
+    <if_sid>500200</if_sid>
+    <match>.exfil.|.c2.|.evil.|.dnscat.</match>
+    <description>DNS query to suspicious exfiltration domain</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>dns,exfiltration,c2,</group>
+  </rule>
+
+</group>

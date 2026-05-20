@@ -1,0 +1,9 @@
+<decoder name="bind-query-log">
+  <prematch>queries: info: client </prematch>
+</decoder>
+
+<decoder name="bind-query-log-fields">
+  <parent>bind-query-log</parent>
+  <regex>client \S+ (\S+)#\d+ \((\S+)\): query:</regex>
+  <order>srcip,url</order>
+</decoder>
