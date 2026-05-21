@@ -43,12 +43,13 @@ hive_connection:
 hive_alert_config:
   type: external
   source: elastalert
-  title: "SOC Alert"
-  description: "Wazuh rule {rule.id} fired on {agent.name} at level {rule.level}"
+  title: "{rule.description} on {agent.name}"
+  description: "Wazuh rule {rule.id} fired on {agent.name} at level {rule.level}. MITRE Tactic: {rule.mitre.tactic}"
   severity: 3
   tags:
     - wazuh
     - mitre
+    - critical
   status: New
 realert:
-  minutes: 30
+  minutes: 10
