@@ -26,4 +26,4 @@ alert_text: |
   MITRE: T1190 Exploit Public-Facing App
 alert_text_type: alert_text_only
 realert:
-  minutes: 15
+  minutes: 10

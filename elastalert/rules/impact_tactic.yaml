@@ -27,4 +27,4 @@ alert_text: |
   MITRE: T1489 Service Stop / T1499 DoS
 alert_text_type: alert_text_only
 realert:
-  minutes: 15
+  minutes: 10
