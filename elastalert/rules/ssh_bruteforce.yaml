@@ -1,7 +1,7 @@
 name: SSH Brute Force Detection
 type: frequency
 query_key: data.srcip
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 
 num_events: 5
 timeframe:

@@ -16,7 +16,7 @@ filter:
 - query:
     query_string:
       query: yara_matched:true
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: YARA Rule Match
 realert:
   minutes: 30

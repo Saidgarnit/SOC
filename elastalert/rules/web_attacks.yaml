@@ -17,7 +17,7 @@ filter:
 - query:
     query_string:
       query: rule.groups:"web" AND rule.groups:"attack"
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: Web Attack Detected
 realert:
   minutes: 5

@@ -1,6 +1,6 @@
 name: Active Response Block Alert
 type: any
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 
 filter:
 - query:

@@ -17,7 +17,7 @@ filter:
 - query:
     query_string:
       query: rule.mitre.tactic:"Lateral Movement"
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: Lateral Movement Detected
 slack_emoji_override: ':arrows_counterclockwise:'
 slack_msg_color: danger

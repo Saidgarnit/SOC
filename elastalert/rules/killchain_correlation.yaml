@@ -1,6 +1,6 @@
 name: "Kill Chain Detected — Multi-Stage Attack"
 type: frequency
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 num_events: 2
 timeframe:
   minutes: 15

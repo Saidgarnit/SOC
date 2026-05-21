@@ -1,6 +1,6 @@
 name: "Exfiltration Detected (TA0010)"
 type: spike
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 spike_height: 3
 spike_type: up
 timeframe:

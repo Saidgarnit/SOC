@@ -1,6 +1,6 @@
 name: C2 Tactic Detected (T1071)
 type: frequency
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 num_events: 5
 timeframe:
   minutes: 10

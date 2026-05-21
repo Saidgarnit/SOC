@@ -18,7 +18,7 @@ filter:
 - query:
     query_string:
       query: rule.groups:"authentication_failed" AND NOT rule.groups:"sshd"
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: Failed Login Attempt
 realert:
   minutes: 5

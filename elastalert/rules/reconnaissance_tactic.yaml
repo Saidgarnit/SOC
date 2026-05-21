@@ -1,7 +1,7 @@
 name: "Reconnaissance Detected (TA0043)"
 type: any
 query_key: agent.name
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 filter:
   - query:
       bool:

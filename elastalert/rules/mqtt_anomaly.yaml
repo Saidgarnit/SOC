@@ -13,7 +13,7 @@ filter:
 - query:
     query_string:
       query: rule.groups:"mqtt" OR rule.description:*mqtt*
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: MQTT Anomaly Detected
 slack_emoji_override: ':satellite_antenna:'
 slack_msg_color: warning

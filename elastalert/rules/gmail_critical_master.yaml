@@ -1,13 +1,13 @@
 name: Critical Alert Master Notification
 type: any
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 filter:
   - range:
       rule.level:
-        gte: 12
+        gte: 10
 alert:
   - email
-  - "elastalert.alerters.thehive.HiveAlerter"
+  - hivealerter
 email:
   - "garnitsaid01@gmail.com"
 smtp_host: "smtp.gmail.com"
@@ -24,33 +24,30 @@ alert_text: |
   CRITICAL SECURITY ALERT
   Timestamp  : {0}
   Host       : {1}
-  Rule ID    : {2}
-  Rule Name  : {3}
-  Severity   : {4}
-  Source IP  : {5}
-  Kibana: http://localhost:5601
-  TheHive: http://localhost:9000
+  Rule       : {2}
+  Severity   : {3}
+  MITRE      : {4}
+  Kibana     : http://localhost:5601
 alert_text_args:
   - '@timestamp'
   - agent.name
-  - rule.id
   - rule.description
   - rule.level
-  - data.srcip
+  - rule.mitre.tactic
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: "6+YFnNzVjJOg/Nh075LqA0Dsl07JWskk"
+  hive_apikey: "o4j3C27LrQejRa9Oq73QllOcU5k2P5KM"
+  hive_verify_cert: false
 hive_alert_config:
-  type: alert
-  source: "ElastAlert-Wazuh"
+  type: external
+  source: elastalert
+  title: "SOC Alert: {rule.description}"
+  description: "Wazuh rule {rule.id} fired on {agent.name} at level {rule.level}"
   severity: 3
   tags:
-    - "soc"
-    - "wazuh"
-    - "critical"
-  tlp: 2
+    - wazuh
+    - mitre
   status: New
-  follow: true
 realert:
   minutes: 30

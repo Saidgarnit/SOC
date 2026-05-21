@@ -1,6 +1,6 @@
 name: Resource Development Detected (T1588)
 type: any
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 filter:
 - query:
     query_string:

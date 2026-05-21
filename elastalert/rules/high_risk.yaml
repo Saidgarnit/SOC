@@ -15,7 +15,7 @@ filter:
 - range:
     rule.level:
       gte: 10
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 name: High Severity Alert
 slack_emoji_override: ':rotating_light:'
 slack_msg_color: danger

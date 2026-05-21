@@ -1,7 +1,7 @@
 name: Discovery Tactic Detected (T1082)
 type: frequency
 query_key: agent.name
-index: wazuh-alerts-*
+index: .ds-wazuh-alerts-4.x-*
 num_events: 3
 timeframe:
   minutes: 5
