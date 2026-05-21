@@ -39,10 +39,11 @@ hive_connection:
   hive_port: 9000
   hive_apikey: "o4j3C27LrQejRa9Oq73QllOcU5k2P5KM"
   hive_verify_cert: false
+  hive_organisation: "SOC"
 hive_alert_config:
   type: external
   source: elastalert
-  title: "SOC Alert: {rule.description}"
+  title: "SOC Alert"
   description: "Wazuh rule {rule.id} fired on {agent.name} at level {rule.level}"
   severity: 3
   tags:
