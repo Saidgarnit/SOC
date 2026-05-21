@@ -1,61 +1,56 @@
 name: Critical Alert Master Notification
 type: any
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 filter:
-- range:
-    rule.level:
-      gte: 12
+  - range:
+      rule.level:
+        gte: 12
 alert:
-- email
+  - email
+  - "elastalert.alerters.thehive.HiveAlerter"
 email:
-- "garnitsaid01@gmail.com"
+  - "garnitsaid01@gmail.com"
 smtp_host: "smtp.gmail.com"
 smtp_port: 587
 smtp_ssl: false
 smtp_starttls: true
 from_addr: "garnitsaid01@gmail.com"
 smtp_auth_file: "/opt/elastalert/smtp_auth.yaml"
-alert_subject: "🚨 CRITICAL SOC Alert: {0}"
+alert_subject: "CRITICAL SOC Alert: {0}"
 alert_subject_args:
-- rule.description
+  - rule.description
 alert_text_type: alert_text_only
 alert_text: |
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  🚨 CRITICAL SECURITY ALERT
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  ⏰ Timestamp  : {0}
-  🖥️  Host       : {1}
-  📍 Agent ID   : {2}
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  ALERT DETAILS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Rule ID       : {3}
-  Rule Name     : {4}
-  Severity      : {5}
-  MITRE Tactic  : {6}
-  MITRE Tech    : {7}
-  MITRE ID      : {8}
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  EVENT CONTEXT
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Source IP     : {9}
-  Dest User     : {10}
-  Full Log      : {11}
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CRITICAL SECURITY ALERT
+  Timestamp  : {0}
+  Host       : {1}
+  Rule ID    : {2}
+  Rule Name  : {3}
+  Severity   : {4}
+  Source IP  : {5}
   Kibana: http://localhost:5601
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TheHive: http://localhost:9000
 alert_text_args:
-- '@timestamp'
-- agent.name
-- agent.id
-- rule.id
-- rule.description
-- rule.level
-- rule.mitre.tactic
-- rule.mitre.technique
-- rule.mitre.id
-- data.srcip
-- data.dstuser
-- full_log
+  - '@timestamp'
+  - agent.name
+  - rule.id
+  - rule.description
+  - rule.level
+  - data.srcip
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "6+YFnNzVjJOg/Nh075LqA0Dsl07JWskk"
+hive_alert_config:
+  type: alert
+  source: "ElastAlert-Wazuh"
+  severity: 3
+  tags:
+    - "soc"
+    - "wazuh"
+    - "critical"
+  tlp: 2
+  status: New
+  follow: true
 realert:
   minutes: 30
