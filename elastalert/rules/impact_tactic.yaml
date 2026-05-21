@@ -1,5 +1,6 @@
 name: "Impact Detected (TA0040)"
 type: any
+query_key: agent.name
 index: wazuh-alerts-*
 filter:
   - query:
@@ -26,4 +27,4 @@ alert_text: |
   MITRE: T1489 Service Stop / T1499 DoS
 alert_text_type: alert_text_only
 realert:
-  minutes: 1
+  minutes: 15

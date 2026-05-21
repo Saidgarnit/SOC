@@ -35,8 +35,8 @@ for name, group in inventory.items():
 "
 
 # ── Re-enroll agents that need it ──
-echo "💪 Re-enrolling agents..."
-bash "$(dirname "$0")/restart-agents.sh"
+#echo "💪 Re-enrolling agents..."
+#bash "$(dirname "$0")/restart-agents.sh" # disabled - agents auto-reconnect
 
 echo "✅ Lab is Clean and Healthy."
 

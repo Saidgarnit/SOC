@@ -1,0 +1,15 @@
+<group name="privilege-escalation,sudo,">
+  <rule id="500300" level="12">
+    <if_sid>5402,5403</if_sid>
+    <description>Privilege escalation: sudo to ROOT executed</description>
+    <mitre><id>T1548.003</id></mitre>
+    <group>privilege-escalation,sudo,pci_dss_10.2.5,</group>
+  </rule>
+  <rule id="500302" level="12">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=.*python| ; USER=root ; COMMAND=.*perl| ; USER=root ; COMMAND=.*ruby|os\.setuid</regex>
+    <description>Privilege escalation: scripting language sudo — likely priv-esc payload</description>
+    <mitre><id>T1548.003</id></mitre>
+    <group>privilege-escalation,execution,</group>
+  </rule>
+</group>

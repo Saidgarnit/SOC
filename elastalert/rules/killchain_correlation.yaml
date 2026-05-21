@@ -1,0 +1,37 @@
+name: "Kill Chain Detected — Multi-Stage Attack"
+type: frequency
+index: wazuh-alerts-*
+num_events: 2
+timeframe:
+  minutes: 15
+filter:
+  - query:
+      bool:
+        minimum_should_match: 1
+        should:
+          - query_string:
+              query: 'rule.groups:privilege_escalation AND rule.level:[10 TO *]'
+          - query_string:
+              query: 'rule.mitre.tactic:"Lateral Movement" AND rule.level:[8 TO *]'
+          - query_string:
+              query: 'rule.mitre.tactic:"Execution" AND rule.level:[8 TO *]'
+          - query_string:
+              query: 'rule.groups:web AND rule.level:[10 TO *]'
+          - query_string:
+              query: 'rule.mitre.id:T1548 OR rule.mitre.id:T1059 OR rule.mitre.id:T1021'
+query_key: agent.name
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_msg_color: "danger"
+slack_username_override: "SOC Alerts"
+slack_emoji_override: ":rotating_light:"
+alert_text: |
+  :rotating_light: *KILL CHAIN DETECTED — MULTI-STAGE ATTACK*
+  Agent: {agent.name}
+  {num_hits} high-severity events across attack tactics in 15 minutes
+  Tactics: Initial Access → Execution → Privilege Escalation / Lateral Movement
+  Investigate immediately.
+alert_text_type: alert_text_only
+realert:
+  minutes: 0

@@ -1,5 +1,6 @@
 name: Suricata IDS Alert
 type: any
+query_key: data.srcip
 index: suricata-alerts-*
 filter:
 - query:
@@ -19,4 +20,4 @@ alert_text_args:
 - proto
 - alert.severity
 realert:
-  minutes: 10
+  minutes: 15

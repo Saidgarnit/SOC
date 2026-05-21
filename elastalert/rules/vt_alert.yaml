@@ -16,7 +16,7 @@ filter:
 - query:
     query_string:
       query: vt_checked:true AND vt_severity:malicious
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 name: VirusTotal Malicious File Detected
 realert:
   minutes: 30

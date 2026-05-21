@@ -1,5 +1,6 @@
 name: "Initial Access Detected (TA0001)"
 type: any
+query_key: agent.name
 index: wazuh-alerts-*
 filter:
   - query:
@@ -25,4 +26,4 @@ alert_text: |
   MITRE: T1190 Exploit Public-Facing App
 alert_text_type: alert_text_only
 realert:
-  minutes: 1
+  minutes: 15

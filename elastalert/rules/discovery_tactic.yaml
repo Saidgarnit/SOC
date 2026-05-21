@@ -1,0 +1,22 @@
+name: Discovery Tactic Detected (T1082)
+type: frequency
+query_key: agent.name
+index: wazuh-alerts-*
+num_events: 3
+timeframe:
+  minutes: 5
+filter:
+- query:
+    query_string:
+      query: data.audit.command:("whoami" OR "uname" OR "id" OR "hostname" OR "ifconfig" OR "ip" OR "netstat" OR "ps" OR "env")
+alert_text_type: alert_text_only
+alert_text: "🟠 *Discovery Tactic Detected (T1082)*\n\n*Host:* {0}\n*Command:* {1}\n*Rule:* {2}\n*Level:* {3}\n*Timestamp:* {4}"
+alert_text_args: [agent.name, data.audit.command, rule.description, rule.level, '@timestamp']
+alert:
+- slack
+slack_webhook_url: https://hooks.slack.com/services/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
+slack_username_override: SOC Alerts
+slack_emoji_override: ':warning:'
+slack_msg_color: warning
+realert:
+  minutes: 10

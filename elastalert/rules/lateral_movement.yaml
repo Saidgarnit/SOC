@@ -12,16 +12,17 @@ alert_text_args:
 - '@timestamp'
 - rule.mitre.id
 alert_text_type: alert_text_only
+query_key: data.srcip
 filter:
 - query:
     query_string:
       query: rule.mitre.tactic:"Lateral Movement"
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 name: Lateral Movement Detected
-realert:
-  minutes: 10
 slack_emoji_override: ':arrows_counterclockwise:'
 slack_msg_color: danger
 slack_username_override: SOC Alerts
 slack_webhook_url: https://hooks.slack.com/services/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
 type: any
+realert:
+  minutes: 15

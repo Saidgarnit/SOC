@@ -15,7 +15,7 @@ filter:
 - query:
     query_string:
       query: misp_matched:true
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 name: MISP Threat Intelligence Match
 realert:
   minutes: 30

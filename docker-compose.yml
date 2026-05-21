@@ -180,7 +180,9 @@ services:
       - ./wazuh/wazuh-template.json:/etc/filebeat/wazuh-template.json
       - ./wazuh/init-dirs.sh:/init-dirs.sh:ro
       - ./wazuh/config/shared/default:/var/ossec/etc/shared/default:rw
-      - ./wazuh/lists:/var/ossec/etc/lists:ro
+      - ./wazuh/lists:/var/ossec/etc/lists:rw
+      - ./wazuh/rules:/var/ossec/etc/rules:rw
+      - ./wazuh/decoders:/var/ossec/etc/decoders:rw
       - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf
       - ./wazuh/logs:/var/ossec/logs
       - ./wazuh/0-wazuh-init:/etc/cont-init.d/0-wazuh-init
@@ -571,6 +573,38 @@ services:
         reservations:
           memory: 256m
 
+  thehive:
+    image: strangebee/thehive:5.2
+    container_name: thehive
+    mem_limit: 1g
+    depends_on:
+      - elasticsearch
+    networks:
+      - soc-net
+    ports:
+      - "9000:9000"
+    environment:
+      - JVM_OPTS=-Xms256m -Xmx512m
+    command:
+      - --secret
+      - "SOCstack2026!TheHive"
+      - --no-cql-wait
+      - --bdb-directory
+      - /data/db
+      - --index-backend
+      - elasticsearch
+      - --es-hostnames
+      - elasticsearch
+      - --es-username
+      - elastic
+      - --es-password
+      - "sYVfKJCe2RCfELjf=GLa"
+      - --no-config-cortex
+    volumes:
+      - thehive_data:/data
+    restart: unless-stopped
+
+
 volumes:
   yara-dvwa:
     external: true
@@ -581,10 +615,12 @@ volumes:
   yara-ftp:
     external: true
   wazuh_alerts:
+  thehive_data:
   es_data:
   wazuh_data:
   misp-db-data:
   misp-app:
+
 
 networks:
   soc-net:

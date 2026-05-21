@@ -1,0 +1,21 @@
+name: C2 Tactic Detected (T1071)
+type: frequency
+index: wazuh-alerts-*
+num_events: 5
+timeframe:
+  minutes: 10
+filter:
+- query:
+    query_string:
+      query: rule.groups:*network* AND rule.level:[7 TO *] AND NOT data.srcip:"127.0.0.1"
+alert_text_type: alert_text_only
+alert_text: "🔴 *C2 Tactic Detected (T1071)*\n\n*Host:* {0}\n*Src IP:* {1}\n*Rule:* {2}\n*Level:* {3}\n*Timestamp:* {4}"
+alert_text_args: [agent.name, data.srcip, rule.description, rule.level, '@timestamp']
+alert:
+- slack
+slack_webhook_url: https://hooks.slack.com/services/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
+slack_username_override: SOC Alerts
+slack_emoji_override: ':rotating_light:'
+slack_msg_color: danger
+realert:
+  minutes: 0

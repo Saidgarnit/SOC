@@ -10,8 +10,7 @@ FLEET_VICTIMS="victim-ubuntu victim-dvwa victim-iot victim-windows victim-mail v
 # ── Step 0: Wazuh Manager Remote Syslog ──
 echo "🔧 Step 0: Ensuring Wazuh Manager accepts remote syslog..."
 docker exec $WAZUH_MANAGER python3 -c "import os; p='/var/ossec/etc/ossec.conf'; c=open(p).read(); open(p,'w').write(c.replace('<remote>', '\n  <remote>\n    <connection>syslog</connection>\n    <port>514</port>\n    <protocol>udp</protocol>\n    <allowed-ips>172.18.0.0/16</allowed-ips>\n  </remote>\n\n  <remote>', 1)) if 'syslog' not in c else None"
-docker exec $WAZUH_MANAGER rm -f /var/ossec/var/run/.wazuh-manager.lock /var/ossec/var/start-script-lock 2>/dev/null || true
-docker exec $WAZUH_MANAGER /var/ossec/bin/wazuh-control restart >/dev/null 2>&1
+docker exec $WAZUH_MANAGER rm -rf /var/ossec/var/run/.wazuh-manager.lock /var/ossec/var/start-script-lock 2>/dev/null || true
 
 # ── Step 1: Fleet-server health & recovery ──
 echo "🔧 Step 1: Fleet-server health check..."
@@ -35,7 +34,7 @@ for VICTIM in $ALL_VICTIMS; do
     fi
 
     # Start Wazuh
-    docker exec $VICTIM rm -f /var/ossec/var/run/.wazuh-agent.lock /var/ossec/var/start-script-lock 2>/dev/null || true
+    docker exec $VICTIM rm -rf /var/ossec/var/run/.wazuh-agent.lock /var/ossec/var/start-script-lock 2>/dev/null || true
     docker exec $VICTIM /var/ossec/bin/wazuh-control start > /dev/null 2>&1
     echo "  ✅ $VICTIM fixed"
 done
@@ -100,45 +99,6 @@ if docker ps --format '{{.Names}}' | grep -q "^victim-webapi$"; then
   fi
 fi
 
-# ── vsftpd decoder + rule persistence ──
-echo "🔧 Ensuring vsftpd decoder and rule persist in wazuh-manager..."
-docker exec wazuh-manager bash -c '
-  # vsftpd decoder
-  DECODER="/var/ossec/etc/decoders/vsftpd_decoder.xml"
-  if [ ! -f "$DECODER" ]; then
-    cat > "$DECODER" << DECODER_EOF
-<decoder name="vsftpd">
-  <prematch>vsftpd</prematch>
-</decoder>
-<decoder name="vsftpd-login">
-  <parent>vsftpd</parent>
-  <regex>(\S+) \[(\S+)\] (FAIL LOGIN|OK LOGIN): Client "(\S+)"</regex>
-  <order>extra_data,dstuser,status,srcip</order>
-</decoder>
-DECODER_EOF
-    echo "  vsftpd decoder created"
-  fi
-
-  # vsftpd rule
-  RULE="/var/ossec/etc/rules/vsftpd_rules.xml"
-  if [ ! -f "$RULE" ]; then
-    cat > "$RULE" << RULE_EOF
-<group name="syslog,vsftpd,authentication_failed,">
-  <rule id="11403" level="5" overwrite="yes">
-    <decoded_as>vsftpd-login</decoded_as>
-    <match>FAIL LOGIN</match>
-    <description>vsftpd: Login failed accessing the FTP server.</description>
-    <mitre>
-      <id>T1110</id>
-    </mitre>
-    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
-  </rule>
-</group>
-RULE_EOF
-    echo "  vsftpd rule created"
-    /var/ossec/bin/wazuh-control restart >/dev/null 2>&1
-  fi
-' && echo "  ✅ vsftpd decoder/rule ensured" || echo "  ⚠️ vsftpd decoder/rule failed"
 
 # ── MITRE ElastAlert rules persistence ──
 echo "🔧 Ensuring 5 MITRE ElastAlert rules are loaded..."
@@ -152,9 +112,9 @@ docker exec victim-ubuntu bash -c "echo 'root:toor' | chpasswd" 2>/dev/null
 
 # Re-enable AR queue on all agents after restart
 for container in victim-ubuntu victim-dvwa victim-jenkins victim-ftp victim-mail victim-dns victim-database victim-windows victim-iot victim-webapi; do
-  docker exec $container /var/ossec/bin/wazuh-control restart 2>/dev/null
+  docker exec $container rm -rf /var/ossec/var/start-script-lock 2>/dev/null; docker exec $container /var/ossec/bin/wazuh-control restart 2>/dev/null
 done
-docker exec wazuh-manager /var/ossec/bin/wazuh-control restart
+docker exec wazuh-manager rm -rf /var/ossec/var/start-script-lock && docker exec wazuh-manager /var/ossec/bin/wazuh-control restart
 
 # Stop unnecessary redis on victim containers only (MISP/OpenCTI use dedicated redis containers)
 for c in victim-ubuntu victim-dvwa victim-jenkins victim-windows victim-iot victim-database victim-mail victim-dns; do

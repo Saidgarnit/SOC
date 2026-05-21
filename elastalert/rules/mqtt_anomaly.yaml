@@ -13,12 +13,12 @@ filter:
 - query:
     query_string:
       query: rule.groups:"mqtt" OR rule.description:*mqtt*
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 name: MQTT Anomaly Detected
-realert:
-  minutes: 10
 slack_emoji_override: ':satellite_antenna:'
 slack_msg_color: warning
 slack_username_override: SOC Alerts
 slack_webhook_url: https://hooks.slack.com/services/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
 type: any
+realert:
+  minutes: 10

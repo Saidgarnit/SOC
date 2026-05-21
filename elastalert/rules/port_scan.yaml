@@ -1,35 +1,39 @@
 name: Port Scan Detected
 type: any
 index: suricata-alerts-*
-
 filter:
 - query:
     query_string:
-      query: 'event_type:alert AND alert.category:"Attempted Information Leak"'
-
+      query: 'event_type:alert AND alert.signature:"Port Scan SYN"'
 alert:
   - slack
-
-slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_webhook_url: "https://hooks.slack.com/services/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"
 slack_username_override: "Wazuh ElastAlert"
-slack_emoji_override: ":suricata:"
-
+slack_emoji_override: ":rotating_light:"
+alert_text_type: alert_text_only
 alert_text: |
   🚨 *Port Scan Detected*
-  
-  *Source IP:* {src_ip}
-  *Destination:* {dest_ip}:{dest_port}
-  *Signature:* {alert.signature}
-  *Severity:* {alert.severity}
-  *Category:* {alert.category}
-  *Protocol:* {proto}
-  
-  *Timestamp:* {timestamp}
+  *Source IP:* {0}
+  *Destination:* {1}:{2}
+  *Signature:* {3}
+  *Severity:* {4}
+  *Protocol:* {5}
+  *Timestamp:* {6}
+alert_text_args:
+  - src_ip
+  - dest_ip
+  - dest_port
+  - alert.signature
+  - alert.severity
+  - proto
+  - timestamp
+alert_subject: "🚨 Port Scan Detected from {0}"
+alert_subject_args:
+  - src_ip
+realert:
+  minutes: 0
 
-alert_subject: "🚨 Port Scan Detected from {src_ip}"
-
+query_key: data.srcip
+  - src_ip
 realert:
   minutes: 30
-
-query_key: 
-  - src_ip

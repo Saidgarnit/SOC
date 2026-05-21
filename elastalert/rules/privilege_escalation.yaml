@@ -1,26 +1,35 @@
-alert:
-- slack
-alert_text: "\U0001F6A8 Privilege Escalation — {0}\n   PRIVILEGE ESCALATION\n\n  \
-  \ Host       : {0}\n   Rule       : {1}\n   Rule ID    : {2}\n   Level      : {3}\n\
-  \   Timestamp  : {4}\n   MITRE      : {5}\n   Kibana     : http://localhost:5601"
-alert_text_args:
-- agent.name
-- rule.description
-- rule.id
-- rule.level
-- '@timestamp'
-- rule.mitre.id
-alert_text_type: alert_text_only
-filter:
-- query:
-    query_string:
-      query: rule.mitre.tactic:"Privilege Escalation" OR rule.groups:"privilege_escalation"
-index: .ds-wazuh-alerts-4.x-*
 name: Privilege Escalation Attempt
-realert:
-  minutes: 10
+type: any
+query_key: agent.name
+index: wazuh-alerts-*
+filter:
+  - query:
+      query_string:
+        query: 'rule.mitre.tactic:"Privilege Escalation" OR rule.groups:"privilege_escalation" OR rule.groups:"sudo" OR rule.groups:"suid"'
+alert:
+  - slack
+slack_webhook_url: https://hooks.slack.com/services/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
+slack_username_override: SOC Alerts
 slack_emoji_override: ':rotating_light:'
 slack_msg_color: danger
-slack_username_override: SOC Alerts
-slack_webhook_url: https://hooks.slack.com/services/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
-type: any
+alert_text_type: alert_text_only
+alert_text: |
+  🚨 Privilege Escalation — {0}
+     PRIVILEGE ESCALATION
+
+     Host       : {0}
+     Rule       : {1}
+     Rule ID    : {2}
+     Level      : {3}
+     Timestamp  : {4}
+     MITRE      : {5}
+     Kibana     : http://localhost:5601
+alert_text_args:
+  - agent.name
+  - rule.description
+  - rule.id
+  - rule.level
+  - '@timestamp'
+  - rule.mitre.id
+realert:
+  minutes: 0

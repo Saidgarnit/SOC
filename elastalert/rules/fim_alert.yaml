@@ -1,6 +1,7 @@
 name: File Integrity Alert
 type: any
-index: .ds-wazuh-alerts-4.x-*
+query_key: agent.name
+index: wazuh-alerts-*
 filter:
 - query:
     query_string:

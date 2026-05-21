@@ -1,0 +1,22 @@
+name: Execution Tactic Detected (T1059)
+type: frequency
+query_key: agent.name
+index: wazuh-alerts-*
+num_events: 3
+timeframe:
+  minutes: 5
+filter:
+- query:
+    query_string:
+      query: rule.groups:*shell* OR rule.groups:*command* OR data.audit.command:("bash" OR "sh" OR "python" OR "perl" OR "nc" OR "ncat")
+alert_text_type: alert_text_only
+alert_text: "🟠 *Execution Tactic Detected (T1059)*\n\n*Host:* {0}\n*Agent ID:* {1}\n*Rule:* {2}\n*Level:* {3}\n*Timestamp:* {4}"
+alert_text_args: [agent.name, agent.id, rule.description, rule.level, '@timestamp']
+alert:
+- slack
+slack_webhook_url: https://hooks.slack.com/services/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
+slack_username_override: SOC Alerts
+slack_emoji_override: ':warning:'
+slack_msg_color: warning
+realert:
+  minutes: 10

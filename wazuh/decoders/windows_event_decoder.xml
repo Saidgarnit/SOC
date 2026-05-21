@@ -1,0 +1,13 @@
+<decoder name="windows-event">
+  <program_name>WinEvent</program_name>
+</decoder>
+<decoder name="windows-event-logon">
+  <parent>windows-event</parent>
+  <regex>EventID=(\d+) User=(\S+) Logon=(\S+)</regex>
+  <order>id, user, logon_type</order>
+</decoder>
+<decoder name="windows-event-proc">
+  <parent>windows-event</parent>
+  <regex>EventID=(\d+) User=(\S+) Process=(\S+)</regex>
+  <order>id, user, process</order>
+</decoder>

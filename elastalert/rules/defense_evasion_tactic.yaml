@@ -1,5 +1,6 @@
 name: "Defense Evasion Detected (TA0005)"
 type: any
+query_key: agent.name
 index: wazuh-alerts-*
 filter:
   - query:
@@ -25,4 +26,4 @@ alert_text: |
   MITRE: T1222 File Permissions / T1070 Indicator Removal
 alert_text_type: alert_text_only
 realert:
-  minutes: 1
+  minutes: 10

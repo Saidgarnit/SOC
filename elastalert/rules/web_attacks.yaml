@@ -12,11 +12,12 @@ alert_text_args:
 - '@timestamp'
 - rule.mitre.id
 alert_text_type: alert_text_only
+query_key: data.srcip
 filter:
 - query:
     query_string:
       query: rule.groups:"web" AND rule.groups:"attack"
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 name: Web Attack Detected
 realert:
   minutes: 5

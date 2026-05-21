@@ -1,6 +1,6 @@
 name: Webshell Indicator Detected
 type: any
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 
 filter:
 - query:

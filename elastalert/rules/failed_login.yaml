@@ -13,11 +13,12 @@ alert_text_args:
 - rule.level
 - '@timestamp'
 alert_text_type: alert_text_only
+query_key: data.srcip
 filter:
 - query:
     query_string:
       query: rule.groups:"authentication_failed" AND NOT rule.groups:"sshd"
-index: .ds-wazuh-alerts-4.x-*
+index: wazuh-alerts-*
 name: Failed Login Attempt
 realert:
   minutes: 5

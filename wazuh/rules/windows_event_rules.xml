@@ -1,0 +1,37 @@
+<group name="windows,authentication,">
+  <rule id="500400" level="3">
+    <decoded_as>windows-event</decoded_as>
+    <match>EventID=4624</match>
+    <description>Windows: Successful logon</description>
+    <mitre><id>T1078</id></mitre>
+    <group>authentication_success,pci_dss_10.2.5,</group>
+  </rule>
+  <rule id="500401" level="10">
+    <if_sid>500400</if_sid>
+    <match>Logon=3</match>
+    <description>Windows: Successful network logon (lateral movement indicator)</description>
+    <mitre><id>T1021</id></mitre>
+    <group>authentication_success,lateral_movement,</group>
+  </rule>
+  <rule id="500402" level="10">
+    <decoded_as>windows-event</decoded_as>
+    <match>EventID=4625</match>
+    <description>Windows: Failed logon attempt</description>
+    <mitre><id>T1110</id></mitre>
+    <group>authentication_failed,pci_dss_10.2.4,</group>
+  </rule>
+  <rule id="500403" level="6">
+    <decoded_as>windows-event</decoded_as>
+    <match>EventID=4688</match>
+    <description>Windows: New process created</description>
+    <mitre><id>T1059</id></mitre>
+    <group>process_monitor,pci_dss_10.2.7,</group>
+  </rule>
+  <rule id="500404" level="12">
+    <if_sid>500403</if_sid>
+    <match>Process=cmd.exe|Process=powershell.exe|Process=wscript.exe|Process=cscript.exe</match>
+    <description>Windows: Suspicious shell process spawned</description>
+    <mitre><id>T1059.001</id></mitre>
+    <group>process_monitor,execution,</group>
+  </rule>
+</group>

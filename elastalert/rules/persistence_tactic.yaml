@@ -1,0 +1,36 @@
+name: "Persistence Mechanism Detected (TA0003)"
+type: any
+query_key: agent.name
+index: wazuh-alerts-*
+filter:
+  - query:
+      bool:
+        should:
+          - match_phrase:
+              rule.groups: "syscheck"
+          - terms:
+              rule.id: ["5902", "5903", "5904", "5905", "5952", "5955", "5956", "5902", "2930", "2931"]
+          - wildcard:
+              rule.description: "*crontab*"
+          - wildcard:
+              rule.description: "*useradd*"
+          - wildcard:
+              rule.description: "*new user*"
+          - wildcard:
+              rule.description: "*added to*"
+          - wildcard:
+              rule.description: "*rc.local*"
+          - wildcard:
+              rule.description: "*startup*"
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_msg_color: "warning"
+alert_text: |
+  🔒 *PERSISTENCE DETECTED* — TA0003
+  Rule: {rule.description}
+  Agent: {agent.name}
+  MITRE: T1053/T1543/T1547/T1136
+alert_text_type: alert_text_only
+realert:
+  minutes: 10

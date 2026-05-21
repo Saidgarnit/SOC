@@ -3,7 +3,7 @@ source "$(dirname "$0")/.env"
 
 FLEET_URL="http://localhost:8220"
 # Fetch fresh enrollment token dynamically
-POLICY_ID="261c9d63-7682-4a91-9a4b-744e6c96fba4"
+POLICY_ID="69515b3a-4bb6-46c8-836d-4a30c0bbf388"
 TOKEN=$(curl -s -X POST "http://localhost:5601/api/fleet/enrollment_api_keys" \
   -H "kbn-xsrf: true" -H "Content-Type: application/json" \
   -u "elastic:${ELASTIC_PASSWORD}" \
