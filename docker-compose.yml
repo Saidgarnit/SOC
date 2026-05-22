@@ -148,7 +148,7 @@ services:
     - soc-net
     restart: 'no'
     volumes:
-    - /tmp/init-es.sh:/init-es.sh:ro
+    - ./elasticsearch/init-es.sh:/init-es.sh:ro
     - ./elasticsearch:/output
   filebeat:
     command: filebeat -e -strict.perms=false
