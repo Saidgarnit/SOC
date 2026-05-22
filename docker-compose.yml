@@ -60,7 +60,6 @@ services:
     - CONNECTOR_CONFIDENCE_LEVEL=15
     - MITRE_INTERVAL=7
     image: opencti/connector-mitre:6.0.5
-    mem_limit: 2g
     memswap_limit: 2g
     networks:
     - soc-net
@@ -496,7 +495,6 @@ services:
     environment:
     - JVM_OPTS=-Xms256m -Xmx512m
     image: strangebee/thehive:5.2
-    mem_limit: 1g
     networks:
     - soc-net
     ports:
