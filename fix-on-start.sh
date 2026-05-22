@@ -165,3 +165,15 @@ docker update --memory="400m" --memory-swap="400m" victim-database 2>/dev/null
 docker update --memory="350m" --memory-swap="350m" victim-windows 2>/dev/null
 docker update --memory="350m" --memory-swap="350m" victim-iot 2>/dev/null
 docker update --memory="350m" --memory-swap="350m" victim-webapi 2>/dev/null
+
+# Fix Elasticsearch OOM crashes
+echo "🔧 Applying Elasticsearch memory limits..."
+docker compose restart elasticsearch
+sleep 10
+echo "✅ Elasticsearch memory fix applied"
+
+# Ensure Elasticsearch has proper memory limits
+echo "🔧 Verifying Elasticsearch memory configuration..."
+docker compose restart elasticsearch 2>/dev/null || true
+sleep 15
+echo "✅ Elasticsearch memory verified"

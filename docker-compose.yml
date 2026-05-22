@@ -101,7 +101,7 @@ services:
       resources:
         limits:
           cpus: 2.0
-          memory: 1500m
+          memory: 2000m
         reservations:
           memory: 1g
     environment:
@@ -609,3 +609,4 @@ volumes:
     external: true
   yara-ubuntu-www:
     external: true
+
