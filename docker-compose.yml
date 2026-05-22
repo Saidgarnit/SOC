@@ -66,7 +66,8 @@ services:
     - soc-net
     restart: always
   elastalert:
-    command:
+    entrypoint:
+    - elastalert
     - --verbose
     - --config
     - /opt/elastalert/config.yaml
@@ -450,7 +451,7 @@ services:
     - NET_ADMIN
     - NET_RAW
     - SYS_NICE
-    command: -i soc-br0 -S /etc/suricata/local.rules
+    command: -i br-a213411967d6 -S /etc/suricata/local.rules
     container_name: suricata
     deploy:
       resources:
@@ -462,8 +463,6 @@ services:
     privileged: true
     restart: always
     volumes:
-    - ./suricata/logs:/var/log/suricata:rw
-    - ./suricata/rules/local.rules:/etc/suricata/local.rules:ro
     - ./suricata/logs:/var/log/suricata:rw
   thehive:
     image: strangebee/thehive:5.2
