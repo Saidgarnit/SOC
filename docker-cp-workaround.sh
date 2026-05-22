@@ -3,6 +3,7 @@
 echo "Injecting workaround configs into containers..."
 docker cp /home/said/soc-stack/filebeat/filebeat.yml filebeat:/usr/share/filebeat/filebeat.yml
 docker cp /home/said/soc-stack/wazuh/config/ossec.conf wazuh-manager:/var/ossec/etc/ossec.conf
+docker exec wazuh-manager /var/ossec/bin/wazuh-control restart || docker restart wazuh-manager
 docker cp /home/said/soc-stack/misp/healthcheck.sh misp:/healthcheck.sh
 docker exec misp chmod +x /healthcheck.sh
 docker cp /home/said/soc-stack/suricata/rules/local.rules suricata:/etc/suricata/local.rules
