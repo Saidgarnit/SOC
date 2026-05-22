@@ -157,11 +157,7 @@ def main():
                 time.sleep(1)
         else:
             print(f"[*] No new alerts to enrich — sleeping {POLL_INTERVAL}s")
-# Handle quota exceeded
-        if response.status_code == 429:
-            print("[!] VT quota exceeded — sleeping 1 hour")
-            time.sleep(3600)
-            continue
+# Quota check removed because response is undefined here
         time.sleep(POLL_INTERVAL)
 
 if __name__ == "__main__":

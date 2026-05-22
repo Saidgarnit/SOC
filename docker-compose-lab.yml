@@ -20,6 +20,7 @@ services:
   victim-metasploitable:
     image: tleemcjr/metasploitable2
     container_name: victim-metasploitable
+    command: sh -c "bin/services.sh && tail -f /dev/null"
     networks:
       - soc-net
     ports:
