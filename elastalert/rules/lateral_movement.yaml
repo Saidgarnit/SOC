@@ -25,4 +25,4 @@ slack_username_override: SOC Alerts
 slack_webhook_url: https://hooks.slack.com/services/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
 type: any
 realert:
-  minutes: 15
+  minutes: 10

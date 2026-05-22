@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  victim-ubuntu:
+    mem_limit: 300m
+  victim-dvwa:
+    mem_limit: 400m
+  victim-windows:
+    mem_limit: 350m
+  victim-jenkins:
+    mem_limit: 400m
+  victim-database:
+    mem_limit: 400m
+  victim-mail:
+    mem_limit: 400m
+  victim-dns:
+    mem_limit: 400m
+  victim-ftp:
+    mem_limit: 400m
+  victim-iot:
+    mem_limit: 350m
+  victim-webapi:
+    mem_limit: 350m
+  victim-metasploitable:
+    mem_limit: 256m
+  kali-attacker:
+    mem_limit: 256m
+  fleet-server:
+    mem_limit: 256m

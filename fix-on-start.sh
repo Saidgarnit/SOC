@@ -136,3 +136,32 @@ for rule in \
     -d "{\"query\":{\"match\":{\"rule_name\":\"${rule}\"}}}" > /dev/null
 done
 echo "  ✅ ElastAlert dedup state cleared"
+
+# ── RESOURCE LIMITS: prevent OOM crashes ──────────────────────
+echo "🔧 Applying memory limits..."
+docker update --memory="1500m" --memory-swap="1500m" elasticsearch 2>/dev/null
+docker update --memory="512m"  --memory-swap="512m"  kibana 2>/dev/null
+docker update --memory="256m"  --memory-swap="256m"  wazuh-manager 2>/dev/null
+docker update --memory="300m"  --memory-swap="300m"  logstash 2>/dev/null
+docker update --memory="128m"  --memory-swap="128m"  elastalert 2>/dev/null
+docker update --memory="128m"  --memory-swap="128m"  suricata 2>/dev/null
+docker update --memory="200m"  --memory-swap="200m"  thehive 2>/dev/null
+docker update --memory="512m"  --memory-swap="512m"  opencti 2>/dev/null
+docker update --memory="256m"  --memory-swap="256m"  rabbitmq 2>/dev/null
+docker update --memory="256m"  --memory-swap="256m"  victim-mail 2>/dev/null
+docker update --memory="256m"  --memory-swap="256m"  victim-dns 2>/dev/null
+docker update --memory="300m"  --memory-swap="300m"  victim-database 2>/dev/null
+docker update --memory="256m"  --memory-swap="256m"  victim-ftp 2>/dev/null
+docker update --memory="400m"  --memory-swap="400m"  victim-jenkins 2>/dev/null
+echo "  ✅ Memory limits applied"
+
+# ── RESOURCE LIMIT CORRECTIONS (containers that need more) ──
+docker update --memory="400m" --memory-swap="400m" victim-dvwa 2>/dev/null
+docker update --memory="400m" --memory-swap="400m" victim-dns 2>/dev/null
+docker update --memory="400m" --memory-swap="400m" victim-ftp 2>/dev/null
+docker update --memory="400m" --memory-swap="400m" victim-mail 2>/dev/null
+docker update --memory="400m" --memory-swap="400m" thehive 2>/dev/null
+docker update --memory="400m" --memory-swap="400m" victim-database 2>/dev/null
+docker update --memory="350m" --memory-swap="350m" victim-windows 2>/dev/null
+docker update --memory="350m" --memory-swap="350m" victim-iot 2>/dev/null
+docker update --memory="350m" --memory-swap="350m" victim-webapi 2>/dev/null

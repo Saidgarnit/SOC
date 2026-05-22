@@ -32,4 +32,4 @@ alert_text_args:
   - '@timestamp'
   - rule.mitre.id
 realert:
-  minutes: 0
+  minutes: 2

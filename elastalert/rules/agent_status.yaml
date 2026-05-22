@@ -19,7 +19,7 @@ alert_text_args:
   - rule.description
 
 realert:
-  hours: 1
+  minutes: 120
 
 alert_subject: "SOC - Agent Status: {0}"
 alert_subject_args:

@@ -38,4 +38,4 @@ slack_username_override: SOC Alerts
 slack_emoji_override: ':warning:'
 slack_msg_color: danger
 realert:
-  minutes: 15
+  minutes: 2
