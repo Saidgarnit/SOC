@@ -1,0 +1,124 @@
+services:
+  victim-windows:
+    image: soc-stack-victim-windows:latest
+    container_name: victim-windows
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  victim-ubuntu:
+    image: soc-stack-victim-ubuntu
+    container_name: victim-ubuntu
+    networks:
+      - soc-net
+    ports:
+      - "2121:21"
+      - "2222:22"
+      - "8888:80"
+    restart: unless-stopped
+
+  victim-metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: victim-metasploitable
+    networks:
+      - soc-net
+    ports:
+      - "2122:21"
+      - "2223:22"
+      - "8889:80"
+    restart: unless-stopped
+
+  victim-dvwa:
+    image: victim-dvwa-img:latest
+    container_name: victim-dvwa
+    networks:
+      - soc-net
+    ports:
+      - "8890:80"
+    restart: unless-stopped
+
+  victim-dns:
+    image: soc-stack-victim-dns
+    container_name: victim-dns
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  victim-database:
+    image: soc-stack-victim-database
+    container_name: victim-database
+    networks:
+      - soc-net
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  victim-ftp:
+    image: soc-stack-victim-ftp
+    container_name: victim-ftp
+    networks:
+      - soc-net
+    ports:
+      - "2124:21"
+      - "21100-21110:21100-21110"
+    restart: unless-stopped
+
+  victim-jenkins:
+    image: soc-stack-victim-jenkins
+    container_name: victim-jenkins
+    networks:
+      - soc-net
+    ports:
+      - "9090:8080"
+    restart: unless-stopped
+
+  victim-mail:
+    image: soc-stack-victim-mail
+    container_name: victim-mail
+    networks:
+      - soc-net
+    ports:
+      - "2525:25"
+      - "1143:143"
+    restart: unless-stopped
+
+  victim-iot:
+    image: soc-stack-victim-iot
+    container_name: victim-iot
+    networks:
+      - soc-net
+    ports:
+      - "1883:1883"
+      - "8891:8080"
+    restart: unless-stopped
+
+  victim-webapi:
+    image: raesene/bwapp
+    container_name: victim-webapi
+    networks:
+      - soc-net
+    ports:
+      - "8892:80"
+    restart: unless-stopped
+
+  kali-attacker:
+    image: kalilinux/kali-rolling
+    container_name: kali-attacker
+    networks:
+      - soc-net
+    command: bash -c 'apt-get update && tail -f /dev/null'
+    restart: unless-stopped
+
+  fleet-server:
+    image: docker.elastic.co/elastic-agent/elastic-agent:8.13.0
+    container_name: fleet-server
+    networks:
+      - soc-net
+    ports:
+      - "8220:8220"
+    restart: unless-stopped
+
+networks:
+  soc-net:
+    external: true
+    name: soc-stack_soc-net

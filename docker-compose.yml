@@ -1,6 +1,8 @@
 networks:
   soc-net:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: soc-br0
 services:
   connector-misp:
     container_name: connector-misp
@@ -13,9 +15,8 @@ services:
       resources:
         limits:
           cpus: 0.2
-          memory: 128m
-        reservations:
           memory: 256m
+        reservations: {}
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -39,7 +40,7 @@ services:
     image: opencti/connector-misp:6.0.5
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   connector-mitre:
     container_name: connector-mitre
     depends_on:
@@ -63,7 +64,7 @@ services:
     memswap_limit: 2g
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   elastalert:
     command:
     - --verbose
@@ -89,7 +90,7 @@ services:
     image: jertel/elastalert2:latest
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
     volumes:
     - ./elastalert/config.yaml:/opt/elastalert/config.yaml
     - ./elastalert/rules:/opt/elastalert/rules
@@ -101,14 +102,14 @@ services:
       resources:
         limits:
           cpus: 2.0
-          memory: 2000m
+          memory: 2500m
         reservations:
-          memory: 1g
+          memory: 1500m
     environment:
     - discovery.type=single-node
     - xpack.security.enabled=true
     - xpack.security.http.ssl.enabled=false
-    - ES_JAVA_OPTS=${ES_JAVA_OPTS:--Xms1g -Xmx1g}
+    - ES_JAVA_OPTS=-Xms1536m -Xmx1536m
     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     healthcheck:
       interval: 20s
@@ -124,7 +125,7 @@ services:
     - soc-net
     ports:
     - 9200:9200
-    restart: unless-stopped
+    restart: always
     ulimits:
       memlock:
         hard: -1
@@ -162,10 +163,9 @@ services:
     image: docker.elastic.co/beats/filebeat:8.13.0
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
     user: root
     volumes:
-    - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     - ./wazuh/logs:/var/ossec/logs:ro
     - /var/log/filebeat:/var/log/filebeat
     - ./suricata/logs:/var/log/suricata:ro
@@ -178,7 +178,7 @@ services:
       resources:
         limits:
           cpus: 1.0
-          memory: 512m
+          memory: 700m
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_SERVICEACCOUNTTOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYV90b2tlbl8xNzc3OTkzOTI1Ol9WQWtGM0h3U09hQUFfREJIMDFmZGc
@@ -201,9 +201,8 @@ services:
     - soc-net
     ports:
     - 5601:5601
-    restart: unless-stopped
-    volumes:
-    - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    restart: always
+
   logstash:
     container_name: logstash
     depends_on:
@@ -213,9 +212,9 @@ services:
       resources:
         limits:
           cpus: 0.5
-          memory: 300m
+          memory: 700m
     environment:
-    - LS_JAVA_OPTS=-Xms512m -Xmx512m
+    - LS_JAVA_OPTS=-Xms256m -Xmx512m
     - XPACK_MONITORING_ENABLED=false
     - LOGSTASH_PIPELINE_WORKERS=1
     - ELASTIC_USERNAME=${ELASTIC_USERNAME}
@@ -226,11 +225,12 @@ services:
     ports:
     - 5000:5000/tcp
     - 5001:5001/udp
-    restart: unless-stopped
+    restart: always
     user: root
     volumes:
     - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     - ./suricata/logs:/var/log/suricata:ro
+    - ./wazuh/logs:/var/ossec/logs:ro
     - ./logstash/geoip:/usr/share/logstash/geoip:ro
   memcached:
     container_name: memcached
@@ -242,7 +242,7 @@ services:
     image: memcached:alpine
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   minio:
     command: server /data
     container_name: minio
@@ -265,7 +265,7 @@ services:
     image: minio/minio:latest
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   misp:
     container_name: misp
     depends_on:
@@ -275,7 +275,7 @@ services:
       resources:
         limits:
           cpus: 0.3
-          memory: 200m
+          memory: 600m
     environment:
     - MYSQL_HOST=misp-db
     - MYSQL_USER=misp
@@ -303,10 +303,9 @@ services:
     ports:
     - 9001:80
     - 9002:443
-    restart: unless-stopped
+    restart: always
     volumes:
     - misp-app:/var/www/MISP
-    - ./misp/healthcheck.sh:/healthcheck.sh:ro
   misp-db:
     container_name: misp-db
     environment:
@@ -323,7 +322,7 @@ services:
     image: mysql:8.0
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
     volumes:
     - misp-db-data:/var/lib/mysql
   misp-redis:
@@ -336,7 +335,7 @@ services:
     image: redis:7-alpine
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   opencti:
     container_name: opencti
     depends_on:
@@ -350,7 +349,7 @@ services:
       resources:
         limits:
           cpus: 0.5
-          memory: 512m
+          memory: 1500m
     environment:
     - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
     - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
@@ -387,7 +386,7 @@ services:
     - soc-net
     ports:
     - 3000:8080
-    restart: unless-stopped
+    restart: always
   opencti-redis:
     command: redis-server --maxmemory 96mb --maxmemory-policy allkeys-lru
     container_name: opencti-redis
@@ -399,7 +398,7 @@ services:
     image: redis:7-alpine
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   opencti-worker:
     container_name: opencti-worker
     depends_on:
@@ -409,7 +408,7 @@ services:
       resources:
         limits:
           cpus: 0.3
-          memory: 128m
+          memory: 256m
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -426,7 +425,7 @@ services:
     image: opencti/worker:6.0.5
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   rabbitmq:
     container_name: rabbitmq
     deploy:
@@ -445,14 +444,13 @@ services:
     image: rabbitmq:3.12-management-alpine
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   suricata:
     cap_add:
     - NET_ADMIN
     - NET_RAW
     - SYS_NICE
-    command: -i br-a213411967d6 --set default-rule-path=/var/lib/suricata/rules -s
-      /var/lib/suricata/rules/suricata.rules
+    command: -i soc-br0 -S /etc/suricata/local.rules
     container_name: suricata
     deploy:
       resources:
@@ -462,46 +460,48 @@ services:
     image: jasonish/suricata:latest
     network_mode: host
     privileged: true
-    restart: unless-stopped
+    restart: always
     volumes:
-    - ./suricata/rules:/etc/suricata/rules:rw
     - ./suricata/logs:/var/log/suricata:rw
-    - ./suricata/threshold.conf:/etc/suricata/threshold.conf:rw
-    - ./suricata/config/suricata.yaml:/etc/suricata/suricata.yaml:rw
+    - ./suricata/rules/local.rules:/etc/suricata/local.rules:ro
+    - ./suricata/logs:/var/log/suricata:rw
   thehive:
-    command:
-    - --secret
-    - SOCstack2026!TheHive
-    - --no-cql-wait
-    - --bdb-directory
-    - /data/db
-    - --index-backend
-    - elasticsearch
-    - --es-hostnames
-    - elasticsearch
-    - --es-username
-    - elastic
-    - --es-password
-    - sYVfKJCe2RCfELjf=GLa
-    - --no-config-cortex
+    image: strangebee/thehive:5.2
     container_name: thehive
     depends_on:
-    - elasticsearch
+      - elasticsearch
     deploy:
       resources:
         limits:
-          cpus: 0.5
-          memory: 200m
+          cpus: "0.5"
+          memory: 1024m
+        reservations:
+          memory: 512m
     environment:
-    - JVM_OPTS=-Xms256m -Xmx512m
-    image: strangebee/thehive:5.2
+      - JVM_OPTS=-Xms256m -Xmx512m
+    command:
+      - --secret
+      - "SOCstack2026!TheHive"
+      - --no-cql-wait
+      - --bdb-directory
+      - /data/db
+      - --index-backend
+      - elasticsearch
+      - --es-hostnames
+      - elasticsearch
+      - --es-username
+      - elastic
+      - --es-password
+      - "sYVfKJCe2RCfELjf=GLa"
+      - --no-config-cortex
     networks:
-    - soc-net
+      - soc-net
     ports:
-    - 9000:9000
-    restart: unless-stopped
+      - "9000:9000"
     volumes:
-    - thehive_data:/data
+      - thehive_data:/data
+    restart: unless-stopped
+
   vt-enricher:
     build:
       context: ./threat-intelligence
@@ -525,14 +525,14 @@ services:
     image: vt-enricher:local
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   wazuh-manager:
     container_name: wazuh-manager
     deploy:
       resources:
         limits:
           cpus: 1.0
-          memory: 256m
+          memory: 384m
     environment:
     - INDEXER_URL=http://elasticsearch:9200
     - INDEXER_USERNAME=${ELASTIC_USERNAME}
@@ -542,12 +542,12 @@ services:
     healthcheck:
       interval: 30s
       retries: 5
-      start_period: 60s
+      start_period: 120s
       test:
       - CMD-SHELL
       - curl -sf -k -u wazuh:Wazuh1234! -X POST https://localhost:55000/security/user/authenticate
         | grep -q 'token'
-      timeout: 10s
+      timeout: 15s
     image: wazuh/wazuh-manager:4.7.5
     init: true
     networks:
@@ -557,21 +557,15 @@ services:
     - 1514:1514/udp
     - 1515:1515
     - 55000:55000
-    restart: unless-stopped
+    restart: always
     volumes:
-    - ./wazuh/wazuh-template.json:/etc/filebeat/wazuh-template.json
     - ./wazuh/init-dirs.sh:/init-dirs.sh:ro
     - ./wazuh/config/shared/default:/var/ossec/etc/shared/default:rw
     - ./wazuh/lists:/var/ossec/etc/lists:rw
     - ./wazuh/rules:/var/ossec/etc/rules:rw
     - ./wazuh/decoders:/var/ossec/etc/decoders:rw
-    - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf
     - ./wazuh/logs:/var/ossec/logs
-    - ./wazuh/0-wazuh-init:/etc/cont-init.d/0-wazuh-init
-    - ./wazuh/0a-setup-filebeat:/etc/cont-init.d/0a-setup-filebeat
-    - ./wazuh/1-set-api-password:/etc/cont-init.d/1-set-api-password
     - ./wazuh/set_wazuh_pass.py:/tmp/set_wazuh_pass.py
-    - ./wazuh/filebeat-template.yml:/filebeat-template.yml:ro
   yara-scanner:
     build: ./yara/scanner
     command:
@@ -587,7 +581,7 @@ services:
           memory: 64m
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
     volumes:
     - ./yara/samples:/samples
     - yara-dvwa:/victims/dvwa:ro
@@ -595,10 +589,10 @@ services:
     - yara-ubuntu-tmp:/victims/ubuntu-tmp:ro
     - yara-ftp:/victims/ftp:ro
 volumes:
+  thehive_data:
   es_data: null
   misp-app: null
   misp-db-data: null
-  thehive_data: null
   wazuh_alerts: null
   wazuh_data: null
   yara-dvwa:
@@ -609,4 +603,3 @@ volumes:
     external: true
   yara-ubuntu-www:
     external: true
-
