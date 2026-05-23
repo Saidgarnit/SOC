@@ -1,11 +1,33 @@
 #!/bin/bash
 # ── victim-ubuntu entrypoint ──────────────────────────────────────────
+
+# Start rsyslog FIRST (needed for auth.log)
+service rsyslog start 2>/dev/null || true
+
 # Services
 service ssh start 2>/dev/null || true
 service apache2 start 2>/dev/null || true
 service vsftpd start 2>/dev/null || true
 
-# ── Wazuh auto-enroll (survives reboot) ──────────────────────
+# Configure SSH for attack detection
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/^#LogLevel INFO/LogLevel DEBUG3/' /etc/ssh/sshd_config || sed -i '1i LogLevel DEBUG3' /etc/ssh/sshd_config
+sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication no/' /etc/ssh/sshd_config
+echo 'MaxAuthTries 10' >> /etc/ssh/sshd_config
+service ssh restart 2>/dev/null || true
+
+# Add auth.log to Wazuh monitoring
+cat >> /var/ossec/etc/ossec.conf << 'OSSECEOF'
+
+  <!-- SSH Authentication logs -->
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/auth.log</location>
+  </localfile>
+OSSECEOF
+
+# ── Wazuh auto-enroll (survives reboot) ──────────────────────────────
 /var/ossec/bin/wazuh-modulesd 2>/dev/null &
 sleep 2
 if [ ! -s /var/ossec/etc/client.keys ]; then
