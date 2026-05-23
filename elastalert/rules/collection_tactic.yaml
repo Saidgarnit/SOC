@@ -1,7 +1,7 @@
 name: Collection Tactic Detected (T1005)
 type: any
 query_key: agent.name
-index: .ds-wazuh-alerts-4.x-*
+index: soc-logs-enriched-*
 filter:
 - query:
     query_string:
@@ -11,9 +11,23 @@ alert_text: "🔴 *Collection Tactic Detected (T1005)*\n\n*Host:* {0}\n*File:* {
 alert_text_args: [agent.name, syscheck.path, syscheck.event, rule.description, '@timestamp']
 alert:
 - slack
+- hivealerter
 slack_webhook_url: https://hooks.slack.com/services/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
 slack_username_override: SOC Alerts
 slack_emoji_override: ':rotating_light:'
 slack_msg_color: danger
 realert:
   minutes: 10
+
+
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+hive_alert_config:
+  title: "{match[rule.description]}"
+  type: "external"
+  source: "elastalert"
+  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  severity: 2
+  tags: ["soc-alert", "elastalert"]

@@ -1,7 +1,7 @@
 name: "Persistence Mechanism Detected (TA0003)"
 type: any
 query_key: agent.name
-index: .ds-wazuh-alerts-4.x-*
+index: soc-logs-enriched-*
 filter:
   - query:
       bool:
@@ -24,6 +24,7 @@ filter:
               rule.description: "*startup*"
 alert:
   - slack
+  - hivealerter
 slack_webhook_url: "https://hooks.slack.com/services/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"
 slack_msg_color: "warning"
 alert_text: |
@@ -34,3 +35,16 @@ alert_text: |
 alert_text_type: alert_text_only
 realert:
   minutes: 10
+
+
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+hive_alert_config:
+  title: "{match[rule.description]}"
+  type: "external"
+  source: "elastalert"
+  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  severity: 2
+  tags: ["soc-alert", "elastalert"]

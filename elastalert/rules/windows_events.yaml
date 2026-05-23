@@ -1,0 +1,34 @@
+name: Windows Security Events
+type: any
+index: soc-logs-enriched-*
+
+filter:
+  - term:
+      agent.name: "4973d1bc81b4"
+
+realert:
+  minutes: 10
+
+alert:
+  - slack
+  - hivealerter
+
+slack_webhook_url: "${SLACK_WEBHOOK_URL}"
+slack_title: "SOC Alert: Windows Security Event"
+slack_text_string: "Agent: {agent.name} | Rule: {rule.description} | Log: {full_log}"
+
+alert_text_type: alert_text_only
+alert_text: "Windows event detected on {agent.name}\nRule {rule.id}: {rule.description}"
+
+
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+hive_alert_config:
+  title: "{match[rule.description]}"
+  type: "external"
+  source: "elastalert"
+  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  severity: 2
+  tags: ["soc-alert", "elastalert"]

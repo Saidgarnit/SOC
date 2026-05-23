@@ -1,5 +1,6 @@
 alert:
 - slack
+- hivealerter
 alert_text: "\U0001F4E1 MQTT Anomaly — {0}\n   IOT PROTOCOL ANOMALY\n\n   Host   \
   \    : {0}\n   Rule       : {1}\n   Rule ID    : {2}\n   Timestamp  : {3}\n   Kibana\
   \     : http://localhost:5601"
@@ -13,7 +14,7 @@ filter:
 - query:
     query_string:
       query: rule.groups:"mqtt" OR rule.description:*mqtt*
-index: .ds-wazuh-alerts-4.x-*
+index: soc-logs-enriched-*
 name: MQTT Anomaly Detected
 slack_emoji_override: ':satellite_antenna:'
 slack_msg_color: warning
@@ -22,3 +23,16 @@ slack_webhook_url: https://hooks.slack.com/services/T0ASP9FEPUZ/B0AT4LL61PA/FsRI
 type: any
 realert:
   minutes: 10
+
+
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+hive_alert_config:
+  title: "{match[rule.description]}"
+  type: "external"
+  source: "elastalert"
+  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  severity: 2
+  tags: ["soc-alert", "elastalert"]

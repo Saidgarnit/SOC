@@ -1,5 +1,6 @@
 alert:
 - slack
+- hivealerter
 alert_text: "\U0001F6A8 HIGH SEVERITY — {0}\n   CRITICAL EVENT\n\n   Host       :\
   \ {0}\n   Rule       : {1}\n   Rule ID    : {2}\n   Level      : {3}\n   Timestamp\
   \  : {4}\n   MITRE      : {5}\n   Kibana     : http://localhost:5601"
@@ -15,7 +16,7 @@ filter:
 - range:
     rule.level:
       gte: 10
-index: .ds-wazuh-alerts-4.x-*
+index: soc-logs-enriched-*
 name: High Severity Alert
 slack_emoji_override: ':rotating_light:'
 slack_msg_color: danger
@@ -24,3 +25,16 @@ slack_webhook_url: https://hooks.slack.com/services/T0ASP9FEPUZ/B0AT4LL61PA/FsRI
 type: any
 realert:
   minutes: 10
+
+
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+hive_alert_config:
+  title: "{match[rule.description]}"
+  type: "external"
+  source: "elastalert"
+  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  severity: 2
+  tags: ["soc-alert", "elastalert"]

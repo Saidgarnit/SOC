@@ -1,7 +1,7 @@
 name: SMB Brute Force Attack
 type: frequency
 query_key: data.srcip
-index: .ds-wazuh-alerts-4.x-*
+index: soc-logs-enriched-*
 num_events: 5
 timeframe:
   minutes: 5
@@ -11,6 +11,7 @@ filter:
         query: rule.id:"13104"
 alert:
   - slack
+  - hivealerter
 slack_webhook_url: https://hooks.slack.com/services/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
 slack_username_override: SOC Alerts
 slack_emoji_override: ':warning:'
@@ -23,3 +24,16 @@ alert_text_args:
   - '@timestamp'
 realert:
   minutes: 2
+
+
+hive_connection:
+  hive_host: http://thehive
+  hive_port: 9000
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+hive_alert_config:
+  title: "{match[rule.description]}"
+  type: "external"
+  source: "elastalert"
+  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  severity: 2
+  tags: ["soc-alert", "elastalert"]

@@ -1,4 +1,9 @@
 #!/bin/bash
+export DOCKER_HOST=unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock
+chmod 666 /mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock 2>/dev/null || true
+# --- Ensure Suricata bridge interface is dynamically updated on boot ---
+bash /home/said/soc-stack/update-suricata-bridge.sh
+
 echo "🔧 SOC stack fixes (no restart)..."
 source "$(dirname "$0")/.env"
 PASS="${ELASTIC_PASSWORD}"
@@ -139,7 +144,7 @@ echo "  ✅ ElastAlert dedup state cleared"
 
 # ── RESOURCE LIMITS: prevent OOM crashes ──────────────────────
 echo "🔧 Applying memory limits..."
-docker update --memory="1500m" --memory-swap="1500m" elasticsearch 2>/dev/null
+docker update --memory="2048m" --memory-swap="2048m" elasticsearch 2>/dev/null
 docker update --memory="512m"  --memory-swap="512m"  kibana 2>/dev/null
 docker update --memory="256m"  --memory-swap="256m"  wazuh-manager 2>/dev/null
 docker update --memory="300m"  --memory-swap="300m"  logstash 2>/dev/null
@@ -168,12 +173,32 @@ docker update --memory="350m" --memory-swap="350m" victim-webapi 2>/dev/null
 
 # Fix Elasticsearch OOM crashes
 echo "🔧 Applying Elasticsearch memory limits..."
-docker compose restart elasticsearch
-sleep 10
 echo "✅ Elasticsearch memory fix applied"
 
 # Ensure Elasticsearch has proper memory limits
 echo "🔧 Verifying Elasticsearch memory configuration..."
-docker compose restart elasticsearch 2>/dev/null || true
 sleep 15
 echo "✅ Elasticsearch memory verified"
+
+# ── CRON PERSISTENCE: Inject cron jobs into running containers ────
+echo "Ensuring EQL and Attack crons are active..."
+
+# ElastAlert EQL engine (Runs every 5 minutes)
+docker exec elastalert bash -c '(crontab -l 2>/dev/null | grep -q eql_sequence_check) || (crontab -l 2>/dev/null; echo "*/5 * * * * python3 /opt/elastalert/rules/eql_sequence_check.py") | crontab -'
+
+# Kali Attacker (Runs every 15 minutes)
+docker exec kali-attacker bash -c '(crontab -l 2>/dev/null | grep -q attack-sim) || (crontab -l 2>/dev/null; echo "*/15 * * * * bash /root/attack-sim.sh") | crontab -'
+echo "Crons injected successfully."
+docker compose restart elasticsearch
+sleep 15
+docker update --memory="1500m" --memory-swap="1500m" thehive 2>/dev/null
+docker update --memory="512m" --memory-swap="512m" fleet-server 2>/dev/null
+
+# Ensure wazuh analysisd is running
+if docker ps | grep -q wazuh-manager; then
+  docker exec wazuh-manager bash -c "
+    mkdir -p /var/ossec/etc/shared/default
+    touch /var/ossec/etc/shared/ar.conf
+    pgrep wazuh-analysisd > /dev/null || /var/ossec/bin/wazuh-analysisd 2>/dev/null &
+  " 2>/dev/null
+fi

@@ -25,4 +25,4 @@ services:
   kali-attacker:
     mem_limit: 256m
   fleet-server:
-    mem_limit: 256m
+    mem_limit: 400m

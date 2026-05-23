@@ -1,6 +1,6 @@
 name: Critical Alert Master Notification
 type: any
-index: .ds-wazuh-alerts-4.x-*
+index: soc-logs-enriched-*
 filter:
   - range:
       rule.level:
@@ -37,7 +37,7 @@ alert_text_args:
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: "o4j3C27LrQejRa9Oq73QllOcU5k2P5KM"
+  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
   hive_verify_cert: false
   hive_organisation: "SOC"
 hive_alert_config:
