@@ -15,7 +15,7 @@ services:
       resources:
         limits:
           cpus: 0.2
-          memory: 256m
+          memory: 512m
         reservations: {}
     environment:
     - OPENCTI_URL=http://opencti:8080
@@ -70,7 +70,7 @@ services:
     - elastalert
     - --verbose
     - --config
-    - /opt/elastalert/config.yaml
+    - /ea-config.yaml
     container_name: elastalert
     depends_on:
       elasticsearch:
@@ -88,14 +88,11 @@ services:
     - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
     - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
-    image: jertel/elastalert2:latest
+    image: elastalert-custom
     networks:
     - soc-net
     restart: always
     volumes:
-    - ./elastalert/config.yaml:/opt/elastalert/config.yaml
-    - ./elastalert/rules:/opt/elastalert/rules
-    - ./elastalert/smtp_auth.yaml:/opt/elastalert/smtp_auth.yaml
     - ./elastalert/logs:/opt/elastalert/logs
   elasticsearch:
     container_name: elasticsearch
@@ -409,7 +406,7 @@ services:
       resources:
         limits:
           cpus: 0.3
-          memory: 256m
+          memory: 512m
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -451,7 +448,7 @@ services:
     - NET_ADMIN
     - NET_RAW
     - SYS_NICE
-    command: -i br-a213411967d6 -S /etc/suricata/local.rules
+    command: -i docker0
     container_name: suricata
     deploy:
       resources:
@@ -602,3 +599,4 @@ volumes:
     external: true
   yara-ubuntu-www:
     external: true
+

@@ -146,7 +146,7 @@ echo "  ✅ ElastAlert dedup state cleared"
 echo "🔧 Applying memory limits..."
 docker update --memory="2048m" --memory-swap="2048m" elasticsearch 2>/dev/null
 docker update --memory="512m"  --memory-swap="512m"  kibana 2>/dev/null
-docker update --memory="256m"  --memory-swap="256m"  wazuh-manager 2>/dev/null
+docker update --memory="512m" --memory-swap="512m" wazuh-manager 2>/dev/null
 docker update --memory="300m"  --memory-swap="300m"  logstash 2>/dev/null
 docker update --memory="128m"  --memory-swap="128m"  elastalert 2>/dev/null
 docker update --memory="128m"  --memory-swap="128m"  suricata 2>/dev/null
@@ -193,6 +193,10 @@ docker compose restart elasticsearch
 sleep 15
 docker update --memory="1500m" --memory-swap="1500m" thehive 2>/dev/null
 docker update --memory="512m" --memory-swap="512m" fleet-server 2>/dev/null
+
+# Ensure wazuh firewall log dirs exist
+docker exec wazuh-manager mkdir -p /var/ossec/logs/firewall/$(date +%Y) 2>/dev/null
+docker exec wazuh-manager chown -R wazuh:wazuh /var/ossec/logs/firewall/ 2>/dev/null
 
 # Ensure wazuh analysisd is running
 if docker ps | grep -q wazuh-manager; then

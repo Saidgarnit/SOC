@@ -1,0 +1,38 @@
+# ElastAlert Slack Configuration for SSH Brute-Force Detection
+
+es_host: elasticsearch
+es_port: 9200
+writeback_index: elastalert_status
+
+# Rule: SSH Brute-Force Detection
+rules:
+  - name: SSH Brute-Force Alert
+    type: any
+    index: wazuh-alerts-*
+    query_key: data.srcip
+    alert:
+      - slack
+    slack_webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+    slack_username_override: Wazuh SOC Lab
+    slack_emoji_override: ':warning:'
+    
+    filter:
+      - term:
+          rule.id: "5760"
+      - range:
+          timestamp:
+            gte: now-5m
+
+# ElastAlert general settings
+es_conn_timeout: 20
+writeback_index: elastalert_status
+buffer_time:
+  minutes: 15
+
+rules_folder: ./rules
+
+run_every:
+  minutes: 1
+
+es_conn_timeout: 20
+es_conn_scroll_timeout: 30
