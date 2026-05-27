@@ -30,9 +30,7 @@ services:
     restart: always
   elastalert:
     command:
-    - --verbose
-    - --config
-    - /opt/elastalert/config.yaml
+    - /opt/elastalert/run.sh
     container_name: elastalert
     depends_on:
       elasticsearch:
