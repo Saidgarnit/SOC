@@ -4,6 +4,12 @@ source "$(dirname "$0")/.env"
 
 echo "🚀 Starting SOC Infrastructure..."
 
+# ── Start both compose stacks ──
+echo "📦 Bringing up core SOC stack..."
+docker compose -f "$(dirname "$0")/docker-compose.yml" up -d
+echo "🖥️  Bringing up lab machines..."
+docker compose -f "$(dirname "$0")/docker-compose-lab.yml" up -d
+
 # ── Wait for Fleet Server (HTTP not HTTPS) ──
 echo "⏳ Waiting for Fleet Server..."
 until curl -s http://localhost:8220/api/status | grep -q "HEALTHY"; do

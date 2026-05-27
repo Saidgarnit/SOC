@@ -1,101 +1,24 @@
 filebeat.inputs:
-  - type: filestream
-    id: wazuh-alerts
-    enabled: true
-    paths:
-      - /var/ossec/logs/alerts/alerts.json
-    parsers:
-      - ndjson:
-          keys_under_root: true
-          overwrite_keys: true
-          add_error_key: true
-          expand_keys: true
-    fields:
-      log_source: wazuh
-    fields_under_root: true
-    prospector.scanner.check_interval: 5s
-
-  - type: syslog
-    format: rfc3164
-    enabled: true
-    protocol.udp:
-      host: "0.0.0.0:5514"
-    fields:
-      log_source: metasploitable
-      host_role: vuln-linux
-    fields_under_root: true
-
   - type: log
     enabled: true
     paths:
-      - /var/log/suricata/eve.json
-    json.message_key: message
-    json.keys_under_root: true
-    json.add_error_key: true
+      - /var/log/syslog
+      - /var/log/auth.log
+      - /var/log/*.log
     fields:
-      log_source: suricata
+      source_host: docker-host
     fields_under_root: true
 
-  - type: httpjson
-    id: misp-threat-intel
-    enabled: true
-    request.url: "https://172.18.0.27:443/events/restSearch/json"
-    request.ssl.verification_mode: none
-    request.timeout: 30s
-    request.method: POST
-    request.headers:
-      Authorization: "S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t"
-      Accept: "application/json"
-      Content-Type: "application/json"
-      User-Agent: "MISP-Connector"
-    request.body:
-      returnObjects: "1"
-      limit: "100"
-      published: "1"
-    interval: 5m
-    fields:
-      log_source: misp-threat-intel
-    fields_under_root: true
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
 
-  - type: httpjson
-    id: opencti-threat-intel
-    enabled: true
-    request.url: "http://opencti:8080/graphql"
-    request.method: POST
-    request.headers:
-      Authorization: "Bearer bbfe1ad3-c317-4efe-9f14-0ea298a9476d"
-      Content-Type: "application/json"
-    request.body:
-      query: "{ indicators(first: 100) { edges { node { id name description pattern valid_from valid_until } } } }"
-    interval: 5m
-    fields:
-      log_source: opencti-threat-intel
-    fields_under_root: true
-
-setup.template.enabled: false
-setup.ilm.enabled: false
+setup.kibana:
+  host: "kibana:5601"
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+  hosts: ["elasticsearch:9200"]
   username: "elastic"
-  password: "sYVfKJCe2RCfELjf=GLa"
-  indices:
-    - index: "suricata-alerts-%{+yyyy.MM.dd}"
-      when.equals:
-        log_source: suricata
-    - index: "wazuh-alerts-4.x-%{+yyyy.MM.dd}"
-      when.equals:
-        log_source: wazuh
-    - index: "syslog-%{+yyyy.MM.dd}"
-      when.equals:
-        log_source: metasploitable
-    - index: "misp-threat-intel-%{+yyyy.MM.dd}"
-      when.equals:
-        log_source: misp-threat-intel
-    - index: "filebeat-opencti-intel-%{+yyyy.MM.dd}"
-      when.equals:
-        log_source: opencti-threat-intel
+  password: "Kjd9r43ANUymjjcba0M6"
 
 logging.level: info
-logging.to_stderr: true
-logging.to_files: false

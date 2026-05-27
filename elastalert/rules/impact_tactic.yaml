@@ -1,44 +1,62 @@
-name: "Impact Detected (TA0040)"
+name: Impact Detected (TA0040)
 type: any
 query_key: agent.name
 index: soc-logs-enriched-*
 filter:
-  - query:
-      bool:
-        minimum_should_match: 1
-        should:
-          - range:
-              rule.level:
-                gte: 12
-          - match_phrase:
-              rule.groups: "service_availability"
-          - terms:
-              rule.id: ["533", "535", "2932"]
+- query:
+    bool:
+      minimum_should_match: 1
+      should:
+      - range:
+          rule.level:
+            gte: 12
+      - match_phrase:
+          rule.groups: service_availability
+      - terms:
+          rule.id:
+          - '533'
+          - '535'
+          - '2932'
 alert:
-  - slack
-  - hivealerter
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_msg_color: "danger"
-alert_text: |
-  :boom: *IMPACT DETECTED* -- TA0040
-  Rule ID: {rule.id}
-  Level: {rule.level}
-  Description: {rule.description}
-  Agent: {agent.name}
-  MITRE: T1489 Service Stop / T1499 DoS
+- slack
+- hivealerter
+slack_webhook_url: https://hooks.slack.com/services/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
+slack_msg_color: danger
+alert_text: "\U0001F6A8 *SOC ALERT \u2014 IMPACT DETECTED (TA0040)*\n\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n*Detection:* {0}\n\
+  *Target/Agent:* `{1}`\n*Rule ID:* {2} | *Level:* {3}\n*MITRE:* {4} \u2014 {5}\n\
+  *Source IP:* `{6}`\n*Detected at:* {7}\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\n_Netdefender SOC \u2014 Threat Intelligence_"
 alert_text_type: alert_text_only
 realert:
   minutes: 10
-
-
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
 hive_alert_config:
-  title: "{match[rule.description]}"
-  type: "external"
-  source: "elastalert"
-  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  title: '{match[rule][description]}'
+  type: external
+  source: elastalert
+  description: 'Detected by ElastAlert rule
+
+
+    Index: {rule[index]}'
   severity: 2
-  tags: ["soc-alert", "elastalert"]
+  tags:
+  - soc-alert
+  - elastalert
+alert_missing_value: N/A
+alert_text_args:
+- rule.description
+- agent.name
+- rule.id
+- rule.level
+- rule.mitre.tactic[0]
+- rule.mitre.technique[0]
+- data.srcip
+- '@timestamp'

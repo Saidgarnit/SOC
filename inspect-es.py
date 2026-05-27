@@ -6,7 +6,7 @@
 import urllib.request, urllib.error, json, base64
 
 ES    = "http://localhost:9200"
-CREDS = base64.b64encode(b"elastic:sYVfKJCe2RCfELjf=GLa").decode()
+CREDS = base64.b64encode(b"elastic:Kjd9r43ANUymjjcba0M6").decode()
 
 def call(path):
     req = urllib.request.Request(ES + path,

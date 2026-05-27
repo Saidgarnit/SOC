@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 ES_HOST  = "http://localhost:9200"
 ES_USER  = "elastic"
-ES_PASS  = "sYVfKJCe2RCfELjf=GLa"
+ES_PASS  = "Kjd9r43ANUymjjcba0M6"
 SLACK_WH = "https://hooks.slack.com/services/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"
 
 SEQUENCES = [

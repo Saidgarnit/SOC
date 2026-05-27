@@ -4,43 +4,6 @@ networks:
     driver_opts:
       com.docker.network.bridge.name: soc-br0
 services:
-  connector-misp:
-    container_name: connector-misp
-    depends_on:
-      misp:
-        condition: service_healthy
-      opencti:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: 0.2
-          memory: 512m
-        reservations: {}
-    environment:
-    - OPENCTI_URL=http://opencti:8080
-    - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-    - CONNECTOR_ID=misp-connector-001
-    - CONNECTOR_TYPE=EXTERNAL_IMPORT
-    - CONNECTOR_NAME=MISP
-    - CONNECTOR_SCOPE=misp-galaxy,misp-attribute
-    - CONNECTOR_CONFIDENCE_LEVEL=75
-    - CONNECTOR_LOG_LEVEL=info
-    - MISP_URL=http://misp
-    - MISP_KEY=S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t
-    - MISP_SSL=false
-    - MISP_FEED_MODE=false
-    - MISP_DATETIME_ATTRIBUTE=timestamp
-    - MISP_CREATE_REPORTS=true
-    - MISP_REPORT_TYPE=misp-event
-    - MISP_CREATE_INDICATORS=true
-    - MISP_CREATE_OBSERVABLES=true
-    - MISP_IMPORT_FROM_DATE=2026-01-01
-    - MISP_INTERVAL=5
-    image: opencti/connector-misp:6.0.5
-    networks:
-    - soc-net
-    restart: always
   connector-mitre:
     container_name: connector-mitre
     depends_on:
@@ -66,11 +29,10 @@ services:
     - soc-net
     restart: always
   elastalert:
-    entrypoint:
-    - elastalert
+    command:
     - --verbose
     - --config
-    - /ea-config.yaml
+    - /opt/elastalert/config.yaml
     container_name: elastalert
     depends_on:
       elasticsearch:
@@ -88,11 +50,14 @@ services:
     - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
     - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
-    image: elastalert-custom
+    image: jertel/elastalert2:latest
     networks:
     - soc-net
     restart: always
     volumes:
+    - ./elastalert/config.yaml:/opt/elastalert/config.yaml
+    - ./elastalert/rules:/opt/elastalert/rules
+    - ./elastalert/smtp_auth.yaml:/opt/elastalert/smtp_auth.yaml
     - ./elastalert/logs:/opt/elastalert/logs
   elasticsearch:
     container_name: elasticsearch
@@ -145,7 +110,7 @@ services:
     - soc-net
     restart: 'no'
     volumes:
-    - ./elasticsearch/init-es.sh:/init-es.sh:ro
+    - /tmp/init-es.sh:/init-es.sh:ro
     - ./elasticsearch:/output
   filebeat:
     command: filebeat -e -strict.perms=false
@@ -200,7 +165,6 @@ services:
     ports:
     - 5601:5601
     restart: always
-
   logstash:
     container_name: logstash
     depends_on:
@@ -264,46 +228,6 @@ services:
     networks:
     - soc-net
     restart: always
-  misp:
-    container_name: misp
-    depends_on:
-      misp-db:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: 0.3
-          memory: 600m
-    environment:
-    - MYSQL_HOST=misp-db
-    - MYSQL_USER=misp
-    - MYSQL_PASSWORD=misp_password
-    - MYSQL_DATABASE=misp
-    - REDIS_HOST=misp-redis
-    - REDIS_PASSWORD=
-    - ENABLE_REDIS_EMPTY_PASSWORD=true
-    - PHP_SESSION_DEFAULTS=redis
-    - BASE_URL=http://localhost:9001
-    - DISABLE_SSL_REDIRECT=true
-    - PHP_SESSION_COOKIE_SECURE=false
-    healthcheck:
-      interval: 30s
-      retries: 10
-      start_period: 300s
-      test:
-      - CMD
-      - /bin/bash
-      - /healthcheck.sh
-      timeout: 10s
-    image: ghcr.io/misp/misp-docker/misp-core:latest
-    networks:
-    - soc-net
-    ports:
-    - 9001:80
-    - 9002:443
-    restart: always
-    volumes:
-    - misp-app:/var/www/MISP
   misp-db:
     container_name: misp-db
     environment:
@@ -406,7 +330,7 @@ services:
       resources:
         limits:
           cpus: 0.3
-          memory: 512m
+          memory: 256m
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -448,7 +372,7 @@ services:
     - NET_ADMIN
     - NET_RAW
     - SYS_NICE
-    command: -i docker0
+    command: -i soc-br0 -S /etc/suricata/local.rules
     container_name: suricata
     deploy:
       resources:
@@ -461,43 +385,44 @@ services:
     restart: always
     volumes:
     - ./suricata/logs:/var/log/suricata:rw
+    - ./suricata/rules/local.rules:/etc/suricata/local.rules:ro
+    - ./suricata/logs:/var/log/suricata:rw
   thehive:
     image: strangebee/thehive:5.2
     container_name: thehive
     depends_on:
-      - elasticsearch
+    - elasticsearch
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 1024m
         reservations:
           memory: 512m
     environment:
-      - JVM_OPTS=-Xms256m -Xmx512m
+    - JVM_OPTS=-Xms256m -Xmx512m
     command:
-      - --secret
-      - "SOCstack2026!TheHive"
-      - --no-cql-wait
-      - --bdb-directory
-      - /data/db
-      - --index-backend
-      - elasticsearch
-      - --es-hostnames
-      - elasticsearch
-      - --es-username
-      - elastic
-      - --es-password
-      - "sYVfKJCe2RCfELjf=GLa"
-      - --no-config-cortex
+    - --secret
+    - SOCstack2026!TheHive
+    - --no-cql-wait
+    - --bdb-directory
+    - /data/db
+    - --index-backend
+    - elasticsearch
+    - --es-hostnames
+    - elasticsearch
+    - --es-username
+    - elastic
+    - --es-password
+    - sYVfKJCe2RCfELjf=GLa
+    - --no-config-cortex
     networks:
-      - soc-net
+    - soc-net
     ports:
-      - "9000:9000"
+    - 9000:9000
     volumes:
-      - thehive_data:/data
+    - thehive_data:/data
     restart: unless-stopped
-
   vt-enricher:
     build:
       context: ./threat-intelligence
@@ -584,8 +509,27 @@ services:
     - yara-ubuntu-www:/victims/ubuntu-www:ro
     - yara-ubuntu-tmp:/victims/ubuntu-tmp:ro
     - yara-ftp:/victims/ftp:ro
+  fleet-server:
+    image: docker.elastic.co/beats/elastic-agent:8.13.0
+    container_name: fleet-server
+    hostname: fleet-server
+    environment:
+      FLEET_SERVER_ENABLE: 'true'
+      FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
+      FLEET_SERVER_ELASTICSEARCH_USERNAME: ${ELASTIC_USERNAME}
+      FLEET_SERVER_ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+      FLEET_SERVER_INSECURE_HTTP: 'true'
+      FLEET_SERVER_HOST: 0.0.0.0
+      FLEET_SERVER_PORT: '8220'
+    ports:
+    - 8220:8220
+    networks:
+    - soc-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 volumes:
-  thehive_data:
+  thehive_data: null
   es_data: null
   misp-app: null
   misp-db-data: null
@@ -599,4 +543,3 @@ volumes:
     external: true
   yara-ubuntu-www:
     external: true
-

@@ -1,0 +1,7 @@
+- module: threatintel
+  misp:
+    enabled: true
+    var.input: httpjson
+    var.url: http://misp/events/restSearch
+    var.api_key: S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t
+    var.interval: 5m

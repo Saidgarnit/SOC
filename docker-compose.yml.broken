@@ -1,0 +1,594 @@
+networks:
+  soc-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: soc-br0
+services:
+  connector-misp:
+    container_name: connector-misp
+    depends_on:
+      misp:
+        condition: service_healthy
+      opencti:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.2
+          memory: 1024m
+        reservations: {}
+    environment:
+    - OPENCTI_URL=http://opencti:8080
+    - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+    - CONNECTOR_ID=misp-connector-001
+    - CONNECTOR_TYPE=EXTERNAL_IMPORT
+    - CONNECTOR_NAME=MISP
+    - CONNECTOR_SCOPE=misp-galaxy,misp-attribute
+    - CONNECTOR_CONFIDENCE_LEVEL=75
+    - CONNECTOR_LOG_LEVEL=info
+    - MISP_URL=http://misp
+    - MISP_KEY=S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t
+    - MISP_SSL=false
+    - MISP_FEED_MODE=false
+    - MISP_DATETIME_ATTRIBUTE=timestamp
+    - MISP_CREATE_REPORTS=true
+    - MISP_REPORT_TYPE=misp-event
+    - MISP_CREATE_INDICATORS=true
+    - MISP_CREATE_OBSERVABLES=true
+    - MISP_IMPORT_FROM_DATE=2026-01-01
+    - MISP_INTERVAL=5
+    image: opencti/connector-misp:6.0.5
+    networks:
+    - soc-net
+    restart: always
+  connector-mitre:
+    container_name: connector-mitre
+    depends_on:
+      opencti:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.2
+          memory: 128m
+    environment:
+    - OPENCTI_URL=http://opencti:8080
+    - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+    - CONNECTOR_ID=80468305-6490-449e-990a-1150493630f4
+    - CONNECTOR_TYPE=EXTERNAL_IMPORT
+    - CONNECTOR_NAME=MITRE_ATTACK
+    - CONNECTOR_SCOPE=identity,attack-pattern,course-of-action,intrusion-set,malware,tool,report
+    - CONNECTOR_CONFIDENCE_LEVEL=15
+    - MITRE_INTERVAL=7
+    image: opencti/connector-mitre:6.0.5
+    memswap_limit: 2g
+    networks:
+    - soc-net
+    restart: always
+  elastalert:
+    container_name: elastalert
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 128m
+    dns:
+    - 8.8.8.8
+    environment:
+    - ELASTICSEARCH_HOST=elasticsearch
+    - ELASTICSEARCH_PORT=9200
+    - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
+    - ELASTICSEARCH_PASSWORD=Kjd9r43ANUymjjcba0M6
+    - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    image: elastalert-custom
+    networks:
+    - soc-net
+    restart: always
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["printf 'es_host: elasticsearch\nes_port: 9200\nes_username: elastic\nes_password: Kjd9r43ANUymjjcba0M6\nrules_folder: /opt/elastalert/rules\nrun_every:\n  minutes: 1\nbuffer_time:\n  minutes: 15\nwriteback_index: elastalert_status\nalert_time_limit:\n  days: 2\n' > /tmp/ea.yml ; elastalert-create-index --config /tmp/ea.yml --no-ssl || true ; exec elastalert --verbose --config /tmp/ea.yml"]
+    volumes:
+      - ./elastalert/logs:/opt/elastalert/logs
+      - ./elastalert/rules:/opt/elastalert/rules
+  elasticsearch:
+    container_name: elasticsearch
+    deploy:
+      resources:
+        limits:
+          cpus: 2.0
+          memory: 2500m
+        reservations:
+          memory: 1500m
+    environment:
+    - ELASTIC_PASSWORD=Kjd9r43ANUymjjcba0M6
+    - discovery.type=single-node
+    - xpack.security.enabled=true
+    - xpack.security.http.ssl.enabled=false
+    - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u elastic:Kjd9r43ANUymjjcba0M6 http://localhost:9200/_cluster/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    networks:
+    - soc-net
+    ports:
+    - 9200:9200
+    restart: always
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+    volumes:
+    - es_data:/usr/share/elasticsearch/data
+  elasticsearch-init:
+    command:
+    - /bin/bash
+    - /init-es.sh
+    container_name: elasticsearch-init
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+    - ELASTIC_PASSWORD=Kjd9r43ANUymjjcba0M6
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    networks:
+    - soc-net
+    restart: 'no'
+    volumes:
+    - ./elasticsearch/init-es.sh:/init-es.sh:ro
+    - ./elasticsearch:/output
+  filebeat:
+    container_name: filebeat
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 128m
+    image: docker.elastic.co/beats/filebeat:8.13.0
+    command: ["/bin/bash", "-c", "rm -f /usr/share/filebeat/modules.d/*.disabled; cp /tmp/modules-override/*.yml /usr/share/filebeat/modules.d/ 2>/dev/null || true; exec /usr/local/bin/docker-entrypoint -e --strict.perms=false"]
+    networks:
+    - soc-net
+    restart: always
+    user: root
+    volumes:
+    - ./wazuh/logs:/var/ossec/logs:ro
+    - /var/log/filebeat:/var/log/filebeat
+    - ./suricata/logs:/var/log/suricata:ro
+    - ./filebeat/modules.d:/tmp/modules-override:ro
+    - ./filebeat/filebeat.yml:/tmp/filebeat-custom.yml:ro
+    kibana:
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    command: filebeat -e -c /tmp/filebeat-custom.yml
+    deploy:
+      resources:
+        limits:
+          cpus: 1.0
+          memory: 2048m
+    environment:
+    - NODE_OPTIONS=--max-old-space-size=1536
+    - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    - ELASTICSEARCH_SERVICEACCOUNTTOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYV90b2tlbl8xNzc3OTkzOTI1Ol9WQWtGM0h3U09hQUFfREJIMDFmZGc
+    - XPACK_SECURITY_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+    - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+    - XPACK_REPORTING_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+    - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
+    - XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS=["${FLEET_SERVER_HOST:-http://fleet-server:8220}"]
+    healthcheck:
+      interval: 30s
+      retries: 10
+      start_period: 90s
+      test:
+      - CMD-SHELL
+      - curl -sf http://localhost:5601/api/status | grep -q 'available' || curl -sf
+        http://localhost:5601/api/status | grep -q 'degraded'
+      timeout: 10s
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    networks:
+    - soc-net
+    ports:
+    - 5601:5601
+    restart: always
+
+  logstash:
+    container_name: logstash
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 700m
+    environment:
+    - LS_JAVA_OPTS=-Xms128m -Xmx256m
+    - XPACK_MONITORING_ENABLED=false
+    - LOGSTASH_PIPELINE_WORKERS=1
+    - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+    - ELASTIC_PASSWORD=Kjd9r43ANUymjjcba0M6
+    image: logstash-custom:local
+    networks:
+    - soc-net
+    ports:
+    - 5000:5000/tcp
+    - 5001:5001/udp
+    restart: always
+    user: root
+    volumes:
+    - ./suricata/logs:/var/log/suricata:ro
+    - ./wazuh/logs:/var/ossec/logs:ro
+    - ./logstash/geoip:/usr/share/logstash/geoip:ro
+  memcached:
+    container_name: memcached
+    deploy:
+      resources:
+        limits:
+          cpus: 0.1
+          memory: 64m
+    image: memcached:alpine
+    networks:
+    - soc-net
+    restart: always
+  minio:
+    command: server /data
+    container_name: minio
+    deploy:
+      resources:
+        limits:
+          cpus: 0.2
+          memory: 128m
+    environment:
+    - MINIO_ROOT_USER=opencti
+    - MINIO_ROOT_PASSWORD=opencti_password
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:9000/minio/health/live
+    image: minio/minio:latest
+    networks:
+    - soc-net
+    restart: always
+  misp:
+    container_name: misp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost/users/login -o /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    depends_on:
+      misp-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 600m
+    environment:
+    - MYSQL_HOST=misp-db
+    - MYSQL_USER=misp
+    - MYSQL_PASSWORD=misp_password
+    - MYSQL_DATABASE=misp
+    - REDIS_HOST=misp-redis
+    - REDIS_PASSWORD=
+    - ENABLE_REDIS_EMPTY_PASSWORD=true
+    - PHP_SESSION_DEFAULTS=redis
+    - BASE_URL=http://localhost:9001
+    - DISABLE_SSL_REDIRECT=true
+    - PHP_SESSION_COOKIE_SECURE=false
+    image: ghcr.io/misp/misp-docker/misp-core:latest
+    networks:
+    - soc-net
+    ports:
+    - 9001:80
+    - 9002:443
+    restart: always
+    volumes:
+
+    - misp-app:/var/www/MISP
+  misp-db:
+    container_name: misp-db
+    environment:
+      MYSQL_DATABASE: misp
+      MYSQL_PASSWORD: misp_password
+      MYSQL_ROOT_PASSWORD: misp_root_password
+      MYSQL_USER: misp
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test:
+      - CMD-SHELL
+      - mysqladmin ping -h localhost -uroot -pmisp_root_password --silent
+    image: mysql:8.0
+    networks:
+    - soc-net
+    restart: always
+    volumes:
+    - misp-db-data:/var/lib/mysql
+  misp-redis:
+    container_name: misp-redis
+    deploy:
+      resources:
+        limits:
+          cpus: 0.1
+          memory: 64m
+    image: redis:7-alpine
+    networks:
+    - soc-net
+    restart: always
+  opencti:
+    container_name: opencti
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 1500m
+    environment:
+    - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
+    - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
+    - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
+    - DATABASE__TYPE=elasticsearch
+    - ELASTICSEARCH__URL=http://elasticsearch:9200
+    - ELASTICSEARCH__USERNAME=${ELASTIC_USERNAME}
+    - ELASTICSEARCH__PASSWORD=Kjd9r43ANUymjjcba0M6
+    - ELASTICSEARCH__SSL_VERIFY=false
+    - REDIS__HOSTNAME=opencti-redis
+    - REDIS__PORT=6379
+    - RABBITMQ__HOSTNAME=rabbitmq
+    - RABBITMQ__PORT=5672
+    - RABBITMQ__USER=guest
+    - RABBITMQ__PASSWORD=guest
+    - MINIO__ENDPOINT=minio
+    - MINIO__PORT=9000
+    - MINIO__USE_SSL=false
+    - MINIO__ACCESS_KEY=opencti
+    - MINIO__SECRET_KEY=opencti_password
+    - APP__PORT=8080
+    - APP__BASE_URL=${OPENCTI_BASE_URL:-http://localhost:3000}
+    healthcheck:
+      interval: 30s
+      retries: 15
+      start_period: 120s
+      test:
+      - CMD-SHELL
+      - wget -qO- http://localhost:8080/graphql > /dev/null 2>&1; [ $? -le 1 ] &&
+        exit 0 || exit 1
+      timeout: 15s
+    image: opencti/platform:6.0.5
+    networks:
+    - soc-net
+    ports:
+    - 3000:8080
+    restart: always
+  opencti-redis:
+    command: redis-server --maxmemory 96mb --maxmemory-policy allkeys-lru
+    container_name: opencti-redis
+    deploy:
+      resources:
+        limits:
+          cpus: 0.2
+          memory: 64m
+    image: redis:7-alpine
+    networks:
+    - soc-net
+    restart: always
+  opencti-worker:
+    container_name: opencti-worker
+    depends_on:
+      opencti:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 512m
+    environment:
+    - OPENCTI_URL=http://opencti:8080
+    - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+    - WORKER_LOG_LEVEL=info
+    - RABBITMQ__HOSTNAME=rabbitmq
+    - RABBITMQ__PORT=5672
+    - RABBITMQ__USER=guest
+    - RABBITMQ__PASSWORD=guest
+    - MINIO__ENDPOINT=minio
+    - MINIO__PORT=9000
+    - MINIO__USE_SSL=false
+    - MINIO__ACCESS_KEY=opencti
+    - MINIO__SECRET_KEY=opencti_password
+    image: opencti/worker:6.0.5
+    networks:
+    - soc-net
+    restart: always
+  rabbitmq:
+    container_name: rabbitmq
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 256m
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test:
+      - CMD
+      - rabbitmq-diagnostics
+      - -q
+      - ping
+    image: rabbitmq:3.12-management-alpine
+    networks:
+    - soc-net
+    restart: always
+  suricata:
+    cap_add:
+    - NET_ADMIN
+    - NET_RAW
+    - SYS_NICE
+    command: -i docker0
+    container_name: suricata
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 128m
+    image: jasonish/suricata:latest
+    network_mode: host
+    privileged: true
+    restart: always
+    volumes:
+    - ./suricata/logs:/var/log/suricata:rw
+  thehive:
+    image: strangebee/thehive:5.2
+    container_name: thehive
+    depends_on:
+      - elasticsearch
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1024m
+        reservations:
+          memory: 512m
+    environment:
+      - JVM_OPTS=-Xms256m -Xmx512m
+    command:
+      - --secret
+      - "Kjd9r43ANUymjjcba0M6TheHive"
+      - --no-cql-wait
+      - --bdb-directory
+      - /data/db
+      - --index-backend
+      - elasticsearch
+      - --es-hostnames
+      - elasticsearch
+      - --es-username
+      - elastic
+      - --es-password
+      - "Kjd9r43ANUymjjcba0M6"
+      - --no-config-cortex
+    networks:
+      - soc-net
+    ports:
+      - "9000:9000"
+    volumes:
+      - thehive_data:/data
+    restart: unless-stopped
+
+  vt-enricher:
+    build:
+      context: ./threat-intelligence
+      dockerfile: Dockerfile
+    container_name: vt-enricher
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.2
+          memory: 128m
+    environment:
+    - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+    - ES_USER=${ELASTIC_USERNAME}
+    - ES_PASS=Kjd9r43ANUymjjcba0M6
+    - ES_HOST=http://elasticsearch:9200
+    - ES_USERNAME=${ELASTIC_USERNAME}
+    - ES_PASSWORD=Kjd9r43ANUymjjcba0M6
+    image: vt-enricher:local
+    networks:
+    - soc-net
+    restart: always
+  wazuh-manager:
+    container_name: wazuh-manager
+    deploy:
+      resources:
+        limits:
+          cpus: 1.0
+          memory: 384m
+    environment:
+    - INDEXER_URL=http://elasticsearch:9200
+    - INDEXER_USERNAME=${ELASTIC_USERNAME}
+    - INDEXER_PASSWORD=${ELASTIC_PASSWORD}
+    - API_USERNAME=${WAZUH_API_USER}
+    - API_PASSWORD=${WAZUH_API_PASSWORD}
+    image: wazuh/wazuh-manager:4.7.5
+
+    init: true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -s -o /dev/null -w \"%{http_code}\" https://localhost:55000 | grep -E \"401|200\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+    - soc-net
+    ports:
+    - 1514:1514/tcp
+    - 1514:1514/udp
+    - 1515:1515
+    - 55000:55000
+    restart: always
+    volumes:
+    - ./wazuh/init-dirs.sh:/init-dirs.sh:ro
+    - ./wazuh/set_wazuh_pass.py:/tmp/set_wazuh_pass.py:ro
+    - ./wazuh/etc:/var/ossec/etc
+    - ./wazuh/logs:/var/ossec/logs
+
+  yara-scanner:
+    build: ./yara/scanner
+    command:
+    - bash
+    - -c
+    - while true; do python3 /scanner/scan.py || echo "YARA scan failed, retrying...";
+      sleep 10; done
+    container_name: yara-scanner
+    deploy:
+      resources:
+        limits:
+          cpus: 0.1
+          memory: 64m
+    networks:
+    - soc-net
+    restart: always
+    volumes:
+    - ./yara/samples:/samples
+    - yara-dvwa:/victims/dvwa:ro
+    - yara-ubuntu-www:/victims/ubuntu-www:ro
+    - yara-ubuntu-tmp:/victims/ubuntu-tmp:ro
+    - yara-ftp:/victims/ftp:ro
+volumes:
+  thehive_data:
+  es_data: null
+  misp-app: null
+  misp-db-data: null
+  wazuh_alerts: null
+  wazuh_data: null
+  yara-dvwa:
+    external: true
+  yara-ftp:
+    external: true
+  yara-ubuntu-tmp:
+    external: true
+  yara-ubuntu-www:
+    external: true
+

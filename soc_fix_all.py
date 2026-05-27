@@ -171,7 +171,7 @@ print("""
 
   B) docker exec -it kali-attacker bash -c "curl -s http://5.188.86.172 || true"
 
-  C) curl -s -u elastic:sYVfKJCe2RCfELjf=GLa \\
+  C) curl -s -u elastic:Kjd9r43ANUymjjcba0M6 \\
        "http://localhost:9200/soc-logs-enriched-*/_search?q=source_ip:5.188.86.172&size=1" \\
        | python3 -m json.tool | grep -E "misp|vt_"
 

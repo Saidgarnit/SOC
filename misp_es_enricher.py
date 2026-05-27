@@ -10,7 +10,7 @@ urllib3.disable_warnings()
 MISP_URL  = "http://localhost:9001"
 MISP_KEY  = "rRdEjTAv2QETQKKjK1bXrzFqXxWfQPn6TskkUmCM"
 ES_URL    = "http://localhost:9200"
-ES_AUTH   = ("elastic", "sYVfKJCe2RCfELjf=GLa")
+ES_AUTH   = ("elastic", "Kjd9r43ANUymjjcba0M6")
 ES_INDEX  = "soc-logs-enriched-*"
 
 print("[1] Fetching IOC IPs from MISP...")

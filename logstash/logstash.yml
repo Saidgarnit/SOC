@@ -1,3 +1,4 @@
 xpack.monitoring.elasticsearch.username: elastic
-xpack.monitoring.elasticsearch.password: SOCstack2026!
+xpack.monitoring.elasticsearch.password: Kjd9r43ANUymjjcba0M6
 pipeline.workers: 1
+path.config: /usr/share/logstash/pipeline

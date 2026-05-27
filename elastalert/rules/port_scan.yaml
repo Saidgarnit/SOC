@@ -4,50 +4,52 @@ index: suricata-alerts-*
 filter:
 - query:
     query_string:
-      query: 'event_type:alert AND alert.signature:"Port Scan SYN"'
+      query: event_type:alert AND alert.signature:"Port Scan SYN"
 alert:
-  - slack
-  - hivealerter
-slack_webhook_url: "https://hooks.slack.com/services/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"
-slack_username_override: "Wazuh ElastAlert"
-slack_emoji_override: ":rotating_light:"
+- slack
+- hivealerter
+slack_webhook_url: https://hooks.slack.com/services/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
+slack_username_override: Wazuh ElastAlert
+slack_emoji_override: ':rotating_light:'
 alert_text_type: alert_text_only
-alert_text: |
-  🚨 *Port Scan Detected*
-  *Source IP:* {0}
-  *Destination:* {1}:{2}
-  *Signature:* {3}
-  *Severity:* {4}
-  *Protocol:* {5}
-  *Timestamp:* {6}
+alert_text: "\U0001F6A8 *SOC ALERT \u2014 PORT SCAN DETECTED*\n\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n*Detection:* {0}\n*Target/Agent:*\
+  \ `{1}`\n*Rule ID:* {2} | *Level:* {3}\n*MITRE:* {4} \u2014 {5}\n*Source IP:* `{6}`\n\
+  *Detected at:* {7}\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\n_Netdefender SOC \u2014 Threat Intelligence_"
 alert_text_args:
-  - src_ip
-  - dest_ip
-  - dest_port
-  - alert.signature
-  - alert.severity
-  - proto
-  - timestamp
-alert_subject: "🚨 Port Scan Detected from {0}"
+- rule.description
+- agent.name
+- rule.id
+- rule.level
+- rule.mitre.tactic[0]
+- rule.mitre.technique[0]
+- data.srcip
+- '@timestamp'
+alert_subject: "\U0001F6A8 Port Scan Detected from {0}"
 alert_subject_args:
-  - src_ip
-realert:
-  minutes: 0
-
-query_key: data.srcip
-  - src_ip
+- src_ip
 realert:
   minutes: 30
-
-
+query_key: data.srcip - src_ip
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
 hive_alert_config:
-  title: "{match[rule.description]}"
-  type: "external"
-  source: "elastalert"
-  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  title: '{match[rule][description]}'
+  type: external
+  source: elastalert
+  description: 'Detected by ElastAlert rule
+
+
+    Index: {rule[index]}'
   severity: 2
-  tags: ["soc-alert", "elastalert"]
+  tags:
+  - soc-alert
+  - elastalert
+alert_missing_value: N/A

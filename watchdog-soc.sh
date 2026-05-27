@@ -1,50 +1,109 @@
 #!/bin/bash
-source "$(dirname "$0")/.env"
+# SOC Watchdog v4.2 — no python3 dependency on agents, recent-errors only
+LOG="/home/said/soc-stack/watchdog.log"
+KEY_BACKUP="/home/said/soc-stack/.wazuh-agent-keys.bak"
+WAZUH_API="https://localhost:55000"
+WAZUH_USER="wazuh"; WAZUH_PASS="Wazuh1234!"
+ES_PASS="Kjd9r43ANUymjjcba0M6"
+SOC_DIR="/home/said/soc-stack"
+TS=$(date '+%Y-%m-%d %H:%M:%S')
+log() { echo "[$TS] $*" | tee -a "$LOG"; }
 
-FLEET_URL="http://localhost:8220"
-# Fetch fresh enrollment token dynamically
-POLICY_ID="69515b3a-4bb6-46c8-836d-4a30c0bbf388"
-TOKEN=$(curl -s -X POST "http://localhost:5601/api/fleet/enrollment_api_keys" \
-  -H "kbn-xsrf: true" -H "Content-Type: application/json" \
-  -u "elastic:${ELASTIC_PASSWORD}" \
-  -d "{\"policy_id\":\"$POLICY_ID\"}" \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)[\"item\"][\"api_key\"])" 2>/dev/null)
-[ -z "$TOKEN" ] && TOKEN="ejgyZ01KNEJZOFhzcWFUT2RROEw6OC1LN2RDdWtSenU2UGZuc09ZRWRkQQ=="
+declare -A AGENT_IDS=(
+  [victim-ubuntu]="019" [victim-jenkins]="014" [victim-database]="012"
+  [victim-dvwa]="018"   [victim-dns]="011"     [victim-mail]="013"
+  [victim-windows]="016" [victim-ftp]="015"    [victim-iot]="017"
+  [victim-webapi]="022"
+)
 
-# 1. Check Fleet Server (HTTP not HTTPS)
-if ! curl -s "$FLEET_URL/api/status" | grep -q "HEALTHY"; then
-    echo "$(date): Fleet Server down. Restarting..."
-    docker restart fleet-server
-    sleep 30
+log "=== Watchdog v4.2 ==="
+
+# 1. Containers up
+for V in "${!AGENT_IDS[@]}"; do
+  STATUS=$(docker inspect --format='{{.State.Status}}' "$V" 2>/dev/null || echo "missing")
+  if [ "$STATUS" != "running" ]; then
+    log "RESTART $V (was: $STATUS)"
+    cd "$SOC_DIR" && docker compose -f docker-compose-lab.yml up -d "$V" >>"$LOG" 2>&1
+    sleep 10
+  fi
+done
+
+# 2. Clean stale DB entries via Python3 on manager (manager always has python3)
+STALE=$(docker exec wazuh-manager python3 - 2>/dev/null <<'PY'
+import sqlite3
+c = sqlite3.connect('/var/ossec/var/db/global.db')
+n = c.execute("SELECT COUNT(*) FROM agent WHERE id BETWEEN 1 AND 10").fetchone()[0]
+if n > 0:
+    c.execute("DELETE FROM agent WHERE id BETWEEN 1 AND 10")
+    c.commit()
+print(n)
+c.close()
+PY
+)
+STALE=$((${STALE:-0} + 0))
+if [ "$STALE" -gt 0 ]; then
+  log "Removed $STALE stale DB entries"
+  docker exec wazuh-manager bash -c \
+    "grep -v '^[0-9]* !' /var/ossec/etc/client.keys > /tmp/ck && cp /tmp/ck /var/ossec/etc/client.keys"
+  PID=$(docker exec wazuh-manager bash -c "cat /var/ossec/var/run/wazuh-remoted*.pid 2>/dev/null | head -1")
+  [ -n "$PID" ] && docker exec wazuh-manager kill -HUP "$PID" 2>/dev/null && sleep 3
 fi
 
-# 2. Check for offline agents and re-enroll them
-OFFLINE=$(curl -s -u elastic:${ELASTIC_PASSWORD} \
-  "$FLEET_URL/api/fleet/agents?perPage=50" \
-  -H "kbn-xsrf: true" \
-  | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-for a in data.get('items', []):
-    if a['status'] == 'offline':
-        print(a.get('local_metadata',{}).get('host',{}).get('hostname','?'))
-" 2>/dev/null)
+# 3. Backup keys
+docker exec wazuh-manager grep -v '^[0-9]* !' /var/ossec/etc/client.keys \
+  2>/dev/null > "$KEY_BACKUP"
+log "Keys backed up ($(wc -l < "$KEY_BACKUP") entries)"
 
-if [ -n "$OFFLINE" ]; then
-    echo "$(date): Offline agents detected: $OFFLINE"
-    bash "$(dirname "$0")/restart-agents.sh"
+# 4. Fix victims — use pgrep (universal) and check only LAST 5 log lines for errors
+for V in "${!AGENT_IDS[@]}"; do
+  # pgrep works on all containers; fallback to 1 if not available (assume running)
+  PROC=$(docker exec "$V" sh -c "pgrep wazuh-agentd | wc -l" 2>/dev/null || echo "1")
+  PROC=$((PROC + 0))
+
+  # Only check last 5 log lines to avoid historical error count triggering fixes
+  ERR=$(docker exec "$V" sh -c \
+    "tail -5 /var/ossec/logs/ossec.log 2>/dev/null | grep -c 'Unable to add agent\|Duplicate agent'" \
+    2>/dev/null || echo "0")
+  ERR=$(echo "${ERR}" | head -1 | tr -dc "0-9"); ERR=$((${ERR:-0} + 0))
+
+  if [ "$PROC" -eq 0 ] || [ "$ERR" -gt 0 ]; then
+    log "FIXING $V (agentd=$PROC recent_errors=$ERR)"
+    KEY=$(docker exec wazuh-manager grep " ${V} " /var/ossec/etc/client.keys 2>/dev/null | grep -v '!')
+    [ -z "$KEY" ] && KEY=$(grep " ${V} " "$KEY_BACKUP" 2>/dev/null | grep -v '!')
+    if [ -z "$KEY" ]; then log "  No key for $V — skip"; continue; fi
+    docker exec "$V" /var/ossec/bin/wazuh-control stop >>"$LOG" 2>&1 || true
+    sleep 1
+    docker exec "$V" sh -c "kill -9 \$(pgrep wazuh-agentd) 2>/dev/null; true"
+    docker exec "$V" sh -c "echo '${KEY}' > /var/ossec/etc/client.keys; chmod 640 /var/ossec/etc/client.keys"
+    docker exec "$V" /var/ossec/bin/wazuh-control start >>"$LOG" 2>&1
+    sleep 3
+    P2=$(docker exec "$V" sh -c "pgrep wazuh-agentd | wc -l" 2>/dev/null || echo "?")
+    log "  $V fixed — agentd count: $P2"
+  fi
+done
+
+# 5. Fleet-server
+FS=$(docker inspect --format='{{.State.Status}}' fleet-server 2>/dev/null || echo "missing")
+if [ "$FS" != "running" ]; then
+  log "Restarting fleet-server"
+  cd "$SOC_DIR" && docker compose -f docker-compose-lab.yml up -d fleet-server >>"$LOG" 2>&1
+  sleep 15
 fi
-# 3. Fix OpenCTI date-based threat-intel index (created daily without proper mapping)
-TODAY=$(date +%Y.%m.%d)
-INDEX="opencti-threat-intel-${TODAY}"
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "elastic:${ELASTIC_PASSWORD}" \
-  "http://localhost:9200/${INDEX}")
-if [ "$STATUS" = "200" ]; then
-    echo "$(date): Deleting corrupt OpenCTI index ${INDEX}..."
-    curl -s -u "elastic:${ELASTIC_PASSWORD}" -X DELETE "http://localhost:9200/${INDEX}"
-    docker restart opencti
-    echo "$(date): OpenCTI restarted after index cleanup"
-fi
-# 4. Revive crashed connectors
-docker start connector-misp 2>/dev/null || true
-docker start connector-mitre 2>/dev/null || true
+
+# 6. Summary
+TOKEN=$(curl -sk -u "${WAZUH_USER}:${WAZUH_PASS}" \
+  "${WAZUH_API}/security/user/authenticate?raw=true" 2>/dev/null)
+W_ACTIVE=$(curl -sk -H "Authorization: Bearer $TOKEN" \
+  "${WAZUH_API}/agents?q=id!=000&limit=50" 2>/dev/null | \
+  python3 -c "
+import sys,json
+a=json.load(sys.stdin).get('data',{}).get('affected_items',[])
+print(len([x for x in a if x.get('status')=='active']))
+" 2>/dev/null || echo "?")
+F_ONLINE=$(curl -sk -u "elastic:${ES_PASS}" \
+  'http://localhost:9200/.fleet-agents-7/_count' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":{"term":{"active":true}}}' 2>/dev/null | \
+  python3 -c "import sys,json; print(json.load(sys.stdin).get('count',0))" 2>/dev/null || echo "?")
+log "SUMMARY — Wazuh: ${W_ACTIVE}/10 | Fleet: ${F_ONLINE}/11"
+log "=== done ==="

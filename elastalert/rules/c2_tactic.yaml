@@ -9,8 +9,24 @@ filter:
     query_string:
       query: rule.groups:*network* AND rule.level:[7 TO *] AND NOT data.srcip:"127.0.0.1"
 alert_text_type: alert_text_only
-alert_text: "🔴 *C2 Tactic Detected (T1071)*\n\n*Host:* {0}\n*Src IP:* {1}\n*Rule:* {2}\n*Level:* {3}\n*Timestamp:* {4}"
-alert_text_args: [agent.name, data.srcip, rule.description, rule.level, '@timestamp']
+alert_text: "\U0001F6A8 *SOC ALERT \u2014 C2 TACTIC DETECTED (T1071)*\n\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n*Detection:*\
+  \ {0}\n*Target/Agent:* `{1}`\n*Rule ID:* {2} | *Level:* {3}\n*MITRE:* {4} \u2014\
+  \ {5}\n*Source IP:* `{6}`\n*Detected at:* {7}\n\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\n_Netdefender SOC \u2014 Threat Intelligence_"
+alert_text_args:
+- rule.description
+- agent.name
+- rule.id
+- rule.level
+- rule.mitre.tactic[0]
+- rule.mitre.technique[0]
+- data.srcip
+- '@timestamp'
 alert:
 - slack
 - hivealerter
@@ -20,16 +36,20 @@ slack_emoji_override: ':rotating_light:'
 slack_msg_color: danger
 realert:
   minutes: 10
-
-
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: "qaU5mFxE64fL+5yihYHoqA68J5yeJoEg"
+  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
 hive_alert_config:
-  title: "{match[rule.description]}"
-  type: "external"
-  source: "elastalert"
-  description: "Detected by ElastAlert rule\n\nIndex: {rule[index]}"
+  title: '{match[rule][description]}'
+  type: external
+  source: elastalert
+  description: 'Detected by ElastAlert rule
+
+
+    Index: {rule[index]}'
   severity: 2
-  tags: ["soc-alert", "elastalert"]
+  tags:
+  - soc-alert
+  - elastalert
+alert_missing_value: N/A

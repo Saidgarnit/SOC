@@ -61,13 +61,13 @@ sleep 5
 
 # Check results
 docker exec victim-ubuntu bash -c "
-  FAILED=\$(grep -c 'Failed password' /var/log/auth.log 2>/dev/null || echo 0)
-  TOTAL=\$(wc -l < /var/log/auth.log 2>/dev/null || echo 0)
+  FAILED=\$(grep -c 'Failed password' /var/log/auth.log 2>/dev/null | tail -n 1 || echo 0)
+  TOTAL=\$(wc -l < /var/log/auth.log 2>/dev/null | tail -n 1 || echo 0)
   echo \"  ✓ Auth.log: \$FAILED failed attempts, \$TOTAL total lines\"
 "
 
 docker exec wazuh-manager bash -c "
-  ALERTS=\$(grep -c '\"id\":\"5760\"' /var/ossec/logs/alerts/alerts.json 2>/dev/null || echo 0)
+  ALERTS=\$(grep -c '\"id\":\"5760\"' /var/ossec/logs/alerts/alerts.json 2>/dev/null | tail -n 1 || echo 0)
   echo \"  ✓ Wazuh: \$ALERTS SSH brute-force alerts generated\"
 "
 
@@ -77,7 +77,7 @@ echo "✅ TEST 5: Wazuh Alert File Status"
 echo "──────────────────────────────────"
 docker exec wazuh-manager bash -c "
   SIZE=\$(du -h /var/ossec/logs/alerts/alerts.json 2>/dev/null | awk '{print \$1}')
-  COUNT=\$(grep -c '\"id\":' /var/ossec/logs/alerts/alerts.json 2>/dev/null || echo 0)
+  COUNT=\$(grep -c '\"id\":' /var/ossec/logs/alerts/alerts.json 2>/dev/null | tail -n 1 || echo 0)
   echo \"  ✓ Alerts file: \$SIZE (\$COUNT total alerts)\"
 "
 

@@ -1,8 +1,19 @@
 #!/bin/bash
+
+# Prevent concurrent runs (e.g. .bashrc + cron both firing on boot)
+exec 200>/tmp/fix-on-start.lock
+flock -n 200 || { echo "[fix-on-start] Already running — skipping duplicate."; exit 0; }
+
 export DOCKER_HOST=unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock
 chmod 666 /mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock 2>/dev/null || true
 # --- Ensure Suricata bridge interface is dynamically updated on boot ---
 bash /home/said/soc-stack/update-suricata-bridge.sh
+
+# Ensure Suricata rules are loaded
+echo "🔧 Updating Suricata rules..."
+docker exec suricata suricata-update --no-reload 2>/dev/null | tail -2
+docker exec suricata kill -USR2 $(docker exec suricata cat /var/run/suricata/suricata.pid 2>/dev/null) 2>/dev/null || true
+echo "  ✅ Suricata rules updated"
 
 echo "🔧 SOC stack fixes (no restart)..."
 source "$(dirname "$0")/.env"
@@ -38,9 +49,27 @@ for VICTIM in $ALL_VICTIMS; do
         docker exec $VICTIM bash -c "touch /var/log/auth.log; chmod 644 /var/log/auth.log; chown root:adm /var/log/auth.log 2>/dev/null; pgrep rsyslogd >/dev/null || rsyslogd 2>/dev/null" >/dev/null 2>&1
     fi
 
-    # Start Wazuh
+    # Start Wazuh — clear stale key first so manager rejects don't block with "Duplicate agent name"
     docker exec $VICTIM rm -rf /var/ossec/var/run/.wazuh-agent.lock /var/ossec/var/start-script-lock 2>/dev/null || true
-    docker exec $VICTIM /var/ossec/bin/wazuh-control start > /dev/null 2>&1
+    WAZUH_INSTALLED=$(docker exec $VICTIM test -f /var/ossec/bin/agent-auth 2>/dev/null && echo yes || echo no)
+    if [ "$WAZUH_INSTALLED" = "yes" ]; then
+      STALE_ID=$(docker exec wazuh-manager /var/ossec/bin/agent_control -l 2>/dev/null \
+        | grep "$VICTIM" | grep -oP 'ID: \K[0-9]+')
+      if [ -n "$STALE_ID" ]; then
+        docker exec -i wazuh-manager /var/ossec/bin/manage_agents << HEREDOC 2>/dev/null
+R
+$STALE_ID
+y
+Q
+HEREDOC
+      fi
+      docker exec $VICTIM bash -c '
+        > /var/ossec/etc/client.keys
+        /var/ossec/bin/wazuh-control stop 2>/dev/null; sleep 2
+        /var/ossec/bin/agent-auth -m wazuh-manager 2>/dev/null; sleep 2
+        /var/ossec/bin/wazuh-control start 2>/dev/null
+      '
+    fi
     echo "  ✅ $VICTIM fixed"
 done
 
@@ -115,11 +144,13 @@ for RULE in execution_tactic discovery_tactic collection_tactic c2_tactic resour
 done
 docker exec victim-ubuntu bash -c "echo 'root:toor' | chpasswd" 2>/dev/null
 
-# Re-enable AR queue on all agents after restart
-for container in victim-ubuntu victim-dvwa victim-jenkins victim-ftp victim-mail victim-dns victim-database victim-windows victim-iot victim-webapi; do
-  docker exec $container rm -rf /var/ossec/var/start-script-lock 2>/dev/null; docker exec $container /var/ossec/bin/wazuh-control restart 2>/dev/null
-done
-docker exec wazuh-manager rm -rf /var/ossec/var/start-script-lock && docker exec wazuh-manager /var/ossec/bin/wazuh-control restart
+# Ensure Wazuh log dirs exist before restart (analysisd dies without these)
+
+docker exec wazuh-manager bash -c "mkdir -p /var/ossec/logs/alerts /var/ossec/logs/archives/$(date +%Y) && chown -R wazuh:wazuh /var/ossec/logs/ && chmod -R 750 /var/ossec/logs/" 2>/dev/null
+
+docker exec wazuh-manager rm -rf /var/ossec/var/start-script-lock
+
+docker exec wazuh-manager /var/ossec/bin/wazuh-control restart
 
 # Stop unnecessary redis on victim containers only (MISP/OpenCTI use dedicated redis containers)
 for c in victim-ubuntu victim-dvwa victim-jenkins victim-windows victim-iot victim-database victim-mail victim-dns; do
@@ -144,12 +175,12 @@ echo "  ✅ ElastAlert dedup state cleared"
 
 # ── RESOURCE LIMITS: prevent OOM crashes ──────────────────────
 echo "🔧 Applying memory limits..."
-docker update --memory="2048m" --memory-swap="2048m" elasticsearch 2>/dev/null
+docker update --memory="1536m" --memory-swap="1536m" elasticsearch 2>/dev/null
 docker update --memory="512m"  --memory-swap="512m"  kibana 2>/dev/null
 docker update --memory="512m" --memory-swap="512m" wazuh-manager 2>/dev/null
-docker update --memory="300m"  --memory-swap="300m"  logstash 2>/dev/null
+docker update --memory="600m"  --memory-swap="600m"  logstash 2>/dev/null
 docker update --memory="128m"  --memory-swap="128m"  elastalert 2>/dev/null
-docker update --memory="128m"  --memory-swap="128m"  suricata 2>/dev/null
+docker update --memory="512m"  --memory-swap="512m"  suricata 2>/dev/null
 docker update --memory="200m"  --memory-swap="200m"  thehive 2>/dev/null
 docker update --memory="512m"  --memory-swap="512m"  opencti 2>/dev/null
 docker update --memory="256m"  --memory-swap="256m"  rabbitmq 2>/dev/null
@@ -181,28 +212,103 @@ sleep 15
 echo "✅ Elasticsearch memory verified"
 
 # ── CRON PERSISTENCE: Inject cron jobs into running containers ────
-echo "Ensuring EQL and Attack crons are active..."
+echo "Ensuring EQL and Attack simulation loops are active..."
 
-# ElastAlert EQL engine (Runs every 5 minutes)
-docker exec elastalert bash -c '(crontab -l 2>/dev/null | grep -q eql_sequence_check) || (crontab -l 2>/dev/null; echo "*/5 * * * * python3 /opt/elastalert/rules/eql_sequence_check.py") | crontab -'
-
-# Kali Attacker (Runs every 15 minutes)
-docker exec kali-attacker bash -c '(crontab -l 2>/dev/null | grep -q attack-sim) || (crontab -l 2>/dev/null; echo "*/15 * * * * bash /root/attack-sim.sh") | crontab -'
-echo "Crons injected successfully."
+# EQL engine loop (crontab not available in container — use background loop)
+docker exec -d elastalert bash -c '
+  pgrep -f "eql_sequence_check.py" > /dev/null 2>&1 && exit 0
+  while true; do
+    python3 /opt/elastalert/rules/eql_sequence_check.py 2>/dev/null
+    sleep 300
+  done
+'
+# Kali attack simulation loop (crontab not available — use background loop)
+docker exec -d kali-attacker bash -c '
+  pgrep -f "attack-sim.sh" > /dev/null 2>&1 && exit 0
+  while true; do
+    bash /root/attack-sim.sh 2>/dev/null
+    sleep 900
+  done
+'
+echo "Background loops started successfully."
 docker compose restart elasticsearch
 sleep 15
 docker update --memory="1500m" --memory-swap="1500m" thehive 2>/dev/null
 docker update --memory="512m" --memory-swap="512m" fleet-server 2>/dev/null
 
-# Ensure wazuh firewall log dirs exist
-docker exec wazuh-manager mkdir -p /var/ossec/logs/firewall/$(date +%Y) 2>/dev/null
-docker exec wazuh-manager chown -R wazuh:wazuh /var/ossec/logs/firewall/ 2>/dev/null
+# Ensure all wazuh log dirs exist (analysisd CRITICAL without alerts + archives)
+
+docker exec wazuh-manager bash -c "
+  mkdir -p /var/ossec/logs/alerts
+  mkdir -p /var/ossec/logs/archives/\$(date +%Y)
+  mkdir -p /var/ossec/logs/firewall/\$(date +%Y)
+  chown -R wazuh:wazuh /var/ossec/logs/
+  chmod -R 750 /var/ossec/logs/
+" 2>/dev/null
+echo "  ✅ Wazuh log directories verified"
 
 # Ensure wazuh analysisd is running
 if docker ps | grep -q wazuh-manager; then
-  docker exec wazuh-manager bash -c "
+
+docker exec wazuh-manager bash -c "
     mkdir -p /var/ossec/etc/shared/default
-    touch /var/ossec/etc/shared/ar.conf
+    mkdir -p /var/ossec/etc/shared/default && touch /var/ossec/etc/shared/ar.conf
     pgrep wazuh-analysisd > /dev/null || /var/ossec/bin/wazuh-analysisd 2>/dev/null &
   " 2>/dev/null
 fi
+
+# Auto-inject WSL workaround configs on boot
+cd /home/said/soc-stack && ./docker-cp-workaround.sh
+
+# ── Fleet: delete stale inactive agents via Kibana API ──────────────────────
+echo "🔧 Fleet: cleaning stale inactive agents..."
+ELASTIC_PASS=$(grep "^ELASTIC_PASSWORD" ~/soc-stack/.env | cut -d= -f2)
+
+python3 << 'PYEOF'
+import json, urllib.request, base64, subprocess, time
+
+p = subprocess.run(['grep','^ELASTIC_PASSWORD','/home/said/soc-stack/.env'],
+    capture_output=True, text=True)
+pw = p.stdout.strip().split('=',1)[1]
+creds = base64.b64encode(f'elastic:{pw}'.encode()).decode()
+headers = {
+    'Content-Type': 'application/json',
+    'kbn-xsrf': 'true',
+    'Authorization': f'Basic {creds}'
+}
+
+# Wait for Kibana
+for _ in range(20):
+    try:
+        urllib.request.urlopen('http://localhost:5601/api/status', timeout=5)
+        break
+    except:
+        time.sleep(10)
+
+# Get inactive agent IDs
+req = urllib.request.Request(
+    'http://localhost:9200/.fleet-agents/_search?size=1000',
+    data=json.dumps({'query':{'term':{'active':False}},'_source':['agent.id']}).encode(),
+    headers=headers, method='GET'
+)
+req.add_header('Content-Type','application/json')
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        hits = json.load(r).get('hits',{}).get('hits',[])
+    ids = [h['_source']['agent']['id'] for h in hits if 'agent' in h.get('_source',{})]
+    print(f'  Found {len(ids)} stale Fleet agents')
+    deleted = 0
+    for agent_id in ids:
+        try:
+            req2 = urllib.request.Request(
+                f'http://localhost:5601/api/fleet/agents/{agent_id}',
+                headers=headers, method='DELETE'
+            )
+            urllib.request.urlopen(req2, timeout=5)
+            deleted += 1
+        except:
+            pass
+    print(f'  Deleted {deleted}/{len(ids)} stale Fleet agents')
+except Exception as e:
+    print(f'  Fleet cleanup skipped: {e}')
+PYEOF

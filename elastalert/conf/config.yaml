@@ -1,7 +1,7 @@
 es_host: elasticsearch
 es_port: 9200
 es_username: elastic
-es_password: sYVfKJCe2RCfELjf=GLa
+es_password: Kjd9r43ANUymjjcba0M6
 rules_folder: /opt/elastalert/rules
 run_every:
   minutes: 1

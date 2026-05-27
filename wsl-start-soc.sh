@@ -49,6 +49,11 @@ sleep 30
 docker exec wazuh-manager bash -c "
   mkdir -p /var/ossec/etc/shared/default
   touch /var/ossec/etc/shared/ar.conf
+  mkdir -p /var/ossec/logs/alerts
+  mkdir -p /var/ossec/logs/archives/\$(date +%Y)
+  mkdir -p /var/ossec/logs/firewall/\$(date +%Y)
+  chown -R wazuh:wazuh /var/ossec/logs/
+  chmod -R 750 /var/ossec/logs/
   /var/ossec/bin/wazuh-control restart
 " >> $LOG 2>&1
 
