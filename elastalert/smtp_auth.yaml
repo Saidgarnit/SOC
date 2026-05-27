@@ -1,2 +1,3 @@
-user: "garnitsaid01@gmail.com"
-password: "asafotzjorlbablw"
+smtp_auth:
+  user: "alerts@example.com"
+  password: "alertpassword"

@@ -147,16 +147,6 @@ services:
     volumes:
     - ./elasticsearch/init-es.sh:/init-es.sh:ro
     - ./elasticsearch:/output
-    healthcheck:
-      test:
-      - CMD
-      - curl
-      - -f
-      - http://elasticsearch:9200/_cluster/health
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 0s
   filebeat:
     command: filebeat -e -strict.perms=false
     container_name: filebeat
@@ -297,11 +287,6 @@ services:
     - BASE_URL=http://localhost:9001
     - DISABLE_SSL_REDIRECT=true
     - PHP_SESSION_COOKIE_SECURE=false
-    - REDIS_HOST=misp-redis
-    - REDIS_PORT=6379
-    - MYSQL_HOST=misp-db
-    - MYSQL_USER=misp
-    - MYSQL_DATABASE=misp
     healthcheck:
       test:
       - CMD
