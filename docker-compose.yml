@@ -4,48 +4,6 @@ networks:
     driver_opts:
       com.docker.network.bridge.name: soc-br0
 services:
-  connector-misp:
-    container_name: connector-misp
-    depends_on:
-      misp:
-        condition: service_healthy
-      opencti:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: 0.2
-          memory: 512m
-        reservations: {}
-    environment:
-    - OPENCTI_URL=http://opencti:8080
-    - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-    - CONNECTOR_ID=misp-connector-001
-    - CONNECTOR_TYPE=EXTERNAL_IMPORT
-    - CONNECTOR_NAME=MISP
-    - CONNECTOR_SCOPE=misp-galaxy,misp-attribute
-    - CONNECTOR_CONFIDENCE_LEVEL=75
-    - CONNECTOR_LOG_LEVEL=info
-    - MISP_URL=http://misp
-    - MISP_KEY=S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t
-    - MISP_SSL=false
-    - MISP_FEED_MODE=false
-    - MISP_DATETIME_ATTRIBUTE=timestamp
-    - MISP_CREATE_REPORTS=true
-    - MISP_REPORT_TYPE=misp-event
-    - MISP_CREATE_INDICATORS=true
-    - MISP_CREATE_OBSERVABLES=true
-    - MISP_IMPORT_FROM_DATE=2026-01-01
-    - MISP_INTERVAL=5
-    - MISP_URL=http://misp
-    - MISP_KEY=test123456789test123456789test1234
-    - MISP_INSECURE_SSL=true
-    - MISP_DISABLE_SSL_VERIFICATION=true
-    - CONNECTOR_MISP_API_KEY_CACHE_TIME=3600
-    image: opencti/connector-misp:6.0.5
-    networks:
-    - soc-net
-    restart: always
   connector-mitre:
     container_name: connector-mitre
     depends_on:
@@ -70,36 +28,6 @@ services:
     networks:
     - soc-net
     restart: always
-  elastalert:
-    entrypoint: /opt/elastalert/elastalert/elastalert.py
-    container_name: elastalert
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: 0.3
-          memory: 128m
-    dns:
-    - 8.8.8.8
-    environment:
-    - ELASTICSEARCH_HOST=elasticsearch
-    - ELASTICSEARCH_PORT=9200
-    - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
-    - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
-    - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
-    - ELASTICSEARCH_HOST=elasticsearch
-    - ELASTICSEARCH_PORT=9200
-    - ES_USERNAME=${ELASTIC_USERNAME}
-    - ES_PASSWORD=${ELASTIC_PASSWORD}
-    - ELASTIC_SECURITY=true
-    image: elastalert-custom
-    networks:
-    - soc-net
-    restart: always
-    volumes:
-    - ./elastalert/logs:/opt/elastalert/logs
   elasticsearch:
     container_name: elasticsearch
     deploy:
