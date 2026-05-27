@@ -4,6 +4,43 @@ networks:
     driver_opts:
       com.docker.network.bridge.name: soc-br0
 services:
+  connector-misp:
+    container_name: connector-misp
+    depends_on:
+      misp:
+        condition: service_healthy
+      opencti:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 0.2
+          memory: 512m
+        reservations: {}
+    environment:
+    - OPENCTI_URL=http://opencti:8080
+    - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+    - CONNECTOR_ID=misp-connector-001
+    - CONNECTOR_TYPE=EXTERNAL_IMPORT
+    - CONNECTOR_NAME=MISP
+    - CONNECTOR_SCOPE=misp-galaxy,misp-attribute
+    - CONNECTOR_CONFIDENCE_LEVEL=75
+    - CONNECTOR_LOG_LEVEL=info
+    - MISP_URL=http://misp
+    - MISP_KEY=S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t
+    - MISP_SSL=false
+    - MISP_FEED_MODE=false
+    - MISP_DATETIME_ATTRIBUTE=timestamp
+    - MISP_CREATE_REPORTS=true
+    - MISP_REPORT_TYPE=misp-event
+    - MISP_CREATE_INDICATORS=true
+    - MISP_CREATE_OBSERVABLES=true
+    - MISP_IMPORT_FROM_DATE=2026-01-01
+    - MISP_INTERVAL=5
+    image: opencti/connector-misp:6.0.5
+    networks:
+    - soc-net
+    restart: always
   connector-mitre:
     container_name: connector-mitre
     depends_on:
@@ -29,8 +66,11 @@ services:
     - soc-net
     restart: always
   elastalert:
-    command:
-    - /opt/elastalert/run.sh
+    entrypoint:
+    - elastalert
+    - --verbose
+    - --config
+    - /ea-config.yaml
     container_name: elastalert
     depends_on:
       elasticsearch:
@@ -48,14 +88,11 @@ services:
     - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
     - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
-    image: jertel/elastalert2:latest
+    image: elastalert-custom
     networks:
     - soc-net
     restart: always
     volumes:
-    - ./elastalert/config.yaml:/opt/elastalert/config.yaml
-    - ./elastalert/rules:/opt/elastalert/rules
-    - ./elastalert/smtp_auth.yaml:/opt/elastalert/smtp_auth.yaml
     - ./elastalert/logs:/opt/elastalert/logs
   elasticsearch:
     container_name: elasticsearch
@@ -108,8 +145,18 @@ services:
     - soc-net
     restart: 'no'
     volumes:
-    - /tmp/init-es.sh:/init-es.sh:ro
+    - ./elasticsearch/init-es.sh:/init-es.sh:ro
     - ./elasticsearch:/output
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://elasticsearch:9200/_cluster/health
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 0s
   filebeat:
     command: filebeat -e -strict.perms=false
     container_name: filebeat
@@ -226,6 +273,54 @@ services:
     networks:
     - soc-net
     restart: always
+  misp:
+    container_name: misp
+    depends_on:
+      misp-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048m
+        reservations:
+          memory: 1024m
+    environment:
+    - MYSQL_HOST=misp-db
+    - MYSQL_USER=misp
+    - MYSQL_PASSWORD=misp_password
+    - MYSQL_DATABASE=misp
+    - REDIS_HOST=misp-redis
+    - REDIS_PASSWORD=
+    - ENABLE_REDIS_EMPTY_PASSWORD=true
+    - PHP_SESSION_DEFAULTS=redis
+    - BASE_URL=http://localhost:9001
+    - DISABLE_SSL_REDIRECT=true
+    - PHP_SESSION_COOKIE_SECURE=false
+    - REDIS_HOST=misp-redis
+    - REDIS_PORT=6379
+    - MYSQL_HOST=misp-db
+    - MYSQL_USER=misp
+    - MYSQL_DATABASE=misp
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost/
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    image: ghcr.io/misp/misp-docker/misp-core:latest
+    networks:
+    - soc-net
+    ports:
+    - 9001:80
+    - 9002:443
+    restart: always
+    volumes:
+    - misp-app:/var/www/MISP
   misp-db:
     container_name: misp-db
     environment:
@@ -328,7 +423,7 @@ services:
       resources:
         limits:
           cpus: 0.3
-          memory: 256m
+          memory: 512m
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -370,7 +465,7 @@ services:
     - NET_ADMIN
     - NET_RAW
     - SYS_NICE
-    command: -i soc-br0 -S /etc/suricata/local.rules
+    command: -i docker0
     container_name: suricata
     deploy:
       resources:
@@ -382,8 +477,6 @@ services:
     privileged: true
     restart: always
     volumes:
-    - ./suricata/logs:/var/log/suricata:rw
-    - ./suricata/rules/local.rules:/etc/suricata/local.rules:ro
     - ./suricata/logs:/var/log/suricata:rw
   thehive:
     image: strangebee/thehive:5.2
