@@ -48,3 +48,12 @@ echo "✅ Lab is Clean and Healthy."
 
 # Start vt-enricher
 docker start vt-enricher 2>/dev/null || true
+
+# ── Ensure manually-managed containers are running ──
+echo "Starting elastalert..."
+docker start elastalert 2>/dev/null || \
+  docker run -d --name elastalert --network soc-stack_soc-net \
+    --restart always --memory 256m \
+    -v /home/said/soc-stack/elastalert/rules:/opt/elastalert/rules:ro \
+    --entrypoint bash elastalert-custom:latest \
+    -c 'python3 -m elastalert.elastalert --config /opt/elastalert/config.yaml --verbose'

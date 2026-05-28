@@ -60,3 +60,11 @@ realert:
 smtp_login: garnitsaid01@gmail.com
 smtp_password: asafotzjorlbablw
 alert_missing_value: N/A
+
+# Slack alerting
+alert:
+  - slack
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: "SOC ElastAlert"
+slack_emoji_override: ":rotating_light:"
+slack_msg_color: "danger"

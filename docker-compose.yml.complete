@@ -14,8 +14,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.2'
-          memory: 128m
+          cpus: 0.2
+          memory: 512m
+        reservations: {}
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -26,7 +27,7 @@ services:
     - CONNECTOR_CONFIDENCE_LEVEL=75
     - CONNECTOR_LOG_LEVEL=info
     - MISP_URL=http://misp
-    - MISP_KEY=${MISP_API_KEY}
+    - MISP_KEY=S3UcdQZ4cx6T8BhSsjOtMqJ3VdRfPj38RUNFCU0t
     - MISP_SSL=false
     - MISP_FEED_MODE=false
     - MISP_DATETIME_ATTRIBUTE=timestamp
@@ -39,7 +40,7 @@ services:
     image: opencti/connector-misp:6.0.5
     networks:
     - soc-net
-    restart: unless-stopped
+    restart: always
   connector-mitre:
     container_name: connector-mitre
     depends_on:
@@ -48,8 +49,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512m
+          cpus: 0.2
+          memory: 128m
     environment:
     - OPENCTI_URL=http://opencti:8080
     - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -65,10 +66,11 @@ services:
     - soc-net
     restart: always
   elastalert:
-    command:
-    - -c
-    - echo "ZXNfaG9zdDogZWxhc3RpY3NlYXJjaAplc19wb3J0OiA5MjAwCmVzX3VzZXJuYW1lOiBlbGFzdGljCmVzX3Bhc3N3b3JkOiAiS2pkOXI0M0FOVXltampjYmEwTTYiCnJ1bGVzX2ZvbGRlcjogL29wdC9lbGFzdGFsZXJ0L3J1bGVzCnJ1bl9ldmVyeToKICBtaW51dGVzOiAxCmJ1ZmZlcl90aW1lOgogIG1pbnV0ZXM6IDE1CndyaXRlYmFja19pbmRleDogZWxhc3RhbGVydF9zdGF0dXMKYWxlcnRfdGltZV9saW1pdDoKICBkYXlzOiAyCg=="
-      | base64 -d > /tmp/ea.yml && python3 -m elastalert.elastalert --config /tmp/ea.yml
+    entrypoint:
+    - elastalert
+    - --verbose
+    - --config
+    - /ea-config.yaml
     container_name: elastalert
     depends_on:
       elasticsearch:
@@ -76,29 +78,36 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 256m
-    entrypoint: bash
-    image: elastalert-custom:latest
+          cpus: 0.3
+          memory: 128m
+    dns:
+    - 8.8.8.8
+    environment:
+    - ELASTICSEARCH_HOST=elasticsearch
+    - ELASTICSEARCH_PORT=9200
+    - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
+    - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    image: elastalert-custom
     networks:
     - soc-net
     restart: always
     volumes:
-    - ./elastalert/rules:/opt/elastalert/rules:ro
+    - ./elastalert/logs:/opt/elastalert/logs
   elasticsearch:
     container_name: elasticsearch
     deploy:
       resources:
         limits:
-          cpus: '2.5'
-          memory: 3000m
+          cpus: 2.0
+          memory: 2500m
         reservations:
-          memory: 900m
+          memory: 1500m
     environment:
     - discovery.type=single-node
     - xpack.security.enabled=true
     - xpack.security.http.ssl.enabled=false
-    - ES_JAVA_OPTS=-Xms768m -Xmx768m
+    - ES_JAVA_OPTS=-Xms1536m -Xmx1536m
     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     healthcheck:
       interval: 20s
@@ -139,10 +148,7 @@ services:
     - ./elasticsearch/init-es.sh:/init-es.sh:ro
     - ./elasticsearch:/output
   filebeat:
-    command:
-    - -c
-    - echo "ZmlsZWJlYXQuaW5wdXRzOgogIC0gdHlwZTogZmlsZXN0cmVhbQogICAgaWQ6IHdhenVoLWFsZXJ0cwogICAgZW5hYmxlZDogdHJ1ZQogICAgcGF0aHM6CiAgICAgIC0gL3Zhci9vc3NlYy9sb2dzL2FsZXJ0cy9hbGVydHMuanNvbgogICAgcGFyc2VyczoKICAgICAgLSBuZGpzb246CiAgICAgICAgICBrZXlzX3VuZGVyX3Jvb3Q6IHRydWUKICAgICAgICAgIG92ZXJ3cml0ZV9rZXlzOiB0cnVlCiAgICAgICAgICBhZGRfZXJyb3Jfa2V5OiB0cnVlCiAgICAgICAgICBleHBhbmRfa2V5czogdHJ1ZQogICAgZmllbGRzOgogICAgICBsb2dfc291cmNlOiB3YXp1aAogICAgZmllbGRzX3VuZGVyX3Jvb3Q6IHRydWUKICAgIHByb3NwZWN0b3Iuc2Nhbm5lci5jaGVja19pbnRlcnZhbDogNXMKCiAgLSB0eXBlOiBsb2cKICAgIGVuYWJsZWQ6IHRydWUKICAgIHBhdGhzOgogICAgICAtIC92YXIvbG9nL3N1cmljYXRhL2V2ZS5qc29uCiAgICBqc29uLmtleXNfdW5kZXJfcm9vdDogdHJ1ZQogICAganNvbi5hZGRfZXJyb3Jfa2V5OiB0cnVlCiAgICBmaWVsZHM6CiAgICAgIGxvZ19zb3VyY2U6IHN1cmljYXRhCiAgICBmaWVsZHNfdW5kZXJfcm9vdDogdHJ1ZQoKc2V0dXAudGVtcGxhdGUuZW5hYmxlZDogZmFsc2UKc2V0dXAuaWxtLmVuYWJsZWQ6IGZhbHNlCgpvdXRwdXQuZWxhc3RpY3NlYXJjaDoKICBob3N0czogWyJodHRwOi8vZWxhc3RpY3NlYXJjaDo5MjAwIl0KICB1c2VybmFtZTogImVsYXN0aWMiCiAgcGFzc3dvcmQ6ICJLamQ5cjQzQU5VeW1qamNiYTBNNiIKICBpbmRpY2VzOgogICAgLSBpbmRleDogIndhenVoLWFsZXJ0cy00LngtJXsreXl5eS5NTS5kZH0iCiAgICAgIHdoZW4uZXF1YWxzOgogICAgICAgIGxvZ19zb3VyY2U6IHdhenVoCiAgICAtIGluZGV4OiAic3VyaWNhdGEtYWxlcnRzLSV7K3l5eXkuTU0uZGR9IgogICAgICB3aGVuLmVxdWFsczoKICAgICAgICBsb2dfc291cmNlOiBzdXJpY2F0YQoKbG9nZ2luZy5sZXZlbDogaW5mbwpsb2dnaW5nLnRvX3N0ZGVycjogdHJ1ZQo="
-      | base64 -d > /tmp/fb.yml && filebeat -e -strict.perms=false -c /tmp/fb.yml
+    command: filebeat -e -strict.perms=false
     container_name: filebeat
     depends_on:
       elasticsearch:
@@ -150,9 +156,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 512m
-    entrypoint: bash
+          cpus: 0.3
+          memory: 128m
     image: docker.elastic.co/beats/filebeat:8.13.0
     networks:
     - soc-net
@@ -160,31 +165,8 @@ services:
     user: root
     volumes:
     - ./wazuh/logs:/var/ossec/logs:ro
+    - /var/log/filebeat:/var/log/filebeat
     - ./suricata/logs:/var/log/suricata:ro
-  fleet-server:
-    container_name: fleet-server
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512m
-    environment:
-      FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
-      FLEET_SERVER_ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
-      FLEET_SERVER_ELASTICSEARCH_USERNAME: ${ELASTIC_USERNAME}
-      FLEET_SERVER_ENABLE: 'true'
-      FLEET_SERVER_HOST: 0.0.0.0
-      FLEET_SERVER_INSECURE_HTTP: 'true'
-      FLEET_SERVER_PORT: '8220'
-    hostname: fleet-server
-    image: docker.elastic.co/beats/elastic-agent:8.13.0
-    networks:
-    - soc-net
-    ports:
-    - 8220:8220
   kibana:
     container_name: kibana
     depends_on:
@@ -193,8 +175,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 1536m
+          cpus: 1.0
+          memory: 700m
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_SERVICEACCOUNTTOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYV90b2tlbl8xNzc3OTkzOTI1Ol9WQWtGM0h3U09hQUFfREJIMDFmZGc
@@ -203,7 +185,6 @@ services:
     - XPACK_REPORTING_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
     - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
     - XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS=["${FLEET_SERVER_HOST:-http://fleet-server:8220}"]
-    - NODE_OPTIONS=--max-old-space-size=1024
     healthcheck:
       interval: 30s
       retries: 10
@@ -219,6 +200,7 @@ services:
     ports:
     - 5601:5601
     restart: always
+
   logstash:
     container_name: logstash
     depends_on:
@@ -227,8 +209,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.5'
-          memory: 1024m
+          cpus: 0.5
+          memory: 700m
     environment:
     - LS_JAVA_OPTS=-Xms256m -Xmx512m
     - XPACK_MONITORING_ENABLED=false
@@ -290,10 +272,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.5'
-          memory: 1200m
-        reservations:
-          memory: 1024m
+          cpus: 0.3
+          memory: 600m
     environment:
     - MYSQL_HOST=misp-db
     - MYSQL_USER=misp
@@ -308,13 +288,12 @@ services:
     - PHP_SESSION_COOKIE_SECURE=false
     healthcheck:
       interval: 30s
-      retries: 5
-      start_period: 120s
+      retries: 10
+      start_period: 300s
       test:
       - CMD
-      - curl
-      - -f
-      - http://localhost/
+      - /bin/bash
+      - /healthcheck.sh
       timeout: 10s
     image: ghcr.io/misp/misp-docker/misp-core:latest
     networks:
@@ -367,8 +346,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 2048m
+          cpus: 0.5
+          memory: 1500m
     environment:
     - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
     - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
@@ -474,8 +453,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 1024m
+          cpus: 0.5
+          memory: 128m
     image: jasonish/suricata:latest
     network_mode: host
     privileged: true
@@ -483,41 +462,42 @@ services:
     volumes:
     - ./suricata/logs:/var/log/suricata:rw
   thehive:
-    command:
-    - --secret
-    - SOCstack2026!TheHive
-    - --no-cql-wait
-    - --bdb-directory
-    - /data/db
-    - --index-backend
-    - elasticsearch
-    - --es-hostnames
-    - elasticsearch
-    - --es-username
-    - elastic
-    - --es-password
-    - Kjd9r43ANUymjjcba0M6
-    - --no-config-cortex
+    image: strangebee/thehive:5.2
     container_name: thehive
     depends_on:
-    - elasticsearch
+      - elasticsearch
     deploy:
       resources:
         limits:
-          cpus: '1.5'
-          memory: 1200m
+          cpus: "0.5"
+          memory: 1024m
         reservations:
           memory: 512m
     environment:
-    - JVM_OPTS=-Xms256m -Xmx512m
-    image: strangebee/thehive:5.2
+      - JVM_OPTS=-Xms256m -Xmx512m
+    command:
+      - --secret
+      - "SOCstack2026!TheHive"
+      - --no-cql-wait
+      - --bdb-directory
+      - /data/db
+      - --index-backend
+      - elasticsearch
+      - --es-hostnames
+      - elasticsearch
+      - --es-username
+      - elastic
+      - --es-password
+      - "sYVfKJCe2RCfELjf=GLa"
+      - --no-config-cortex
     networks:
-    - soc-net
+      - soc-net
     ports:
-    - 9000:9000
-    restart: unless-stopped
+      - "9000:9000"
     volumes:
-    - thehive_data:/data
+      - thehive_data:/data
+    restart: unless-stopped
+
   vt-enricher:
     build:
       context: ./threat-intelligence
@@ -529,8 +509,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512m
+          cpus: 0.2
+          memory: 128m
     environment:
     - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
     - ES_USER=${ELASTIC_USERNAME}
@@ -547,8 +527,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 2048m
+          cpus: 1.0
+          memory: 384m
     environment:
     - INDEXER_URL=http://elasticsearch:9200
     - INDEXER_USERNAME=${ELASTIC_USERNAME}
@@ -556,14 +536,14 @@ services:
     - API_USERNAME=${WAZUH_API_USER}
     - API_PASSWORD=${WAZUH_API_PASSWORD}
     healthcheck:
-      interval: 60s
-      retries: 10
-      start_period: 180s
+      interval: 30s
+      retries: 5
+      start_period: 120s
       test:
       - CMD-SHELL
-      - curl -k -s -o /dev/null -w "%{http_code}" https://localhost:55000 | grep -qE
-        "200|401"
-      timeout: 30s
+      - curl -sf -k -u wazuh:Wazuh1234! -X POST https://localhost:55000/security/user/authenticate
+        | grep -q 'token'
+      timeout: 15s
     image: wazuh/wazuh-manager:4.7.5
     init: true
     networks:
@@ -593,8 +573,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 512m
+          cpus: 0.1
+          memory: 64m
     networks:
     - soc-net
     restart: always
@@ -605,10 +585,10 @@ services:
     - yara-ubuntu-tmp:/victims/ubuntu-tmp:ro
     - yara-ftp:/victims/ftp:ro
 volumes:
+  thehive_data:
   es_data: null
   misp-app: null
   misp-db-data: null
-  thehive_data: null
   wazuh_alerts: null
   wazuh_data: null
   yara-dvwa:
@@ -619,3 +599,4 @@ volumes:
     external: true
   yara-ubuntu-www:
     external: true
+

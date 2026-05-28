@@ -4,9 +4,12 @@ es_username: elastic
 es_password: "Kjd9r43ANUymjjcba0M6"
 rules_folder: /opt/elastalert/rules
 run_every:
-  minutes: 1
+  minutes: 2
 buffer_time:
   minutes: 15
 writeback_index: elastalert_status
 alert_time_limit:
   days: 2
+max_query_size: 10000
+scroll_keepalive: 30s
+disable_rules_on_error: false

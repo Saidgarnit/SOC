@@ -8,6 +8,10 @@ services:
     networks:
       - soc-net
     restart: unless-stopped
+    environment:
+      - FLEET_ENROLLMENT_TOKEN=T2szMFlKNEJBNGlWMHNLaXBrTkE6ZkR5bldidENRVFdRWEJmckhXVnRYdw==
+      - FLEET_URL=https://fleet-server:8220
+      - FLEET_INSECURE=true
 
   victim-ubuntu:
     image: soc-stack-victim-ubuntu
