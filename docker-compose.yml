@@ -606,6 +606,23 @@ services:
     - yara-ubuntu-www:/victims/ubuntu-www:ro
     - yara-ubuntu-tmp:/victims/ubuntu-tmp:ro
     - yara-ftp:/victims/ftp:ro
+  victim-metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: victim-metasploitable
+    ports:
+    - 0.0.0.0:2122:21
+    - 0.0.0.0:2223:22
+    - 0.0.0.0:8889:80
+    networks:
+    - soc-net
+    restart: unless-stopped
+  kali-attacker:
+    image: kali-attacker-persistent:latest
+    container_name: kali-attacker
+    command: bash -c 'tail -f /dev/null'
+    networks:
+    - soc-net
+    restart: unless-stopped
 volumes:
   es_data: null
   misp-app: null
