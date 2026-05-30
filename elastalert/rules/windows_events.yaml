@@ -9,7 +9,7 @@ realert:
 alert:
 - slack
 - hivealerter
-slack_webhook_url: ${SLACK_WEBHOOK_URL}
+slack_webhook_url: https://hooks.slack.com/services/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
 slack_title: 'SOC Alert: Windows Security Event'
 slack_text_string: 'Agent: {match[agent][name]} | Rule: {match[rule][description]}
   | Log: {full_log}'

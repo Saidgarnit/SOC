@@ -91,7 +91,7 @@ services:
     - -c
     environment:
       ELASTICSEARCH_HOST: elasticsearch
-      ELASTICSEARCH_PASSWORD: TMcoI=yr0ulMqTIzH++E
+      ELASTICSEARCH_PASSWORD: SOCstack2026!
       ELASTICSEARCH_PORT: '9200'
       ELASTICSEARCH_USERNAME: elastic
       SLACK_WEBHOOK_URL: ''
@@ -126,7 +126,7 @@ services:
         reservations:
           memory: '1073741824'
     environment:
-      ELASTIC_PASSWORD: TMcoI=yr0ulMqTIzH++E
+      ELASTIC_PASSWORD: SOCstack2026!
       ES_JAVA_OPTS: -Xms1g -Xmx1500m
       discovery.type: single-node
       xpack.security.enabled: 'true'
@@ -137,8 +137,8 @@ services:
       start_period: 1m0s
       test:
       - CMD-SHELL
-      - curl -sf -u elastic:TMcoI=yr0ulMqTIzH++E http://localhost:9200/_cluster/health
-        | grep -vq '"status":"red"'
+      - curl -sf -u elastic:SOCstack2026! http://localhost:9200/_cluster/health |
+        grep -vq '"status":"red"'
       timeout: 10s
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     networks:
@@ -168,7 +168,7 @@ services:
         condition: service_healthy
         required: true
     environment:
-      ELASTIC_PASSWORD: TMcoI=yr0ulMqTIzH++E
+      ELASTIC_PASSWORD: SOCstack2026!
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     networks:
       soc-net: null
@@ -252,13 +252,14 @@ services:
       XPACK_SECURITY_ENCRYPTIONKEY: b19cecf4b77672aeba86532c8f80b45e6b4bfe61d4a6427d0fc228700ae498eb
     healthcheck:
       interval: 30s
-      retries: 10
-      start_period: 1m30s
+      retries: 5
+      start_period: 120s
       test:
       - CMD-SHELL
-      - curl -sf http://localhost:5601/api/status | grep -q 'available' || curl -sf
-        http://localhost:5601/api/status | grep -q 'degraded'
-      timeout: 10s
+      - curl -sf -u elastic:SOCstack2026! http://localhost:5601/api/status | python3
+        -c "import json,sys; d=json.load(sys.stdin); exit(0 if d.get('status',{}).get('overall',{}).get('level')
+        in ['available','degraded'] else 1)" 2>/dev/null
+      timeout: 30s
     image: docker.elastic.co/kibana/kibana:8.13.0
     networks:
       soc-net: null
@@ -277,13 +278,15 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 0.5
-          memory: '629145600'
+          cpus: '0.5'
+          memory: 512m
     environment:
-      ELASTIC_PASSWORD: TMcoI=yr0ulMqTIzH++E
+      ELASTIC_PASSWORD: SOCstack2026!
       ELASTIC_USERNAME: elastic
       LOGSTASH_PIPELINE_WORKERS: '1'
-      LS_JAVA_OPTS: -Xms256m -Xmx384m
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      PIPELINE_BATCH_SIZE: '125'
+      PIPELINE_WORKERS: '1'
       XPACK_MONITORING_ENABLED: 'false'
     image: docker.elastic.co/logstash/logstash:8.13.0
     networks:
@@ -472,7 +475,9 @@ services:
       APP__BASE_URL: http://localhost:3000
       APP__PORT: '8080'
       DATABASE__TYPE: elasticsearch
-      ELASTICSEARCH__PASSWORD: TMcoI=yr0ulMqTIzH++E
+      ELASTICSEARCH_PASSWORD: SOCstack2026!
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH__PASSWORD: SOCstack2026!
       ELASTICSEARCH__SSL_VERIFY: 'false'
       ELASTICSEARCH__URL: http://elasticsearch:9200
       ELASTICSEARCH__USERNAME: elastic
@@ -659,12 +664,15 @@ services:
           cpus: 0.2
           memory: '134217728'
     environment:
+      ELASTICSEARCH_PASSWORD: SOCstack2026!
+      ELASTICSEARCH_USERNAME: elastic
       ES_HOST: http://elasticsearch:9200
-      ES_PASS: TMcoI=yr0ulMqTIzH++E
-      ES_PASSWORD: TMcoI=yr0ulMqTIzH++E
+      ES_PASS: SOCstack2026!
+      ES_PASSWORD: SOCstack2026!
+      ES_PORT: '9200'
       ES_USER: elastic
       ES_USERNAME: elastic
-      VIRUSTOTAL_API_KEY: ''
+      VIRUSTOTAL_API_KEY: 675cb5b469a88a290d69d53f4bd343bb81ea333ae5bab1ad6ae0d821e2bcabb7
     image: vt-enricher:local
     networks:
       soc-net: null
@@ -679,7 +687,7 @@ services:
     environment:
       API_PASSWORD: Wazuh1234!
       API_USERNAME: wazuh
-      INDEXER_PASSWORD: TMcoI=yr0ulMqTIzH++E
+      INDEXER_PASSWORD: SOCstack2026!
       INDEXER_URL: http://elasticsearch:9200
       INDEXER_USERNAME: elastic
     healthcheck:
