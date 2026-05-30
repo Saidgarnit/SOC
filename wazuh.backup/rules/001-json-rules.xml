@@ -1,0 +1,6 @@
+<group name="json,">
+  <rule id="100001" level="0">
+    <decoded_as>json</decoded_as>
+    <description>JSON event</description>
+  </rule>
+</group>

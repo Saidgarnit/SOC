@@ -1,0 +1,48 @@
+name: "🦠 VirusTotal — Malicious Hash"
+type: any
+index: .ds-wazuh-alerts-4.x-*
+realert:
+  hours: 1
+query_key: agent.name
+filter:
+- query:
+    bool:
+      must:
+      - term:
+          vt_checked: true
+      - range:
+          vt_malicious:
+            gt: 0
+
+alert:
+- slack
+alert_text_type: alert_text_only
+alert_text: |
+  🦠 *VirusTotal Malicious Hash*
+  `VIRUSTOTAL / Malware Enrichment`
+
+  🕐 `{0}`
+  🖥️  Host: {1}  ({2})
+  📋 Level: {3}  Rule: {4}
+  📝 {5}
+
+  🔬 Detections: {6} engines
+  📊 Risk Score: {7}
+  ⚠️  Severity:  {8}
+
+  📊 http://localhost:5601
+alert_text_args:
+- "@timestamp"
+- agent.name
+- agent.ip
+- rule.level
+- rule.id
+- rule.description
+- vt_malicious
+- vt_risk_score
+- vt_severity
+
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":biohazard_sign:"
+slack_msg_color: danger

@@ -1,0 +1,8 @@
+Microsoft-Windows-Security-Auditing:security
+Microsoft-Windows-Sysmon/Operational:sysmon
+Microsoft-Windows-PowerShell/Operational:powershell
+Microsoft-Windows-TaskScheduler/Operational:persistence
+Microsoft-Windows-TerminalServices-LocalSessionManager/Operational:lateral-movement
+Microsoft-Windows-WMI-Activity/Operational:execution
+System:system
+Application:application

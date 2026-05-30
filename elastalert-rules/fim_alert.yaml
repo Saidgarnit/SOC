@@ -1,0 +1,71 @@
+name: "📂 File Integrity — FIM Alert"
+type: frequency
+index: .ds-wazuh-alerts-4.x-*
+num_events: 1
+timeframe:
+  minutes: 5
+realert:
+  minutes: 30
+query_key: agent.name
+filter:
+- query:
+    bool:
+      must:
+      - terms:
+          rule.groups:
+          - syscheck
+      must_not:
+      - wildcard:
+          syscheck.path: "/tmp/*"
+      - wildcard:
+          syscheck.path: "/proc/*"
+      - wildcard:
+          syscheck.path: "/run/*"
+      - wildcard:
+          syscheck.path: "/sys/*"
+      - wildcard:
+          syscheck.path: "*/hsperfdata_*"
+      - wildcard:
+          syscheck.path: "*/.cache/*"
+
+alert:
+- slack
+alert_text_type: alert_text_only
+alert_text: |
+  📂 *File Integrity Change*
+  `WAZUH / File Integrity Monitor`
+
+  🕐 `{0}`
+  🖥️  Host: {1}  ({2})
+  📋 Level: {3}  Rule: {4}
+  📝 {5}
+
+  📄 Path:    {6}
+  🔄 Event:   {7}
+  👤 Owner:   {8}
+  🔒 Perms:   {9}
+  📏 Size:    {10} bytes
+  #️⃣  MD5:    `{11}`
+  #️⃣  SHA256: `{12}`
+
+  🔗 T1565 — Data Manipulation
+  📊 http://localhost:5601
+alert_text_args:
+- "@timestamp"
+- agent.name
+- agent.ip
+- rule.level
+- rule.id
+- rule.description
+- syscheck.path
+- syscheck.event
+- syscheck.uname_after
+- syscheck.perm_after
+- syscheck.size_after
+- syscheck.md5_after
+- syscheck.sha256_after
+
+slack_webhook_url: "https://hooks.slack.com/services/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"
+slack_username_override: "SOC Alerts"
+slack_icon_emoji: ":open_file_folder:"
+slack_msg_color: warning
