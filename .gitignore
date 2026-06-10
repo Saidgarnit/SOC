@@ -83,3 +83,6 @@ threat-intelligence/configs/
 filebeat-cfg/
 elastalert/rules_backup.tar.gz
 wazuh-monitord
+
+# Elastic agent binary (trop lourd)
+elastic-agent-*/
