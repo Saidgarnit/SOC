@@ -342,7 +342,7 @@ SOC/
 
 ## Default Credentials
 
-> ⚠️ **Change all passwords before exposing any service outside localhost.**
+
 
 | Service | URL | Username | Default Password |
 |---|---|---|---|
