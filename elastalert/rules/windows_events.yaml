@@ -1,6 +1,6 @@
 name: Windows Security Events
 type: any
-index: soc-logs-enriched-*
+index: wazuh-alerts-4.x-*
 filter:
 - term:
     agent.name: 4973d1bc81b4
@@ -26,16 +26,14 @@ alert_text: "\U0001F6A8 *SOC ALERT \u2014 WINDOWS SECURITY EVENTS*\n\u2500\u2500
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
+  hive_apikey: "ZA7Uh9G0yWMZK/n1KvapNB3qp0Bc224H"
 hive_alert_config:
-  title: '{match[rule][description]}'
+  title: 'SOC Alert'
   type: external
   source: elastalert
-  description: 'Detected by ElastAlert rule
+  description: 'ElastAlert detection'
 
 
-    Index: {rule[index]}'
-  severity: 2
   tags:
   - soc-alert
   - elastalert

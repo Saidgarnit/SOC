@@ -71,7 +71,7 @@ services:
     command:
     - 'printf ''%s\n'' ''rules_folder: /opt/elastalert/rules'' ''run_every:'' ''  minutes:
       1'' ''buffer_time:'' ''  minutes: 15'' ''es_host: elasticsearch'' ''es_port:
-      9200'' ''es_username: elastic'' ''es_password: TMcoI=yr0ulMqTIzH++E'' ''writeback_index:
+      9200'' ''es_username: elastic'' ''es_password: SOCstack2026!'' ''writeback_index:
       elastalert_status'' ''alert_time_limit:'' ''  days: 2'' > /tmp/ea.yaml && exec
       elastalert --verbose --config /tmp/ea.yaml'
     container_name: elastalert
@@ -91,9 +91,9 @@ services:
     - -c
     environment:
       ELASTICSEARCH_HOST: elasticsearch
-      ELASTICSEARCH_PASSWORD: SOCstack2026!
+      ELASTICSEARCH_PASSWORD: 'SOCstack2026!'
       ELASTICSEARCH_PORT: '9200'
-      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_USERNAME: kibana_system
       SLACK_WEBHOOK_URL: ''
     image: jertel/elastalert2:latest
     networks:
@@ -159,27 +159,24 @@ services:
       type: volume
       volume: {}
   elasticsearch-init:
-    command:
-    - /bin/bash
-    - /init-es.sh
     container_name: elasticsearch-init
     depends_on:
       elasticsearch:
         condition: service_healthy
         required: true
+    entrypoint:
+    - bash
+    - -c
+    - if [ -f /init-es.sh ]; then bash /init-es.sh; else echo "Init script not found";
+      fi
     environment:
       ELASTIC_PASSWORD: SOCstack2026!
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     networks:
       soc-net: null
-    restart: 'no'
+    restart: unless-stopped
     volumes:
-    - bind:
-        create_host_path: true
-      read_only: true
-      source: /tmp/init-es.sh
-      target: /init-es.sh
-      type: bind
+    - ./elasticsearch/init-es.sh:/init-es.sh:ro
     - bind:
         create_host_path: true
       source: /home/said/soc-stack/elasticsearch
@@ -231,6 +228,33 @@ services:
       source: /home/said/soc-stack/suricata/logs
       target: /var/log/suricata
       type: bind
+  fleet-server:
+    container_name: fleet-server
+    image: docker.elastic.co/beats/elastic-agent:8.13.0
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+        required: true
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: '536870912'
+    user: root
+    ports:
+      - "8220:8220"
+    networks:
+      - soc-net
+    restart: unless-stopped
+    environment:
+      - FLEET_SERVER_ENABLE=1
+      - FLEET_SERVER_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLWJyYW5kLW5ldzo3TUZTNUZWZlNhTzVHZkhhRGpXRlhR
+      - FLEET_SERVER_POLICY_ID=ee288b13-4170-45fb-81ab-bcc574d15248
+      - FLEET_SERVER_INSECURE_HTTP=true
+      - FLEET_SERVER_ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - FLEET_SERVER_ELASTICSEARCH_USERNAME=elastic
+      - FLEET_SERVER_ELASTICSEARCH_PASSWORD=SOCstack2026!
+      - FLEET_SERVER_PORT=8220
   kibana:
     container_name: kibana
     depends_on:
@@ -243,13 +267,10 @@ services:
           cpus: 1
           memory: '1073741824'
     environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-      ELASTICSEARCH_SERVICEACCOUNTTOKEN: AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYV90b2tlbl8xNzc3OTkzOTI1Ol9WQWtGM0h3U09hQUFfREJIMDFmZGc
-      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: b19cecf4b77672aeba86532c8f80b45e6b4bfe61d4a6427d0fc228700ae498eb
-      XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-      XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS: '["http://fleet-server:8220"]'
-      XPACK_REPORTING_ENCRYPTIONKEY: b19cecf4b77672aeba86532c8f80b45e6b4bfe61d4a6427d0fc228700ae498eb
-      XPACK_SECURITY_ENCRYPTIONKEY: b19cecf4b77672aeba86532c8f80b45e6b4bfe61d4a6427d0fc228700ae498eb
+      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYV90b2tlbjpzdlAtSzhYT1RoQ0NJSFozMi05Nml3
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=b19cecf4b77672aeba86532c8f80b45e6b4bfe61d4a6427d0fc228700ae498eb
+      - XPACK_SECURITY_ENCRYPTIONKEY=c3ad0c38f2a14b9e8d56f14e3b72aa91
+      - XPACK_REPORTING_ENCRYPTIONKEY=ecbc91979f4c4d8a9b3e72cc1d8f44b2
     healthcheck:
       interval: 30s
       retries: 5
@@ -303,12 +324,10 @@ services:
     restart: unless-stopped
     user: root
     volumes:
-    - bind:
-        create_host_path: true
-      read_only: true
-      source: /home/said/soc-stack/logstash/pipeline
+    - read_only: true
+      source: soc-logstash-pipeline
       target: /usr/share/logstash/pipeline
-      type: bind
+      type: volume
     - bind:
         create_host_path: true
       read_only: true
@@ -475,8 +494,8 @@ services:
       APP__BASE_URL: http://localhost:3000
       APP__PORT: '8080'
       DATABASE__TYPE: elasticsearch
-      ELASTICSEARCH_PASSWORD: SOCstack2026!
-      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: 'SOCstack2026!'
+      ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH__PASSWORD: SOCstack2026!
       ELASTICSEARCH__SSL_VERIFY: 'false'
       ELASTICSEARCH__URL: http://elasticsearch:9200
@@ -581,11 +600,11 @@ services:
     - SYS_NICE
     command:
     - -i
-    - eth0
+    - br-9974ca49d99c
     - --set
     - default-rule-path=/var/lib/suricata/rules
     - -s
-    - /var/lib/suricata/rules/suricata.rules
+    - /var/lib/suricata/rules/netdefender.rules
     container_name: suricata
     deploy:
       resources:
@@ -593,8 +612,7 @@ services:
           cpus: 0.5
           memory: '134217728'
     image: jasonish/suricata:latest
-    networks:
-      soc-net: null
+    network_mode: host
     restart: unless-stopped
     volumes:
     - bind:
@@ -621,7 +639,7 @@ services:
     - --es-username
     - elastic
     - --es-password
-    - sYVfKJCe2RCfELjf=GLa
+    - SOCstack2026!
     - --no-config-cortex
     container_name: thehive
     depends_on:
@@ -664,8 +682,8 @@ services:
           cpus: 0.2
           memory: '134217728'
     environment:
-      ELASTICSEARCH_PASSWORD: SOCstack2026!
-      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: 'SOCstack2026!'
+      ELASTICSEARCH_USERNAME: kibana_system
       ES_HOST: http://elasticsearch:9200
       ES_PASS: SOCstack2026!
       ES_PASSWORD: SOCstack2026!
@@ -683,7 +701,7 @@ services:
       resources:
         limits:
           cpus: 0.5
-          memory: '536870912'
+          memory: 1536m
     environment:
       API_PASSWORD: Wazuh1234!
       API_USERNAME: wazuh
@@ -722,6 +740,7 @@ services:
       target: 55000
     restart: unless-stopped
     volumes:
+    - ./wazuh/fix-conf.sh:/etc/cont-init.d/00-fix-conf:ro
     - bind:
         create_host_path: true
       read_only: true
@@ -747,11 +766,6 @@ services:
         create_host_path: true
       source: /home/said/soc-stack/wazuh/decoders
       target: /var/ossec/etc/decoders
-      type: bind
-    - bind:
-        create_host_path: true
-      source: /home/said/soc-stack/wazuh/config/ossec.conf
-      target: /var/ossec/etc/ossec.conf
       type: bind
     - bind:
         create_host_path: true
@@ -818,7 +832,12 @@ services:
       target: /victims/ftp
       type: volume
       volume: {}
-volumes:
+    - type: bind
+      source: /home/said/soc-stack/yara/rules
+      target: /rules
+      read_only: true
+  soc-logstash-pipeline:
+    external: true
   es_data:
     name: soc-stack_es_data
   misp-app:
@@ -839,3 +858,5 @@ volumes:
   yara-ubuntu-www:
     external: true
     name: yara-ubuntu-www
+
+# (Already added below if volumes: section exists — check first)

@@ -2,4 +2,4 @@ http.host: "0.0.0.0"
 xpack.monitoring.enabled: true
 xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
 xpack.monitoring.elasticsearch.username: "elastic"
-xpack.monitoring.elasticsearch.password: "Kjd9r43ANUymjjcba0M6"
+xpack.monitoring.elasticsearch.password: "SOCstack2026!"

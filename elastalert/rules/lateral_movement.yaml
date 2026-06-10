@@ -24,8 +24,8 @@ query_key: data.srcip
 filter:
 - query:
     query_string:
-      query: rule.mitre.tactic:"Lateral Movement"
-index: soc-logs-enriched-*
+      query: "rule.level:>=7 AND (rule.description:*lateral* OR rule.description:*ssh* OR rule.description:*remote*)"
+index: wazuh-alerts-4.x-*
 name: Lateral Movement Detected
 slack_emoji_override: ':arrows_counterclockwise:'
 slack_msg_color: danger
@@ -37,16 +37,14 @@ realert:
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
+  hive_apikey: "ZA7Uh9G0yWMZK/n1KvapNB3qp0Bc224H"
 hive_alert_config:
-  title: '{match[rule][description]}'
+  title: 'SOC Alert'
   type: external
   source: elastalert
-  description: 'Detected by ElastAlert rule
+  description: 'ElastAlert detection'
 
 
-    Index: {rule[index]}'
-  severity: 2
   tags:
   - soc-alert
   - elastalert

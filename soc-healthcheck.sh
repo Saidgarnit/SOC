@@ -4,7 +4,7 @@ FIX_MODE="${1:-}"
 PASS=0; FAIL=0; WARN=0
 RED='[0;31m'; GRN='[0;32m'; YEL='[1;33m'; CYN='[0;36m'; RST='[0m'
 source .env 2>/dev/null || true
-EP="Kjd9r43ANUymjjcba0M6"
+EP="SOCstack2026!"
 
 ok()   { echo -e "  ${GRN}PASS: $1${RST}"; PASS=$((PASS+1)); }
 fail() { echo -e "  ${RED}FAIL: $1${RST}"; FAIL=$((FAIL+1)); }

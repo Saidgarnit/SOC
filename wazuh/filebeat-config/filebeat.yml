@@ -1,0 +1,15 @@
+filebeat.modules:
+  - module: wazuh
+    alerts:
+      enabled: true
+    archives:
+      enabled: false
+
+output.elasticsearch:
+  hosts: ['http://elasticsearch:9200']
+  username: 'elastic'
+  password: 'SOCstack2026!'
+
+setup.template.name: 'wazuh'
+setup.template.pattern: 'wazuh-*'
+setup.ilm.enabled: false

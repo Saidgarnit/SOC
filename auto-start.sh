@@ -1,34 +1,19 @@
 #!/bin/bash
-# SOC Stack Auto-Start — runs on WSL boot
-# Ensures all services survive restarts
-
 LOG="/home/said/soc-stack/startup.log"
 echo "=== SOC Auto-Start $(date) ===" >> $LOG
 
-cd /home/said/soc-stack
+# Fix Docker socket
+sudo chmod 666 /var/run/docker.sock 2>/dev/null
+export DOCKER_HOST=unix:///var/run/docker.sock
+export PATH=$PATH:/usr/bin:/usr/local/bin
 
 # Wait for Docker
-for i in {1..30}; do
-    docker ps >/dev/null 2>&1 && break
+for i in $(seq 1 30); do
+    DOCKER_HOST=unix:///var/run/docker.sock docker ps >/dev/null 2>&1 && break
     sleep 2
 done
 
-# Start all services
-docker-compose up -d >> $LOG 2>&1
-sleep 10
-docker-compose -f docker-compose-lab.yml up -d >> $LOG 2>&1
+cd /home/said/soc-stack
+DOCKER_HOST=unix:///var/run/docker.sock docker compose up -d >> $LOG 2>&1
 
-# Ensure wazuh ossec.conf is a file not directory
-sleep 30
-WAZUH_STATUS=$(docker ps --filter name=wazuh-manager --format '{{.Status}}')
-if echo "$WAZUH_STATUS" | grep -q "Up"; then
-    CONF_TYPE=$(docker exec wazuh-manager file /var/ossec/etc/ossec.conf 2>/dev/null)
-    if echo "$CONF_TYPE" | grep -q "directory"; then
-        docker exec wazuh-manager bash -c "
-            rm -rf /var/ossec/etc/ossec.conf
-            cp /tmp/ossec.conf.backup /var/ossec/etc/ossec.conf 2>/dev/null || true
-        "
-    fi
-fi
-
-echo "SOC started: $(docker ps -q | wc -l) containers" >> $LOG
+echo "SOC started: $(DOCKER_HOST=unix:///var/run/docker.sock docker ps -q | wc -l) containers" >> $LOG

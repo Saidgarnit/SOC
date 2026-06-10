@@ -1,6 +1,6 @@
 name: Exfiltration Detected (TA0010)
 type: spike
-index: soc-logs-enriched-*
+index: wazuh-alerts-4.x-*
 spike_height: 3
 spike_type: up
 timeframe:
@@ -11,11 +11,11 @@ filter:
       minimum_should_match: 1
       should:
       - query_string:
-          query: data.alert.signature:*ET*TROJAN* OR data.alert.signature:*ET*DNS*
+          query: "rule.level:>=7 AND (rule.description:*exfil* OR rule.description:*transfer* OR rule.description:*upload*)"
       - query_string:
-          query: rule.description:*ftp* AND rule.level:[7 TO *]
+          query: "rule.level:>=7 AND (rule.description:*exfil* OR rule.description:*transfer* OR rule.description:*upload*)"
       - query_string:
-          query: rule.mitre.id:T1048 OR rule.mitre.id:T1041 OR rule.mitre.id:T1567
+          query: "rule.level:>=7 AND (rule.description:*exfil* OR rule.description:*transfer* OR rule.description:*upload*)"
 query_key: agent.name
 threshold_ref: 10
 threshold_cur: 20
@@ -41,16 +41,14 @@ realert:
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
+  hive_apikey: "ZA7Uh9G0yWMZK/n1KvapNB3qp0Bc224H"
 hive_alert_config:
-  title: '{match[rule][description]}'
+  title: 'SOC Alert'
   type: external
   source: elastalert
-  description: 'Detected by ElastAlert rule
+  description: 'ElastAlert detection'
 
 
-    Index: {rule[index]}'
-  severity: 2
   tags:
   - soc-alert
   - elastalert

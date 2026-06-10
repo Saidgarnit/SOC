@@ -4,7 +4,7 @@ index: suricata-alerts-*
 filter:
 - query:
     query_string:
-      query: event_type:alert AND alert.signature:"Port Scan SYN"
+      query: rule.groups:alert AND alert.signature:"Port Scan SYN"
 alert:
 - slack
 - hivealerter
@@ -32,23 +32,21 @@ alert_text_args:
 - '@timestamp'
 alert_subject: "\U0001F6A8 Port Scan Detected from {0}"
 alert_subject_args:
-- src_ip
+- agent.ip
 realert:
   minutes: 30
-query_key: data.srcip - src_ip
+query_key: data.srcip - agent.ip
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
+  hive_apikey: "ZA7Uh9G0yWMZK/n1KvapNB3qp0Bc224H"
 hive_alert_config:
-  title: '{match[rule][description]}'
+  title: 'SOC Alert'
   type: external
   source: elastalert
-  description: 'Detected by ElastAlert rule
+  description: 'ElastAlert detection'
 
 
-    Index: {rule[index]}'
-  severity: 2
   tags:
   - soc-alert
   - elastalert

@@ -1,53 +1,45 @@
 name: Suricata IDS Alert
 type: any
-query_key: data.srcip
 index: suricata-alerts-*
 filter:
 - query:
     query_string:
-      query: event_type:alert
+      query: "event_type:alert"
 alert:
 - slack
 - hivealerter
 slack_webhook_url: https://hooks.slack.com/services/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
-slack_username_override: SOC Alerts
-slack_emoji_override: ':rotating_light:'
 slack_msg_color: danger
 alert_text_type: alert_text_only
-alert_text: "\U0001F6A8 *SOC ALERT \u2014 SURICATA IDS ALERT*\n\u2500\u2500\u2500\u2500\
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n*Detection:* {0}\n*Target/Agent:*\
-  \ `{1}`\n*Rule ID:* {2} | *Level:* {3}\n*MITRE:* {4} \u2014 {5}\n*Source IP:* `{6}`\n\
-  *Detected at:* {7}\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
-  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
-  \u2500\u2500\u2500\n_Netdefender SOC \u2014 Threat Intelligence_"
+alert_text: "🚨 *SURICATA IDS ALERT*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n*Rule:* {0}\n*Category:* {1}\n*Severity:* {2}\n*Source:* `{3}` → *Dest:* `{4}:{5}`\n*Protocol:* {6}\n*Detected at:* {7}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n_NetDefender SOC — Suricata IDS_"
 alert_text_args:
-- rule.description
-- agent.name
-- rule.id
-- rule.level
-- rule.mitre.tactic[0]
-- rule.mitre.technique[0]
-- data.srcip
+- alert.signature
+- alert.category
+- alert.severity
+- src_ip
+- dest_ip
+- dest_port
+- proto
 - '@timestamp'
+alert_missing_value: N/A
 realert:
-  minutes: 15
+  minutes: 5
+alert_subject: "SOC - IDS: {0}"
+alert_subject_args:
+- alert.signature
 hive_connection:
   hive_host: http://thehive
   hive_port: 9000
-  hive_apikey: qaU5mFxE64fL+5yihYHoqA68J5yeJoEg
+  hive_apikey: "ZA7Uh9G0yWMZK/n1KvapNB3qp0Bc224H"
+  hive_verify_cert: false
+hive_organisation: SOC
 hive_alert_config:
-  title: '{match[rule][description]}'
   type: external
-  source: elastalert
-  description: 'Detected by ElastAlert rule
-
-
-    Index: {rule[index]}'
-  severity: 2
+  source: suricata
+  title: 'Suricata IDS Alert'
+  description: 'Suricata fired {match[alert][signature]} from {match[src_ip]} to {match[dest_ip]}'
+  rule.level: 3
   tags:
-  - soc-alert
-  - elastalert
-alert_missing_value: N/A
+  - suricata
+  - ids
+  status: New

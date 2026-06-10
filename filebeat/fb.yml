@@ -31,7 +31,7 @@ setup.ilm.enabled: false
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
   username: "elastic"
-  password: "Kjd9r43ANUymjjcba0M6"
+  password: "SOCstack2026!"
   indices:
     - index: "wazuh-alerts-4.x-%{+yyyy.MM.dd}"
       when.equals:

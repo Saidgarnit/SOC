@@ -1,7 +1,7 @@
 #!/bin/sh
 rm -f /var/ossec/var/start-script-lock
 FLEET_URL="${FLEET_URL:-http://fleet-server:8220}"
-ENROLL_TOKEN="${ENROLL_TOKEN:-ejgyZ01KNEJZOFhzcWFUT2RROEw6OC1LN2RDdWtSenU2UGZuc09ZRWRkQQ==}"
+ENROLL_TOKEN="${ENROLL_TOKEN:-OGo2amdwNEJ0WlBNTkJjRzNSTE06VkZBT3E2dkVTSVdKV0xSY3FKLUJmQQ==}"
 AGENT_DIR="/opt/elastic-agent"
 HOSTNAME="$(hostname)"
 
@@ -25,7 +25,7 @@ wait_for_fleet() {
 
 already_online() {
     RESULT=$(curl -sf \
-        -u "${ES_USER:-elastic}:${ES_PASS:-sYVfKJCe2RCfELjf=GLa}" \
+        -u "${ES_USER:-elastic}:${ES_PASS:-SOCstack2026!}" \
         -H "Content-Type: application/json" \
         -d "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"local_metadata.host.hostname\":\"$HOSTNAME\"}},{\"term\":{\"status\":\"online\"}}]}}}" \
         "http://${ES_HOST:-elasticsearch}:9200/.fleet-agents/_search" 2>/dev/null \
@@ -45,7 +45,7 @@ enroll() {
     cd "$AGENT_DIR" && "$AGENT_BIN" enroll \
         --url="$FLEET_URL" \
         --enrollment-token="$ENROLL_TOKEN" \
-        --insecure -f
+        --insecure -f --skip-daemon-reload
     log "Enrollment complete ✔"
 }
 

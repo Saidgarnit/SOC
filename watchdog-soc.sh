@@ -4,7 +4,7 @@ LOG="/home/said/soc-stack/watchdog.log"
 KEY_BACKUP="/home/said/soc-stack/.wazuh-agent-keys.bak"
 WAZUH_API="https://localhost:55000"
 WAZUH_USER="wazuh"; WAZUH_PASS="Wazuh1234!"
-ES_PASS="Kjd9r43ANUymjjcba0M6"
+ES_PASS="SOCstack2026!"
 SOC_DIR="/home/said/soc-stack"
 TS=$(date '+%Y-%m-%d %H:%M:%S')
 log() { echo "[$TS] $*" | tee -a "$LOG"; }

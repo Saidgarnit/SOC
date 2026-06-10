@@ -1,7 +1,7 @@
 output.elasticsearch:
   hosts: ['http://elasticsearch:9200']
   username: elastic
-  password: "Kjd9r43ANUymjjcba0M6"
+  password: "SOCstack2026!"
 
 filebeat.modules:
   - module: wazuh

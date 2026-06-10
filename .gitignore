@@ -1,35 +1,85 @@
-# Permission denied dirs
+# Backups & temp
+backups/
+*.bak
+*.bak-*
+*.disabled
+.fleet-enrollment-token
+
+# Fix scripts one-off (numérotés)
+[0-9]_*.sh
+[0-9][0-9]_*.sh
+[0-9][0-9][a-z]_*.sh
+
+# Fichiers de debug
+diagnose.sh
+health_check.sh
+definitive-fix.sh
+definitive-recovery.sh
+soc-master-recovery.sh
+soc-recovery.sh
+master-soc-fix.sh
+master-hardening.sh
+slim-soc.sh
+slim-and-heal.sh
+kibana-atomic-fix.sh
+
+# SMTP credentials
+elastalert/smtp_auth/
+
+# Kibana exports (trop lourds)
+*.ndjson
+
+# Docker overrides locaux
+docker-compose.override.yml
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Wazuh runtime dirs (permission root)
+wazuh/config/shared/
 wazuh/logs/
+wazuh/lists/amazon/
+wazuh/lists/wazuh/
+
+# Logs runtime
+suricata/logs/
+*.log
+*.log.*
+*.gz
+
+# Wazuh backup complet
+wazuh.backup/
 wazuh/config/
+wazuh/lists/
+
+# Elastic agent binaries
+elastic-agent-*/
 lab/elastic-agent-bin/
+lab/victim-ftp/elastic-agent-bin/
+lab/victim-windows/elastic-agent-bin/
+wazuh-agent-*.apk
+
+# Python venv
 venv/
 
-# Large/generated files
-wazuh/config/shared/default/merged.mg
-*.bak
-*.pre-*
-
-# Secrets (keep these local only)
+# Secrets
 .env
-suricata/logs/
-# Large binaries - not for git
-lab/victim-windows/elastic-agent-bin/
-suricata/logs/
-logstash/geoip/*.mmdb
 
-# Elastic Agent binaries (large)
-lab/*/elastic-agent-bin/
-*.jar
+# Divers
+*.pre-*
 *.zip
 *.tar.gz
-*.bin
-
-# Large binaries / generated artifacts
-lab/*/elastic-agent-bin/
-*.apk
-*.db
-*.log
-*.tar.gz
-*.zip
-*.bin
-wazuh/agent-keys/*.key
+definitive.log
+final.log
+hardening.log
+recovery.log
+startup.log
+watchdog.log
+fix-all.log
+misp-poller.log
+soc-agent-boot.log
+threat-intelligence/configs/
+filebeat-cfg/
+elastalert/rules_backup.tar.gz
+wazuh-monitord
