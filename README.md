@@ -416,5 +416,5 @@ Contributions, bug reports, and new detection rules are welcome.
 
 ---
 
-*Built at ENSIASD Casablanca — Sécurité IT & Confiance Numérique · 2025–2026*
+*Built at Netdefender Casablanca — Sécurité IT & Confiance Numérique · 2025–2026*
 
